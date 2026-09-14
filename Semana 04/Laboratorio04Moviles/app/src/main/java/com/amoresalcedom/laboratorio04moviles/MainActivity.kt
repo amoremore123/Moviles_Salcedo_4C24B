@@ -156,7 +156,7 @@ fun PantallaTareas(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun PreviewPantallaTareas() {
     Laboratorio04MovilesTheme {
         PantallaTareas()
     }
