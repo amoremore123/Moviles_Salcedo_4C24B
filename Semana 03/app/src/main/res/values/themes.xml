@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Lab03RegistroProducto" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
