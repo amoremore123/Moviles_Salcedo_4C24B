@@ -5,11 +5,7 @@ plugins {
 
 android {
     namespace = "com.tecsup.lab04salcedo"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.tecsup.lab04salcedo"
