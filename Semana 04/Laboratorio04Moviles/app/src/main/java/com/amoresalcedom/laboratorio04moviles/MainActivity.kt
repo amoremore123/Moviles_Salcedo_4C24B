@@ -36,8 +36,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Laboratorio04MovilesTheme {
+                var mostrarTareas by remember { mutableStateOf(true) }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PantallaTareas(modifier = Modifier.padding(innerPadding))
+                    Column(modifier = Modifier.padding(innerPadding)) {
+                        // Navegación solicitada manteniendo los botones arriba
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(onClick = { mostrarTareas = false }) {
+                                Text("Temperatura")
+                            }
+                            Button(onClick = { mostrarTareas = true }) {
+                                Text("Tareas")
+                            }
+                        }
+
+                        // Pantallas originales sin modificaciones adicionales
+                        if (mostrarTareas) {
+                            PantallaTareas()
+                        } else {
+                            TemperatureDisplay()
+                        }
+                    }
                 }
             }
         }
