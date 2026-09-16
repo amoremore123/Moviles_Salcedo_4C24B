@@ -140,7 +140,10 @@ fun PantallaCarrito(modifier: Modifier = Modifier) {
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(productos) { producto ->
+                items(
+                    items = productos,
+                    key = { producto -> "${producto.nombre}-${producto.precio}-${producto.cantidad}" }
+                ) { producto ->
                     TarjetaProducto(
                         producto = producto,
                         onEliminar = { productos.remove(producto) }
