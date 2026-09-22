@@ -23,7 +23,7 @@ fun DetailScreen(itemId: Int, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalle") },
+                title = { Text("Detalle del elemento") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -42,10 +42,15 @@ fun DetailScreen(itemId: Int, onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Card(modifier = Modifier.fillMaxSize()) {
+            Text("Elemento #${itemId + 1}")
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 8.dp)
+            ) {
                 Text(
-                    text = "Elemento seleccionado: $itemId",
-                    modifier = Modifier.padding(24.dp)
+                    text = "ID recibido: $itemId\nEste valor llegó como argumento tipado desde el NavHost.",
+                    modifier = Modifier.padding(16.dp)
                 )
             }
         }

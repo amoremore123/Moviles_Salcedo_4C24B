@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.amoresalcedom.semana05.ui.DetailScreen
 import com.amoresalcedom.semana05.ui.HomeScreen
 import com.amoresalcedom.semana05.ui.ListScreen
+import com.amoresalcedom.semana05.ui.ProfileScreen
 
 @Composable
 fun AppNavigation() {
@@ -20,7 +21,8 @@ fun AppNavigation() {
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                onShowList = { navController.navigate(Screen.List.route) }
+                onShowList = { navController.navigate(Screen.List.route) },
+                onShowProfile = { navController.navigate(Screen.Profile.route) }
             )
         }
         composable(Screen.List.route) {
@@ -28,6 +30,15 @@ fun AppNavigation() {
                 onBack = { navController.popBackStack() },
                 onItemSelected = { itemId ->
                     navController.navigate(Screen.Detail.createRoute(itemId))
+                }
+            )
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onBackToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
                 }
             )
         }

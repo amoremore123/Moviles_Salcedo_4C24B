@@ -23,12 +23,12 @@ fun ListScreen(
     onBack: () -> Unit,
     onItemSelected: (Int) -> Unit
 ) {
-    val items = listOf("Producto 1", "Producto 2", "Producto 3", "Producto 4")
+    val items = (1..8).map { "Elemento número $it" }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de productos") },
+                title = { Text("Lista") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -48,6 +48,7 @@ fun ListScreen(
             items(items.indices.toList()) { itemId ->
                 ListItem(
                     headlineContent = { Text(items[itemId]) },
+                    supportingContent = { Text("Toca para ver el detalle") },
                     modifier = Modifier.clickable { onItemSelected(itemId) }
                 )
             }

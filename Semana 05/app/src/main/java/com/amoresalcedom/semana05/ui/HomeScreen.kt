@@ -1,6 +1,7 @@
 package com.amoresalcedom.semana05.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,9 +17,11 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onShowList: () -> Unit) {
+fun HomeScreen(
+    onShowList: () -> Unit,
+    onShowProfile: () -> Unit
+) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Inicio") }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -28,12 +31,20 @@ fun HomeScreen(onShowList: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Bienvenido a la navegación con Compose")
+            Text("Pantalla Tecsup")
             Button(
                 onClick = onShowList,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             ) {
-                Text("Ver lista")
+                Text("Ver lista de elementos")
+            }
+            androidx.compose.material3.OutlinedButton(
+                onClick = onShowProfile,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Mi perfil")
             }
         }
     }
