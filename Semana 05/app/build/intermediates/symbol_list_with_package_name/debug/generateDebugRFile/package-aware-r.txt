@@ -1,0 +1,3 @@
+com.amoresalcedom.semana05
+string app_name
+style Theme_Semana05Navegacion
