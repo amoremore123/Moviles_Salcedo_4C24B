@@ -54,12 +54,8 @@ fun HomeScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     var selectedGoal by remember { mutableIntStateOf(0) }
     val filters = listOf("Hoy", "Esta semana")
-    val goals = listOf("Energía", "Fuerza", "Movilidad")
-    val recommendedClass = when (selectedGoal) {
-        1 -> gymClasses.first { it.name == "CrossFit Express" }
-        2 -> gymClasses.first { it.name == "Yoga Flow" }
-        else -> gymClasses.first { it.name == "HIIT Burn" }
-    }
+    val selectedGoalName = recommendationGoals[selectedGoal]
+    val recommendedClass = recommendClass(selectedGoalName)
 
     Scaffold(
         topBar = {
@@ -141,8 +137,8 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.padding(vertical = 10.dp)
                     ) {
-                        items(goals) { goal ->
-                            val goalIndex = goals.indexOf(goal)
+                        items(recommendationGoals) { goal ->
+                            val goalIndex = recommendationGoals.indexOf(goal)
                             Button(
                                 onClick = { selectedGoal = goalIndex },
                                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
