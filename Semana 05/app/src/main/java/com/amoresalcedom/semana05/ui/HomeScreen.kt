@@ -52,7 +52,14 @@ fun HomeScreen(
     onClassSelected: (Int) -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedGoal by remember { mutableIntStateOf(0) }
     val filters = listOf("Hoy", "Esta semana")
+    val goals = listOf("Energía", "Fuerza", "Movilidad")
+    val recommendedClass = when (selectedGoal) {
+        1 -> gymClasses.first { it.name == "CrossFit Express" }
+        2 -> gymClasses.first { it.name == "Yoga Flow" }
+        else -> gymClasses.first { it.name == "HIIT Burn" }
+    }
 
     Scaffold(
         topBar = {
@@ -111,6 +118,67 @@ fun HomeScreen(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Recomendación IA",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1F6FEB)
+                    )
+                    Text(
+                        text = "Elige tu objetivo y encuentra una clase para ti.",
+                        modifier = Modifier.padding(top = 4.dp),
+                        color = Color(0xFF4A5E7A)
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    ) {
+                        items(goals) { goal ->
+                            val goalIndex = goals.indexOf(goal)
+                            Button(
+                                onClick = { selectedGoal = goalIndex },
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = if (selectedGoal == goalIndex) {
+                                        Color(0xFF1F6FEB)
+                                    } else {
+                                        Color.White
+                                    }
+                                )
+                            ) {
+                                Text(
+                                    text = goal,
+                                    color = if (selectedGoal == goalIndex) {
+                                        Color.White
+                                    } else {
+                                        Color(0xFF1F6FEB)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "Te recomendamos: ${recommendedClass.name}",
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF1B2A41)
+                    )
+                    Button(
+                        onClick = { onClassSelected(recommendedClass.id) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Text("Ver recomendación")
+                    }
+                }
+            }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
