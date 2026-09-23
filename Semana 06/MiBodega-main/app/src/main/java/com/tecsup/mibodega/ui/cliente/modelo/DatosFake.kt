@@ -1,6 +1,10 @@
 package com.tecsup.mibodega.ui.cliente.modelo
 
-import com.tecsup.mibodega.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.filled.LocalDining
+import androidx.compose.material.icons.filled.LocalDrink
 
 val listaCategorias = listOf("Todos", "Bebidas", "Abarrotes", "Snacks")
 
@@ -11,7 +15,7 @@ val listaProductosFake = listOf(
         descripcion = "Arroz extra, grano largo, ideal para el día a día.",
         precio = 4.50,
         categoria = "Abarrotes",
-        imagenRes = R.drawable.ic_arroz
+        icono = Icons.Default.Kitchen
     ),
     Producto(
         id = 2,
@@ -19,7 +23,7 @@ val listaProductosFake = listOf(
         descripcion = "Aceite vegetal 1 L, alto en vitamina E.",
         precio = 8.90,
         categoria = "Abarrotes",
-        imagenRes = R.drawable.ic_aceite
+        icono = Icons.Default.LocalDining
     ),
     Producto(
         id = 3,
@@ -27,7 +31,7 @@ val listaProductosFake = listOf(
         descripcion = "Leche evaporada entera 1 L.",
         precio = 5.20,
         categoria = "Abarrotes",
-        imagenRes = R.drawable.ic_leche
+        icono = Icons.Default.LocalDrink
     ),
     Producto(
         id = 4,
@@ -35,7 +39,7 @@ val listaProductosFake = listOf(
         descripcion = "Galletas de chocolate rellenas 126 g.",
         precio = 3.50,
         categoria = "Snacks",
-        imagenRes = R.drawable.ic_galleta
+        icono = Icons.Default.Fastfood
     ),
     Producto(
         id = 5,
@@ -43,6 +47,6 @@ val listaProductosFake = listOf(
         descripcion = "Bebida gaseosa sabor cola. Ideal para compartir en familia.",
         precio = 6.50,
         categoria = "Bebidas",
-        imagenRes = R.drawable.ic_coca
+        icono = Icons.Default.LocalDrink
     )
 )

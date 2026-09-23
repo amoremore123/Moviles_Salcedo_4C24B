@@ -1,6 +1,5 @@
 package com.tecsup.mibodega.ui.componentes
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,8 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,12 +53,11 @@ fun ProductoCard(
                     .background(GrisClaro, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(producto.imagenRes),
+                Icon(
+                    imageVector = producto.icono,
                     contentDescription = producto.nombre,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                    tint = VerdeBodega,
+                    modifier = Modifier.size(48.dp)
                 )
                 // Category badge overlay
                 Box(
