@@ -66,11 +66,11 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("TECSUP Fit") }
+                title = { Text("TECSUP Fit", fontWeight = FontWeight.Bold) }
             )
         },
         bottomBar = {
-            BottomAppBar {
+            BottomAppBar(containerColor = Color.White) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = {
@@ -112,13 +112,15 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color(0xFFF8FAFC))
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 text = "Encuentra tu clase ideal",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1B2A41)
             )
 
             Card(
@@ -175,7 +177,8 @@ fun HomeScreen(
                         onClick = { onClassSelected(recommendedClass.id) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
+                            .padding(top = 8.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF1F6FEB))
                     ) {
                         Text("Ver recomendación")
                     }
@@ -212,7 +215,8 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onClassSelected(gymClass.id) },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F7FB)),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(
@@ -226,7 +230,8 @@ fun HomeScreen(
                                 Text(
                                     text = gymClass.name,
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1B2A41)
                                 )
                                 Box(
                                     modifier = Modifier
@@ -236,15 +241,23 @@ fun HomeScreen(
                                     Text(
                                         text = gymClass.level,
                                         color = Color(0xFF2E7D32),
-                                        fontSize = 12.sp
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                             }
 
                             Text(
-                                text = gymClass.schedule,
+                                text = "Horario: ${gymClass.schedule}",
                                 color = Color(0xFF4A5E7A),
                                 modifier = Modifier.padding(top = 8.dp)
+                            )
+                            Text(
+                                text = gymClass.capacity,
+                                color = Color(0xFF1F6FEB),
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(top = 2.dp)
                             )
                             Text(
                                 text = gymClass.info,
@@ -254,7 +267,8 @@ fun HomeScreen(
                             Text(
                                 text = "Instructor: ${gymClass.instructor}",
                                 modifier = Modifier.padding(top = 8.dp),
-                                color = Color(0xFF2C3E50)
+                                color = Color(0xFF2C3E50),
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }

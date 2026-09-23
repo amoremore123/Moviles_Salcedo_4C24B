@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,7 +57,8 @@ fun DetailScreen(
         schedule = "Horario no disponible",
         info = "Esta clase no está disponible en este momento.",
         level = "Todos",
-        instructor = "Equipo TECSUP Fit"
+        instructor = "Equipo TECSUP Fit",
+        capacity = "Cupos no disponibles"
     )
     val slots = listOf("07:00", "12:00", "18:30")
     var selectedSlot by remember { mutableStateOf(slots.first()) }
@@ -133,6 +136,7 @@ fun DetailScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DetailRow(label = "Horario", value = classInfo.schedule)
+                    DetailRow(label = "Cupos", value = classInfo.capacity)
                     DetailRow(label = "Instructor", value = classInfo.instructor)
                     DetailRow(label = "Descripción", value = classInfo.info)
                 }
@@ -189,12 +193,19 @@ fun DetailScreen(
 
 @Composable
 private fun DetailRow(label: String, value: String) {
+    val icon: ImageVector = when (label) {
+        "Horario" -> Icons.Default.AccessTime
+        "Cupos" -> Icons.Default.Group
+        "Instructor" -> Icons.Default.Person
+        else -> Icons.Default.FitnessCenter
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = if (label == "Horario") Icons.Default.AccessTime else Icons.Default.Person,
+            imageVector = icon,
             contentDescription = label,
             tint = Color(0xFF1F6FEB),
             modifier = Modifier.size(18.dp)

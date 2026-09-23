@@ -6,7 +6,8 @@ data class GymClass(
     val schedule: String,
     val info: String,
     val level: String,
-    val instructor: String
+    val instructor: String,
+    val capacity: String = "Cupos disponibles"
 )
 
 data class Reservation(
@@ -34,7 +35,8 @@ val gymClasses = listOf(
         schedule = "Hoy · 07:00",
         info = "Entrenamiento funcional para fuerza y resistencia.",
         level = "Nivel intermedio",
-        instructor = "Ana García"
+        instructor = "Ana García",
+        capacity = "Cupos: 5 / 20 disponibles"
     ),
     GymClass(
         id = 2,
@@ -42,7 +44,8 @@ val gymClasses = listOf(
         schedule = "Hoy · 18:30",
         info = "Rutina de movilidad y control respiratorio.",
         level = "Nivel inicial",
-        instructor = "Sofía Torres"
+        instructor = "Sofía Torres",
+        capacity = "Cupos: 12 / 15 disponibles"
     ),
     GymClass(
         id = 3,
@@ -50,7 +53,8 @@ val gymClasses = listOf(
         schedule = "Esta semana · 19:15",
         info = "Intervalos de alta intensidad para mejorar resistencia.",
         level = "Nivel avanzado",
-        instructor = "Marco Ramos"
+        instructor = "Marco Ramos",
+        capacity = "Cupos: 3 / 25 disponibles"
     ),
     GymClass(
         id = 4,
@@ -58,6 +62,7 @@ val gymClasses = listOf(
         schedule = "Esta semana · 12:00",
         info = "Fortalecimiento del abdomen y postura correcta.",
         level = "Nivel inicial",
-        instructor = "Elena Cruz"
+        instructor = "Elena Cruz",
+        capacity = "Cupos: 8 / 20 disponibles"
     )
 )
