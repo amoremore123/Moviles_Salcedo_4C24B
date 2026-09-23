@@ -59,7 +59,11 @@ fun PantallaInicio(
     cantidadCarrito: Int,
     onVerCarrito: () -> Unit,
     onProductoClick: (Producto) -> Unit,
-    onAgregarProducto: (Producto) -> Unit
+    onAgregarProducto: (Producto) -> Unit,
+    onNavigateInicio: () -> Unit = {},
+    onNavigateCategorias: () -> Unit = {},
+    onNavigatePedidos: () -> Unit = {},
+    onNavigatePerfil: () -> Unit = {}
 ) {
     var categoriaSeleccionada by remember { mutableStateOf(listaCategorias.first()) }
     // Búsqueda en tiempo real por nombre de producto
@@ -91,7 +95,15 @@ fun PantallaInicio(
                 }
             )
         },
-        bottomBar = { BarraInferior() }
+        bottomBar = {
+            BarraInferiorNavegacion(
+                selectedIndex = 0,
+                onInicio = onNavigateInicio,
+                onCategorias = onNavigateCategorias,
+                onPedidos = onNavigatePedidos,
+                onPerfil = onNavigatePerfil
+            )
+        }
     ) { paddingInterno ->
         Column(
             modifier = Modifier
@@ -172,32 +184,6 @@ private fun ChipCategoria(
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Text(text = texto, color = contenido, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-private fun BarraInferior() {
-    var seleccionado by remember { mutableStateOf(0) }
-    // Menú inferior de navegación
-    val items = listOf(
-        Triple("Inicio", Icons.Default.Home, 0),
-        Triple("Categorías", Icons.Default.List, 1),
-        Triple("Pedidos", Icons.Default.Receipt, 2),
-        Triple("Perfil", Icons.Default.Person, 3)
-    )
-    NavigationBar {
-        items.forEach { (etiqueta, icono, indice) ->
-            NavigationBarItem(
-                selected = seleccionado == indice,
-                onClick = { seleccionado = indice },
-                icon = { Icon(icono, contentDescription = etiqueta) },
-                label = { Text(etiqueta) },
-                colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                    selectedIconColor = VerdeBodega,
-                    selectedTextColor = VerdeBodega
-                )
-            )
-        }
     }
 }
 
