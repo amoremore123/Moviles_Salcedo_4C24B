@@ -3,6 +3,7 @@ package com.amoresalcedom.semana05.navigation
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Home : Screen("home")
+    data object List : Screen("list")
     data object Reservations : Screen("reservations")
     data object Routines : Screen("routines")
     data object Profile : Screen("profile")

@@ -58,15 +58,16 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "TECSUP Fit",
+                    text = "Portal Academico",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4A148C),
                     textAlign = TextAlign.Center
                 )
+
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Reserva tu próxima clase",
+                    text = "Accede a tu cuenta",
                     fontSize = 14.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Center
