@@ -73,6 +73,13 @@ fun ReservationsScreen(onBackToHome: () -> Unit) {
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
+            val confirmedCount = reservations.count { it.status == "Confirmada" }
+            Text(
+                text = "$confirmedCount reservas confirmadas de ${reservations.size}",
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1B2A41),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(reservations) { reservation ->
                     Card(
