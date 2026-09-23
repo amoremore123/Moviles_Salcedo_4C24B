@@ -28,6 +28,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -75,7 +76,10 @@ fun LoginScreen(
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        errorMessage = null
+                    },
                     label = { Text("Correo Institucional") },
                     leadingIcon = {
                         Icon(
@@ -97,7 +101,10 @@ fun LoginScreen(
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        errorMessage = null
+                    },
                     label = { Text("Contraseña") },
                     leadingIcon = {
                         Icon(
@@ -128,8 +135,25 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage.orEmpty(),
+                        color = Color(0xFFD32F2F),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+
                 Button(
-                    onClick = onLoginSuccess,
+                    onClick = {
+                        errorMessage = when {
+                            !email.contains("@") -> "Ingresa un correo válido."
+                            password.length < 4 -> "La contraseña debe tener al menos 4 caracteres."
+                            else -> null
+                        }
+                        if (errorMessage == null) {
+                            onLoginSuccess()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
