@@ -2,9 +2,11 @@ package com.amoresalcedom.semana05.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -25,8 +27,8 @@ import androidx.compose.ui.unit.sp
 fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("socio@tecsup.edu.pe") }
+    var password by remember { mutableStateOf("123456") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -36,9 +38,9 @@ fun LoginScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFF3EEF9),
-                        Color(0xFFE2D6F5),
-                        Color(0xFFD4C2F0)
+                        Color(0xFF1F6FEB),
+                        Color(0xFF4A90E2),
+                        Color(0xFFEAF2FF)
                     )
                 )
             ),
@@ -46,33 +48,51 @@ fun LoginScreen(
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
+                .fillMaxWidth(0.92f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Fitness Logo Badge
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFEAF2FF),
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.FitnessCenter,
+                            contentDescription = "TECSUP Fit",
+                            tint = Color(0xFF1F6FEB),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
-                    text = "TECSUP Fit",
-                    fontSize = 24.sp,
+                    text = "¡Bienvenido a TECSUP Fit!",
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4A148C),
+                    color = Color(0xFF1B2A41),
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Reserva tu próxima clase",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
+                    text = "Inicia sesión para reservar tus clases y entrenar",
+                    fontSize = 13.sp,
+                    color = Color(0xFF6E7C90),
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 OutlinedTextField(
                     value = email,
@@ -80,20 +100,20 @@ fun LoginScreen(
                         email = it
                         errorMessage = null
                     },
-                    label = { Text("Correo Institucional") },
+                    label = { Text("Correo institucional") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = "Correo",
-                            tint = Color(0xFF673AB7)
+                            tint = Color(0xFF1F6FEB)
                         )
                     },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF673AB7),
-                        unfocusedBorderColor = Color(0xFFD1C4E9)
+                        focusedBorderColor = Color(0xFF1F6FEB),
+                        unfocusedBorderColor = Color(0xFFD3E2FD)
                     )
                 )
 
@@ -110,7 +130,7 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Contraseña",
-                            tint = Color(0xFF673AB7)
+                            tint = Color(0xFF1F6FEB)
                         )
                     },
                     trailingIcon = {
@@ -124,21 +144,23 @@ fun LoginScreen(
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF673AB7),
-                        unfocusedBorderColor = Color(0xFFD1C4E9)
+                        focusedBorderColor = Color(0xFF1F6FEB),
+                        unfocusedBorderColor = Color(0xFFD3E2FD)
                     )
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage.orEmpty(),
                         color = Color(0xFFD32F2F),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                 }
@@ -156,25 +178,26 @@ fun LoginScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF512DA8))
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1F6FEB))
                 ) {
                     Text(
-                        text = "INICIAR SESIÓN",
+                        text = "ENTRENAR AHORA",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                TextButton(onClick = { /* TODO: Forgot password action */ }) {
+                TextButton(onClick = { /* TODO */ }) {
                     Text(
                         text = "¿Olvidaste tu contraseña?",
-                        color = Color(0xFF673AB7),
-                        fontSize = 14.sp
+                        color = Color(0xFF1F6FEB),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
