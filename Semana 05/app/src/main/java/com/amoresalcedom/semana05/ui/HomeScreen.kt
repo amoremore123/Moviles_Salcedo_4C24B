@@ -53,9 +53,15 @@ fun HomeScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var selectedGoal by remember { mutableIntStateOf(0) }
+    var selectedFilter by remember { mutableIntStateOf(0) }
     val filters = listOf("Hoy", "Esta semana")
     val selectedGoalName = recommendationGoals[selectedGoal]
     val recommendedClass = recommendClass(selectedGoalName)
+    val visibleClasses = if (selectedFilter == 0) {
+        gymClasses.filter { it.schedule.startsWith("Hoy") }
+    } else {
+        gymClasses.filter { !it.schedule.startsWith("Hoy") }
+    }
 
     Scaffold(
         topBar = {
@@ -181,9 +187,10 @@ fun HomeScreen(
                 modifier = Modifier.padding(vertical = 12.dp)
             ) {
                 items(filters) { filter ->
-                    val selected = filter == "Hoy"
+                    val filterIndex = filters.indexOf(filter)
+                    val selected = filterIndex == selectedFilter
                     Button(
-                        onClick = { },
+                        onClick = { selectedFilter = filterIndex },
                         modifier = Modifier.height(40.dp),
                         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                             containerColor = if (selected) Color(0xFF1F6FEB) else Color(0xFFEAF2FF)
@@ -200,7 +207,7 @@ fun HomeScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(gymClasses) { gymClass ->
+                items(visibleClasses) { gymClass ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
