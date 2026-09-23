@@ -17,6 +17,16 @@ data class Reservation(
     val slot: String
 )
 
+val recommendationGoals = listOf("Energía", "Fuerza", "Movilidad")
+
+fun recommendClass(goal: String): GymClass {
+    return when (goal) {
+        "Fuerza" -> gymClasses.first { it.name == "CrossFit Express" }
+        "Movilidad" -> gymClasses.first { it.name == "Yoga Flow" }
+        else -> gymClasses.first { it.name == "HIIT Burn" }
+    }
+}
+
 val gymClasses = listOf(
     GymClass(
         id = 1,
