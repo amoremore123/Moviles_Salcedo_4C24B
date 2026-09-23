@@ -58,13 +58,12 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Portal Academico",
+                    text = "Portal Académico",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4A148C),
                     textAlign = TextAlign.Center
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Accede a tu cuenta",

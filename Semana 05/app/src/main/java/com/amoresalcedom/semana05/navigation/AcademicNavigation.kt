@@ -8,9 +8,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.amoresalcedom.semana05.ui.AcademicDetailScreen
 import com.amoresalcedom.semana05.ui.AcademicHomeScreen
+import com.amoresalcedom.semana05.ui.AcademicProfileScreen
 import com.amoresalcedom.semana05.ui.ListScreen
 import com.amoresalcedom.semana05.ui.LoginScreen
-import com.amoresalcedom.semana05.ui.ProfileScreen
 
 @Composable
 fun AcademicNavigation() {
@@ -49,7 +49,7 @@ fun AcademicNavigation() {
             )
         }
         composable(Screen.Profile.route) {
-            ProfileScreen(
+            AcademicProfileScreen(
                 onBackToHome = { navController.popBackStack() }
             )
         }
