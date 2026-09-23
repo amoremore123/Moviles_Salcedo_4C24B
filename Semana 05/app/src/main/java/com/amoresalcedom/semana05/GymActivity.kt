@@ -6,16 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.amoresalcedom.semana05.navigation.AcademicNavigation
+import com.amoresalcedom.semana05.navigation.GymNavigation
 
-class MainActivity : ComponentActivity() {
+class GymActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MaterialTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AcademicNavigation()
+                    GymNavigation()
                 }
             }
         }
