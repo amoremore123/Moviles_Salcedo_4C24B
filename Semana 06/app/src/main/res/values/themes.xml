@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Semana06" parent="android:style/Theme.Material.Light.NoActionBar" />
+</resources>
