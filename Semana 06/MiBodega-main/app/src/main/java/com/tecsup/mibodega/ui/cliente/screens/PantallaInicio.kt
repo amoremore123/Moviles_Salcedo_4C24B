@@ -62,8 +62,10 @@ fun PantallaInicio(
     onAgregarProducto: (Producto) -> Unit
 ) {
     var categoriaSeleccionada by remember { mutableStateOf(listaCategorias.first()) }
+    // Búsqueda en tiempo real por nombre de producto
     var textoBusqueda by remember { mutableStateOf("") }
 
+    // Filtrado combinado: categoría seleccionada y texto de búsqueda simultáneos
     val productosFiltrados = productos.filter { producto ->
         val coincideCategoria = categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
         val coincideBusqueda = producto.nombre.contains(textoBusqueda, ignoreCase = true)
