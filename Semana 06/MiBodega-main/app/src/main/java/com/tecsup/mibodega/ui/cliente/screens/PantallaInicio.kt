@@ -175,6 +175,7 @@ private fun ChipCategoria(
 @Composable
 private fun BarraInferior() {
     var seleccionado by remember { mutableStateOf(0) }
+    // Menú inferior de navegación
     val items = listOf(
         Triple("Inicio", Icons.Default.Home, 0),
         Triple("Categorías", Icons.Default.List, 1),
