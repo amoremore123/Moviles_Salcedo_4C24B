@@ -18,18 +18,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -40,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.mibodega.ui.cliente.modelo.listaCategorias
+import com.tecsup.mibodega.ui.componentes.BarraInferiorNavegacion
 import com.tecsup.mibodega.ui.theme.BodegaTheme
-import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,42 +134,6 @@ fun PantallaCategorias(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun BarraInferiorNavegacion(
-    selectedIndex: Int,
-    onInicio: () -> Unit,
-    onCategorias: () -> Unit,
-    onPedidos: () -> Unit,
-    onPerfil: () -> Unit
-) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = selectedIndex == 0,
-            onClick = onInicio,
-            icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
-            label = { Text("Inicio") }
-        )
-        NavigationBarItem(
-            selected = selectedIndex == 1,
-            onClick = onCategorias,
-            icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Categorías") },
-            label = { Text("Categorías") }
-        )
-        NavigationBarItem(
-            selected = selectedIndex == 2,
-            onClick = onPedidos,
-            icon = { Icon(Icons.Default.Receipt, contentDescription = "Pedidos") },
-            label = { Text("Pedidos") }
-        )
-        NavigationBarItem(
-            selected = selectedIndex == 3,
-            onClick = onPerfil,
-            icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-            label = { Text("Perfil") }
-        )
     }
 }
 

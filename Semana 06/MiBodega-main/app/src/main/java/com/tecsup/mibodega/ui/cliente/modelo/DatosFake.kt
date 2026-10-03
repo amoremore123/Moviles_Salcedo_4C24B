@@ -1,11 +1,5 @@
 package com.tecsup.mibodega.ui.cliente.modelo
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.Kitchen
-import androidx.compose.material.icons.filled.LocalDining
-import androidx.compose.material.icons.filled.LocalDrink
-
 val listaCategorias = listOf("Todos", "Bebidas", "Abarrotes", "Snacks")
 
 val listaProductosFake = listOf(
@@ -15,7 +9,7 @@ val listaProductosFake = listOf(
         descripcion = "Arroz extra, grano largo, ideal para el día a día.",
         precio = 4.50,
         categoria = "Abarrotes",
-        icono = Icons.Default.Kitchen
+        imagenUrl = "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80"
     ),
     Producto(
         id = 2,
@@ -23,7 +17,7 @@ val listaProductosFake = listOf(
         descripcion = "Aceite vegetal 1 L, alto en vitamina E.",
         precio = 8.90,
         categoria = "Abarrotes",
-        icono = Icons.Default.LocalDining
+        imagenUrl = "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80"
     ),
     Producto(
         id = 3,
@@ -31,7 +25,7 @@ val listaProductosFake = listOf(
         descripcion = "Leche evaporada entera 1 L.",
         precio = 5.20,
         categoria = "Abarrotes",
-        icono = Icons.Default.LocalDrink
+        imagenUrl = "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80"
     ),
     Producto(
         id = 4,
@@ -39,7 +33,7 @@ val listaProductosFake = listOf(
         descripcion = "Galletas de chocolate rellenas 126 g.",
         precio = 3.50,
         categoria = "Snacks",
-        icono = Icons.Default.Fastfood
+        imagenUrl = "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=500&q=80"
     ),
     Producto(
         id = 5,
@@ -47,6 +41,6 @@ val listaProductosFake = listOf(
         descripcion = "Bebida gaseosa sabor cola. Ideal para compartir en familia.",
         precio = 6.50,
         categoria = "Bebidas",
-        icono = Icons.Default.LocalDrink
+        imagenUrl = "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80"
     )
 )

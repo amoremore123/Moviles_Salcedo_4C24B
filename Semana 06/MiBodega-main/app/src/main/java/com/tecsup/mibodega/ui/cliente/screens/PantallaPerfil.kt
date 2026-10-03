@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tecsup.mibodega.ui.cliente.modelo.SesionManager
+import com.tecsup.mibodega.ui.componentes.BarraInferiorNavegacion
 import com.tecsup.mibodega.ui.componentes.BotonSecundario
 import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.GrisClaro
@@ -39,6 +41,8 @@ fun PantallaPerfil(
     onNavigatePerfil: () -> Unit,
     onCerrarSesion: () -> Unit
 ) {
+    val usuario = SesionManager.usuarioActual
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,12 +85,12 @@ fun PantallaPerfil(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Juan Pérez",
+                text = usuario?.nombre ?: "Usuario",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "+51 987 654 321",
+                text = usuario?.correo ?: "correo@tecsup.edu.pe",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -95,7 +99,10 @@ fun PantallaPerfil(
 
             BotonSecundario(
                 texto = "Cerrar sesión",
-                onClick = onCerrarSesion
+                onClick = {
+                    SesionManager.cerrarSesion()
+                    onCerrarSesion()
+                }
             )
         }
     }

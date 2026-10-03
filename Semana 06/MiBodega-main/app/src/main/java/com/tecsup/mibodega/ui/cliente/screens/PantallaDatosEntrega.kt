@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,22 +29,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tecsup.mibodega.ui.cliente.modelo.ItemCarrito
+import com.tecsup.mibodega.ui.cliente.modelo.Pedido
+import com.tecsup.mibodega.ui.cliente.modelo.SesionManager
 import com.tecsup.mibodega.ui.componentes.BotonPrimario
 import com.tecsup.mibodega.ui.componentes.CampoTexto
 import com.tecsup.mibodega.ui.theme.BodegaTheme
 
 @Composable
 fun PantallaDatosEntrega(
+    carrito: List<ItemCarrito>,
     onVolver: () -> Unit,
     onConfirmarPedido: () -> Unit
 ) {
-    var nombre by remember { mutableStateOf("Juan Pérez") }
-    var telefono by remember { mutableStateOf("987 654 321") }
-    var direccion by remember { mutableStateOf("Av. Los Olivos 123") }
-    var referencia by remember { mutableStateOf("Frente al parque") }
+    val usuarioActual = SesionManager.usuarioActual
+    var nombre by remember { mutableStateOf(usuarioActual?.nombre ?: "Juan Pérez") }
+    var telefono by remember { mutableStateOf(usuarioActual?.telefono ?: "987 654 321") }
+    var direccion by remember { mutableStateOf(usuarioActual?.direccion ?: "Av. Los Olivos 123") }
+    var referencia by remember { mutableStateOf(usuarioActual?.referencia ?: "Frente al parque") }
     var metodoPago by remember { mutableStateOf("Efectivo al entregar") }
 
     val metodosPago = listOf("Efectivo al entregar", "Yape", "Plin")
+    val subtotal = carrito.sumOf { it.producto.precio * it.cantidad }
+    val total = subtotal + 4.00
 
     Column(
         modifier = Modifier
@@ -60,7 +67,7 @@ fun PantallaDatosEntrega(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onVolver) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
             Text(
                 text = "Datos de entrega",
@@ -140,7 +147,18 @@ fun PantallaDatosEntrega(
 
         BotonPrimario(
             texto = "Confirmar pedido",
-            onClick = onConfirmarPedido
+            onClick = {
+                val nuevoPedido = Pedido(
+                    id = "#${(1000..9999).random()}",
+                    items = carrito,
+                    total = total,
+                    fecha = "02 Oct 2026",
+                    estado = "En camino",
+                    direccion = direccion
+                )
+                SesionManager.agregarPedido(nuevoPedido)
+                onConfirmarPedido()
+            }
         )
 
         Spacer(Modifier.height(24.dp))
@@ -151,6 +169,6 @@ fun PantallaDatosEntrega(
 @Composable
 private fun PantallaDatosEntregaPreview() {
     BodegaTheme {
-        PantallaDatosEntrega(onVolver = {}, onConfirmarPedido = {})
+        PantallaDatosEntrega(carrito = emptyList(), onVolver = {}, onConfirmarPedido = {})
     }
 }

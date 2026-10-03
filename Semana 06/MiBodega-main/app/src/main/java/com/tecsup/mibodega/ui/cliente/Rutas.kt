@@ -3,7 +3,7 @@ package com.tecsup.mibodega.ui.cliente
 object Rutas {
     const val LOGIN = "login"
     const val CREAR_CUENTA = "crear_cuenta"
-    const val INICIO = "inicio"
+    const val INICIO = "inicio?categoria={categoria}"
     const val CATEGORIAS = "categorias"
     const val PEDIDOS = "pedidos"
     const val PERFIL = "perfil"
@@ -12,5 +12,6 @@ object Rutas {
     const val DATOS_ENTREGA = "datos_entrega"
     const val CONFIRMACION = "confirmacion"
 
+    fun inicio(categoria: String = "Todos") = "inicio?categoria=$categoria"
     fun detalle(productoId: Int) = "detalle/$productoId"
 }

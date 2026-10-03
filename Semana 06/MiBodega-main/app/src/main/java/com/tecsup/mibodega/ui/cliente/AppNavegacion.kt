@@ -36,7 +36,11 @@ fun AppNavegacion() {
         composable(Rutas.LOGIN) {
             PantallaLogin(
                 onRegistrarse = { navController.navigate(Rutas.CREAR_CUENTA) },
-                onIniciarSesion = { navController.navigate(Rutas.INICIO) },
+                onLoginExitoso = {
+                    navController.navigate(Rutas.inicio("Todos")) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 onTerminos = { /* TODO */ }
             )
         }
@@ -44,16 +48,21 @@ fun AppNavegacion() {
         composable(Rutas.CREAR_CUENTA) {
             PantallaCrearCuenta(
                 onVolver = { navController.popBackStack() },
-                onCrearCuenta = { _, _, _, _ ->
-                    navController.navigate(Rutas.INICIO) {
-                        popUpTo(Rutas.LOGIN) { inclusive = true }
+                onRegistroExitoso = {
+                    navController.navigate(Rutas.inicio("Todos")) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Rutas.INICIO) {
+        composable(
+            route = Rutas.INICIO,
+            arguments = listOf(navArgument("categoria") { defaultValue = "Todos" })
+        ) { backStackEntry ->
+            val categoriaInicial = backStackEntry.arguments?.getString("categoria") ?: "Todos"
             PantallaInicio(
+                categoriaInicial = categoriaInicial,
                 cantidadCarrito = carrito.sumOf { it.cantidad },
                 onVerCarrito = { navController.navigate(Rutas.CARRITO) },
                 onProductoClick = { producto ->
@@ -62,7 +71,7 @@ fun AppNavegacion() {
                 onAgregarProducto = { producto ->
                     carrito = agregarOSumarProducto(carrito, producto, 1)
                 },
-                onNavigateInicio = { },
+                onNavigateInicio = { navController.navigate(Rutas.inicio("Todos")) { popUpTo(0) { inclusive = true } } },
                 onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
                 onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
                 onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } }
@@ -71,19 +80,21 @@ fun AppNavegacion() {
 
         composable(Rutas.CATEGORIAS) {
             PantallaCategorias(
-                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateInicio = { navController.navigate(Rutas.inicio("Todos")) { popUpTo(0) { inclusive = true } } },
                 onNavigateCategorias = { },
                 onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
                 onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } },
-                onCategoriaClick = { _ ->
-                    navController.navigate(Rutas.INICIO)
+                onCategoriaClick = { categoria ->
+                    navController.navigate(Rutas.inicio(categoria)) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
 
         composable(Rutas.PEDIDOS) {
             PantallaPedidos(
-                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateInicio = { navController.navigate(Rutas.inicio("Todos")) { popUpTo(0) { inclusive = true } } },
                 onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
                 onNavigatePedidos = { },
                 onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } }
@@ -92,13 +103,13 @@ fun AppNavegacion() {
 
         composable(Rutas.PERFIL) {
             PantallaPerfil(
-                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateInicio = { navController.navigate(Rutas.inicio("Todos")) { popUpTo(0) { inclusive = true } } },
                 onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
                 onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
                 onNavigatePerfil = { },
                 onCerrarSesion = {
                     navController.navigate(Rutas.LOGIN) {
-                        popUpTo(Rutas.INICIO) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -148,6 +159,7 @@ fun AppNavegacion() {
 
         composable(Rutas.DATOS_ENTREGA) {
             PantallaDatosEntrega(
+                carrito = carrito,
                 onVolver = { navController.popBackStack() },
                 onConfirmarPedido = {
                     carrito = emptyList()
@@ -161,13 +173,13 @@ fun AppNavegacion() {
         composable(Rutas.CONFIRMACION) {
             PantallaConfirmacion(
                 onVerEstado = {
-                    navController.navigate(Rutas.INICIO) {
+                    navController.navigate(Rutas.PEDIDOS) {
                         popUpTo(Rutas.CONFIRMACION) { inclusive = true }
                     }
                 },
                 onVolverInicio = {
-                    navController.navigate(Rutas.INICIO) {
-                        popUpTo(Rutas.LOGIN) { inclusive = true }
+                    navController.navigate(Rutas.inicio("Todos")) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )

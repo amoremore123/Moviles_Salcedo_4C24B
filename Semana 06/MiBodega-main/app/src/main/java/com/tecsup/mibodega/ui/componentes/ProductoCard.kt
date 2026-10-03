@@ -24,9 +24,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.tecsup.mibodega.R
 import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
@@ -53,11 +57,15 @@ fun ProductoCard(
                     .background(GrisClaro, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = producto.icono,
+                AsyncImage(
+                    model = producto.imagenUrl,
                     contentDescription = producto.nombre,
-                    tint = VerdeBodega,
-                    modifier = Modifier.size(48.dp)
+                    placeholder = painterResource(R.drawable.ilustracion_bodega),
+                    error = painterResource(R.drawable.ilustracion_bodega),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1.2f)
+                        .clip(RoundedCornerShape(12.dp))
                 )
                 // Category badge overlay
                 Box(
