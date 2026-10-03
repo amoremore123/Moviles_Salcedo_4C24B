@@ -16,6 +16,9 @@ import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.PantallaLogin
 import com.tecsup.mibodega.ui.cliente.screens.PantallaCrearCuenta
 import com.tecsup.mibodega.ui.cliente.screens.PantallaInicio
+import com.tecsup.mibodega.ui.cliente.screens.PantallaCategorias
+import com.tecsup.mibodega.ui.cliente.screens.PantallaPedidos
+import com.tecsup.mibodega.ui.cliente.screens.PantallaPerfil
 import com.tecsup.mibodega.ui.cliente.screens.PantallaDetalleProducto
 import com.tecsup.mibodega.ui.cliente.screens.PantallaCarrito
 import com.tecsup.mibodega.ui.cliente.screens.PantallaDatosEntrega
@@ -41,7 +44,7 @@ fun AppNavegacion() {
         composable(Rutas.CREAR_CUENTA) {
             PantallaCrearCuenta(
                 onVolver = { navController.popBackStack() },
-                onCrearCuenta = { nombre, telefono, direccion, referencia ->
+                onCrearCuenta = { _, _, _, _ ->
                     navController.navigate(Rutas.INICIO) {
                         popUpTo(Rutas.LOGIN) { inclusive = true }
                     }
@@ -58,6 +61,45 @@ fun AppNavegacion() {
                 },
                 onAgregarProducto = { producto ->
                     carrito = agregarOSumarProducto(carrito, producto, 1)
+                },
+                onNavigateInicio = { },
+                onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
+                onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
+                onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } }
+            )
+        }
+
+        composable(Rutas.CATEGORIAS) {
+            PantallaCategorias(
+                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateCategorias = { },
+                onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
+                onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } },
+                onCategoriaClick = { _ ->
+                    navController.navigate(Rutas.INICIO)
+                }
+            )
+        }
+
+        composable(Rutas.PEDIDOS) {
+            PantallaPedidos(
+                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
+                onNavigatePedidos = { },
+                onNavigatePerfil = { navController.navigate(Rutas.PERFIL) { launchSingleTop = true } }
+            )
+        }
+
+        composable(Rutas.PERFIL) {
+            PantallaPerfil(
+                onNavigateInicio = { navController.navigate(Rutas.INICIO) { popUpTo(Rutas.INICIO) { inclusive = true } } },
+                onNavigateCategorias = { navController.navigate(Rutas.CATEGORIAS) { launchSingleTop = true } },
+                onNavigatePedidos = { navController.navigate(Rutas.PEDIDOS) { launchSingleTop = true } },
+                onNavigatePerfil = { },
+                onCerrarSesion = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.INICIO) { inclusive = true }
+                    }
                 }
             )
         }
