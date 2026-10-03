@@ -121,6 +121,7 @@ fun PantallaInicio(
                 modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
             )
 
+            // LazyRow de categorías
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
