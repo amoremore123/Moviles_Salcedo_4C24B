@@ -164,6 +164,7 @@ fun InicioScreen(
 
 // Sub-composables PRIVADOS: solo los usa esta pantalla.
 
+// Filtro de categorías mediante LazyRow
 @Composable
 private fun ChipCategoria(
     texto: String,
