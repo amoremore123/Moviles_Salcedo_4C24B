@@ -183,6 +183,7 @@ private fun ChipCategoria(
     }
 }
 
+// Menú inferior de navegación principal
 @Composable
 private fun BarraInferior() {
     var seleccionado by remember { mutableStateOf(0) }
