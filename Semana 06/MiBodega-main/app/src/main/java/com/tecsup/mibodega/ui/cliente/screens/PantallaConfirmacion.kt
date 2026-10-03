@@ -1,4 +1,4 @@
-package com.tecsup.mibodega.ui.cliente.screens.confirmacion
+package com.tecsup.mibodega.ui.cliente.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +33,7 @@ import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
 @Composable
-fun ConfirmacionScreen(
+fun PantallaConfirmacion(
     onVerEstado: () -> Unit,
     onVolverInicio: () -> Unit
 ) {
@@ -119,8 +119,8 @@ fun ConfirmacionScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun ConfirmacionPreview() {
+private fun PantallaConfirmacionPreview() {
     BodegaTheme {
-        ConfirmacionScreen(onVerEstado = {}, onVolverInicio = {})
+        PantallaConfirmacion(onVerEstado = {}, onVolverInicio = {})
     }
 }

@@ -1,6 +1,5 @@
-package com.tecsup.mibodega.ui.cliente.screens.entrega
+package com.tecsup.mibodega.ui.cliente.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +13,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,7 @@ import com.tecsup.mibodega.ui.componentes.CampoTexto
 import com.tecsup.mibodega.ui.theme.BodegaTheme
 
 @Composable
-fun DatosEntregaScreen(
+fun PantallaDatosEntrega(
     onVolver: () -> Unit,
     onConfirmarPedido: () -> Unit
 ) {
@@ -55,7 +53,21 @@ fun DatosEntregaScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        EncabezadoEntrega(onVolver = onVolver)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onVolver) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+            }
+            Text(
+                text = "Datos de entrega",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
 
@@ -135,29 +147,10 @@ fun DatosEntregaScreen(
     }
 }
 
-@Composable
-private fun EncabezadoEntrega(onVolver: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onVolver) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-        }
-        Text(
-            text = "Datos de entrega",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun DatosEntregaPreview() {
+private fun PantallaDatosEntregaPreview() {
     BodegaTheme {
-        DatosEntregaScreen(onVolver = {}, onConfirmarPedido = {})
+        PantallaDatosEntrega(onVolver = {}, onConfirmarPedido = {})
     }
 }
