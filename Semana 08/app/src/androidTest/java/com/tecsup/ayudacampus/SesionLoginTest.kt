@@ -209,7 +209,7 @@ class SesionLoginTest {
         esperar { existe(wifi.titulo) }
         pulsar(wifi.titulo)
         esperar { existe("Detalle del ticket #${wifi.id.toString().padStart(4, '0')}") }
-        pulsar("Volver a mis tickets")
+        pulsarDescripcion("Volver a mis tickets")
         esperar { existe("Mis tickets") }
         buscar("")
         esperar { nodos().any { it.contentDescription?.toString() == "Nuevo ticket" } }
@@ -284,6 +284,97 @@ class SesionLoginTest {
                 val nuevos = app.repository.observarTodosLosTickets().first().filter { it.ticket.id !in iniciales }
                 nuevos.forEach { app.db.openHelper.writableDatabase.execSQL("DELETE FROM tickets WHERE id = ?", arrayOf(it.ticket.id)) }
                 app.repository.cambiarActiva(inactiva.id, inactiva.activa)
+            }
+        }
+    }
+
+    private fun mostrarEnDetalle(texto: String, atras: Boolean = false) {
+        esperar {
+            if (existe(texto)) true else {
+                val lista = nodos().firstOrNull { it.viewIdResourceName?.endsWith("detalle_lista") == true }
+                    ?: nodos().firstOrNull { it.isScrollable }
+                lista?.performAction(if (atras) AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD else AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                estabilizar()
+                false
+            }
+        }
+    }
+
+    @Test
+    fun detalleComentaCalificaCierraYVuelveALaLista() {
+        val inicial = runBlocking { app.repository.observarTodosLosTickets().first().first { it.ticket.estado == "RESUELTO" } }
+        val texto = "Probé el editor y ahora abre correctamente. Gracias por la atención."
+        try {
+            completar("juan@campus.test", "1234")
+            pulsar("Ingresar")
+            esperar { existe("Mis tickets") }
+            pulsar("Resueltos")
+            esperar { existe(inicial.ticket.titulo) }
+            pulsar(inicial.ticket.titulo)
+            esperar { existe("Detalle del ticket #${inicial.ticket.id.toString().padStart(4, '0')}") }
+            esperar { existe(inicial.ticket.titulo) && existe(inicial.ticket.descripcion) }
+            assertTrue(nodos().any { it.text?.toString()?.contains(inicial.categoria.nombre) == true })
+            assertTrue(nodos().any { it.text?.toString()?.contains(inicial.ticket.ubicacion) == true })
+            assertTrue(existe("Estudiante: ${inicial.cliente.nombre}"))
+            assertTrue(nodos().any { it.text?.toString()?.startsWith("Creado: ") == true })
+            mostrarEnDetalle(inicial.comentarios.first().texto)
+            mostrarEnDetalle("Enviar comentario")
+            pulsar("Enviar comentario")
+            mostrarEnDetalle("Escribe un comentario antes de enviarlo")
+            campoNuevo("detalle_comentario", texto)
+            pulsar("Enviar comentario")
+            mostrarEnDetalle("Comentario enviado")
+            mostrarEnDetalle(texto, atras = true)
+            runBlocking {
+                val comentario = app.repository.observarTicket(inicial.ticket.id).first()!!.comentarios.single { it.texto == texto }
+                assertEquals(inicial.cliente.id, comentario.autorId)
+                assertEquals(inicial.cliente.nombre, comentario.autorNombre)
+                assertEquals("CLIENTE", comentario.autorRol)
+            }
+            mostrarEnDetalle("Calificar y cerrar", atras = true)
+            pulsar("Calificar y cerrar")
+            esperar { existe("Calificar y cerrar ticket") }
+            var confirmar = nodos().first { it.text?.toString() == "Confirmar y cerrar" }
+            while (!confirmar.isClickable && confirmar.parent != null) confirmar = confirmar.parent
+            assertFalse(confirmar.isEnabled)
+            pulsarDescripcion("4 estrellas")
+            esperar { existe("Calificación seleccionada: 4 / 5") }
+            pulsar("Cancelar")
+            runBlocking { assertEquals("RESUELTO", app.repository.observarTicket(inicial.ticket.id).first()!!.ticket.estado) }
+            pulsar("Calificar y cerrar")
+            pulsarDescripcion("4 estrellas")
+            confirmar = nodos().first { it.text?.toString() == "Confirmar y cerrar" }
+            while (!confirmar.isClickable && confirmar.parent != null) confirmar = confirmar.parent
+            assertTrue(confirmar.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+            confirmar.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            mostrarEnDetalle("Calificación: 4 / 5", atras = true)
+            esperar { existe("Ticket cerrado") }
+            runBlocking {
+                val ticket = app.repository.observarTicket(inicial.ticket.id).first()!!.ticket
+                assertEquals("CERRADO", ticket.estado)
+                assertEquals(4, ticket.calificacion)
+                assertNotNull(ticket.fechaCierre)
+            }
+            for (paso in 1..8) {
+                val lista = nodos().firstOrNull { it.viewIdResourceName?.endsWith("detalle_lista") == true }
+                if (lista?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != true) break
+                estabilizar()
+            }
+            estabilizar()
+            ParcelFileDescriptor.AutoCloseInputStream(
+                automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso9.png")
+            ).use { it.readBytes() }
+            assertFalse(nodos().any { it.isEditable })
+            assertFalse(existe("Calificar y cerrar"))
+            pulsarDescripcion("Volver a mis tickets")
+            esperar { existe("Mis tickets") }
+        } finally {
+            runBlocking {
+                app.db.openHelper.writableDatabase.execSQL("DELETE FROM comentarios WHERE ticketId = ? AND texto = ?", arrayOf(inicial.ticket.id, texto))
+                app.db.openHelper.writableDatabase.execSQL(
+                    "UPDATE tickets SET estado = ?, calificacion = ?, fechaCierre = ? WHERE id = ?",
+                    arrayOf(inicial.ticket.estado, inicial.ticket.calificacion, inicial.ticket.fechaCierre, inicial.ticket.id)
+                )
             }
         }
     }

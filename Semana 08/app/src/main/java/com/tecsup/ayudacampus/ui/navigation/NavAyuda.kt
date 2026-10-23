@@ -19,9 +19,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
+import com.tecsup.ayudacampus.ui.cliente.DetalleTicketScreen
 import com.tecsup.ayudacampus.ui.cliente.NuevoTicketScreen
 import com.tecsup.ayudacampus.AyudaApp
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
+import com.tecsup.ayudacampus.viewmodel.DetalleTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 
@@ -99,10 +101,16 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 )
             }
         }
-        composable(Rutas.DetalleTicket, arguments = listOf(navArgument("ticketId") { type = NavType.IntType })) { entrada ->
-            if (!recuperando && usuario?.rol == "CLIENTE") {
-                val id = entrada.arguments?.getInt("ticketId") ?: return@composable
-                DestinoPendiente("Detalle del ticket #${id.toString().padStart(4, '0')}", "El detalle estará disponible próximamente.") { nav.popBackStack() }
+        composable(Rutas.DetalleTicket, arguments = listOf(navArgument(Rutas.TicketId) { type = NavType.IntType })) { entrada ->
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "CLIENTE" && it.id > 0 }?.let { actual ->
+                val id = entrada.arguments?.getInt(Rutas.TicketId) ?: return@composable
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val detalleVm: DetalleTicketViewModel = viewModel(
+                    key = "detalle_${actual.id}_$id",
+                    factory = DetalleTicketViewModel.Factory(id, app.repository, vm.usuarioActual)
+                )
+                DetalleTicketScreen(detalleVm, onVolver = { nav.popBackStack() })
             }
         }
         listOf(Rutas.Panel).forEach { ruta ->

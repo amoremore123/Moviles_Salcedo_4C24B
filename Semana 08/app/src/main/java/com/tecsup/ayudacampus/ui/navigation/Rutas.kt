@@ -6,6 +6,7 @@ object Rutas {
     const val MisTickets = "MisTickets"
     const val Panel = "Panel"
     const val NuevoTicket = "NuevoTicket"
+    const val TicketId = "ticketId"
     const val DetalleTicket = "DetalleTicket/{ticketId}"
     fun detalleTicket(id: Int): String = "DetalleTicket/$id"
 }
