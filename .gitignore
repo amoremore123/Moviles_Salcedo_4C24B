@@ -1,0 +1,10 @@
+# Archivos locales y generados de Android / Gradle
+.gradle/
+.idea/
+.kotlin/
+**/build/
+local.properties
+*.iml
+.artifacts/
+*.log
+*.tmp

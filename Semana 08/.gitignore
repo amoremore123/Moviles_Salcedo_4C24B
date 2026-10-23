@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+.kotlin/
+
+# Archivos locales y auxiliares
+*.iml
+.artifacts/
+*.log
+*.tmp
+
+# Copia duplicada fuera del modulo activo
+/Semana 08/

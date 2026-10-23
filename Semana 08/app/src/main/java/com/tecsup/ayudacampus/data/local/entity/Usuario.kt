@@ -9,5 +9,5 @@ data class Usuario(
     val nombre: String,
     val correo: String,
     val clave: String,
-    val rol: String
+    val rol: String // CLIENTE o ADMIN
 )
