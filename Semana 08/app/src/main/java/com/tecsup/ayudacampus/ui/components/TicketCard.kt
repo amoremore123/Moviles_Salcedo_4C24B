@@ -71,7 +71,7 @@ fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifie
 }
 
 @Composable
-private fun IconoCategoria(tipo: String, nombre: String) {
+internal fun IconoCategoria(tipo: String, nombre: String) {
     val color = MaterialTheme.colorScheme.primary
     Canvas(Modifier.size(24.dp).semantics { contentDescription = "Categoría: $nombre" }) {
         val u = size.width / 24f
@@ -97,6 +97,14 @@ private fun IconoCategoria(tipo: String, nombre: String) {
             "pc" -> {
                 drawRect(color, Offset(2*u, 3*u), Size(20*u, 14*u), style = trazo)
                 linea(12f,17f,12f,21f); linea(7f,21f,17f,21f)
+            }
+            "tag" -> {
+                val etiqueta = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(3*u, 3*u); lineTo(13*u, 3*u); lineTo(22*u, 12*u)
+                    lineTo(12*u, 22*u); lineTo(3*u, 13*u); close()
+                }
+                drawPath(etiqueta, color, style = trazo)
+                drawCircle(color, 1.5f*u, Offset(7*u, 7*u), style = trazo)
             }
             else -> {
                 drawRect(color, Offset(4*u, 4*u), Size(16*u, 16*u), style = trazo)

@@ -17,6 +17,11 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.tecsup.ayudacampus.ui.soporte.AtenderTicketScreen
+import com.tecsup.ayudacampus.ui.soporte.CategoriasScreen
+import com.tecsup.ayudacampus.ui.soporte.FormularioCategoriaScreen
+import com.tecsup.ayudacampus.viewmodel.AtenderViewModel
+import com.tecsup.ayudacampus.viewmodel.CategoriasViewModel
 import com.tecsup.ayudacampus.ui.soporte.PanelScreen
 import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
@@ -125,15 +130,45 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 )
                 PanelScreen(panelVm,
                     onTicket = { nav.navigate(Rutas.atenderTicket(it)) { launchSingleTop = true } },
-                    onCerrarSesion = vm::cerrarSesion, cerrandoSesion = cargando, errorSesion = error)
+                    onCerrarSesion = vm::cerrarSesion, cerrandoSesion = cargando, errorSesion = error,
+                    onCategorias = { nav.navigate(Rutas.Categorias) { launchSingleTop = true } })
             }
         }
         composable(Rutas.AtenderTicket, arguments = listOf(navArgument(Rutas.TicketId) { type = NavType.IntType })) { entrada ->
             if (recuperando) PantallaEspera()
-            else if (usuario?.rol == "ADMIN" && (usuario?.id ?: 0) > 0) {
+            else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
                 val id = entrada.arguments?.getInt(Rutas.TicketId) ?: return@composable
-                DestinoPendiente("Atender ticket #${id.toString().padStart(4, '0')}",
-                    "La atención de tickets estará disponible en el Paso 11.", "Volver al panel") { nav.popBackStack() }
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val atenderVm: AtenderViewModel = viewModel(key = "atender_${actual.id}_$id",
+                    factory = AtenderViewModel.Factory(id, app.repository, vm.usuarioActual))
+                AtenderTicketScreen(atenderVm, onVolver = { nav.popBackStack() })
+            }
+        }
+        composable(Rutas.Categorias) {
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val categoriasVm: CategoriasViewModel = viewModel(key = "categorias_${actual.id}",
+                    factory = CategoriasViewModel.Factory(app.repository, vm.usuarioActual))
+                CategoriasScreen(categoriasVm, onVolver = { nav.popBackStack() },
+                    onNueva = { nav.navigate(Rutas.formularioCategoria()) { launchSingleTop = true } },
+                    onEditar = { id -> nav.navigate(Rutas.formularioCategoria(id)) { launchSingleTop = true } })
+            }
+        }
+        composable(Rutas.FormularioCategoria, arguments = listOf(navArgument(Rutas.CategoriaId) { type = NavType.IntType; defaultValue = 0 })) { entrada ->
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
+                val id = entrada.arguments?.getInt(Rutas.CategoriaId)?.takeUnless { it == 0 }
+                val context = LocalContext.current
+                val app = context.applicationContext as AyudaApp
+                val formularioVm: CategoriasViewModel = viewModel(key = "formulario_${actual.id}_$id",
+                    factory = CategoriasViewModel.Factory(app.repository, vm.usuarioActual, id))
+                FormularioCategoriaScreen(formularioVm, onVolver = { nav.popBackStack() }, onGuardado = {
+                    Toast.makeText(context, "Categoría guardada", Toast.LENGTH_SHORT).show()
+                    if (!nav.popBackStack(Rutas.Categorias, false)) {
+                        nav.navigate(Rutas.Categorias) { popUpTo(Rutas.FormularioCategoria) { inclusive = true }; launchSingleTop = true }
+                    }
+                })
             }
         }
     }

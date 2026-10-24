@@ -459,8 +459,8 @@ class SesionLoginTest {
         esperar { existe("Wi-Fi sin conexión") && existe("1 resultado") }
         pulsar("Wi-Fi sin conexión")
         esperar { existe("Atender ticket #${wifi.toString().padStart(4, '0')}") }
-        assertTrue(existe("La atención de tickets estará disponible en el Paso 11."))
-        pulsar("Volver al panel")
+        esperar { existe("Estudiante: Juan") && existe("Wi-Fi sin conexión") }
+        pulsarDescripcion("Volver al panel")
         esperar { existe("Panel de soporte") && existe("Wi-Fi sin conexión") }
         pulsarTag("panel_estado_TODOS")
         pulsarTag("panel_prioridad_TODAS")
@@ -469,6 +469,170 @@ class SesionLoginTest {
         ParcelFileDescriptor.AutoCloseInputStream(
             automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso10_Bandeja.png")
         ).use { it.readBytes() }
+    }
+
+    private fun mostrarControlSoporte(listaTag: String, controlTag: String, atras: Boolean = false) {
+        esperar {
+            if (nodos().any { it.viewIdResourceName?.endsWith(controlTag) == true }) true else {
+                nodos().firstOrNull { it.viewIdResourceName?.endsWith(listaTag) == true }
+                    ?.performAction(if (atras) AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD else AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                estabilizar()
+                false
+            }
+        }
+    }
+    private fun mostrarTextoSoporte(listaTag: String, texto: String) {
+        esperar {
+            if (existe(texto)) true else {
+                nodos().firstOrNull { it.viewIdResourceName?.endsWith(listaTag) == true }
+                    ?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                estabilizar()
+                false
+            }
+        }
+    }
+    private fun inicioListaSoporte(listaTag: String) {
+        for (paso in 1..8) {
+            val lista = nodos().firstOrNull { it.viewIdResourceName?.endsWith(listaTag) == true }
+            if (lista?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != true) break
+            estabilizar()
+        }
+    }
+
+    @Test
+    fun atenderRespondeGuardaEstadoYPrioridadYActualizaPanel() {
+        val inicial = runBlocking { app.repository.observarTodosLosTickets().first().first { it.ticket.estado == "ABIERTO" } }
+        val respuesta = "Soporte verificó la incidencia y continúa trabajando en la solución."
+        try {
+            pulsar("Soporte TI")
+            completar("soporte@campus.test", "admin")
+            pulsar("Ingresar")
+            esperar { existe("Perfil: Soporte TI") }
+            pulsar("Bandeja")
+            esperar { existe(inicial.ticket.titulo) }
+            pulsar(inicial.ticket.titulo)
+            esperar { existe("Atender ticket #${inicial.ticket.id.toString().padStart(4, '0')}") }
+            esperar { existe("Estudiante: ${inicial.cliente.nombre}") && existe(inicial.ticket.descripcion) }
+            mostrarControlSoporte("atender_lista", "atender_estado_CERRADO")
+            assertFalse(nodos().first { it.viewIdResourceName?.endsWith("atender_estado_CERRADO") == true }.isEnabled)
+            mostrarTextoSoporte("atender_lista", "Enviar respuesta")
+            pulsar("Enviar respuesta")
+            esperar { existe("Escribe una respuesta antes de enviarla") }
+            campoNuevo("atender_respuesta", respuesta)
+            pulsar("Enviar respuesta")
+            esperar { existe("Respuesta enviada") }
+            runBlocking {
+                val comentario = app.repository.observarTicket(inicial.ticket.id).first()!!.comentarios.single { it.texto == respuesta }
+                val soporte = requireNotNull(app.repository.login("soporte@campus.test", "admin"))
+                assertEquals(soporte.id, comentario.autorId)
+                assertEquals(soporte.nombre, comentario.autorNombre)
+                assertEquals("ADMIN", comentario.autorRol)
+            }
+            mostrarControlSoporte("atender_lista", "atender_estado_EN_PROCESO", atras = true)
+            pulsarTag("atender_estado_EN_PROCESO")
+            pulsarTag("atender_prioridad_MEDIA")
+            pulsar("Guardar cambios")
+            esperar { existe("Cambios guardados") }
+            runBlocking {
+                val ticket = app.repository.observarTicket(inicial.ticket.id).first()!!.ticket
+                assertEquals("EN_PROCESO", ticket.estado); assertEquals("MEDIA", ticket.prioridad)
+                assertNull(ticket.calificacion); assertNull(ticket.fechaCierre)
+            }
+            inicioListaSoporte("atender_lista")
+            estabilizar()
+            ParcelFileDescriptor.AutoCloseInputStream(
+                automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso11_Atender.png")
+            ).use { it.readBytes() }
+            pulsarDescripcion("Volver al panel")
+            esperar { existe("Panel de soporte") }
+            pulsar("Resumen")
+            esperar { nodos().any { it.contentDescription?.toString() == "Abiertos: 1" } && nodos().any { it.contentDescription?.toString() == "En proceso: 3" } }
+        } finally {
+            runBlocking {
+                app.db.openHelper.writableDatabase.execSQL("DELETE FROM comentarios WHERE ticketId = ? AND texto = ?", arrayOf(inicial.ticket.id, respuesta))
+                app.db.openHelper.writableDatabase.execSQL(
+                    "UPDATE tickets SET estado = ?, prioridad = ?, calificacion = ?, fechaCierre = ? WHERE id = ?",
+                    arrayOf(inicial.ticket.estado, inicial.ticket.prioridad, inicial.ticket.calificacion, inicial.ticket.fechaCierre, inicial.ticket.id))
+            }
+        }
+    }
+
+    @Test
+    fun categoriasCreaEditaActivaYEliminaConConfirmacionSinRomperRelaciones() {
+        val iniciales = runBlocking { app.repository.observarCategorias().first() }
+        val nombre = "Audio de prueba"
+        try {
+            pulsar("Soporte TI")
+            completar("soporte@campus.test", "admin")
+            pulsar("Ingresar")
+            esperar { existe("Perfil: Soporte TI") }
+            pulsar("Categorías")
+            esperar { existe("Categorías") && existe("Cuenta") }
+            pulsarDescripcion("Agregar categoría")
+            esperar { existe("Nueva categoría") }
+            pulsar("Guardar categoría")
+            esperar { existe("Ingresa el nombre de la categoría") }
+            campoNuevo("categoria_nombre", " HARDWARE ")
+            pulsar("Guardar categoría")
+            esperar { existe("Ya existe una categoría con ese nombre") }
+            campoNuevo("categoria_nombre", nombre)
+            pulsarTag("categoria_icono_wifi")
+            pulsarTag("categoria_form_activa")
+            estabilizar()
+            ParcelFileDescriptor.AutoCloseInputStream(
+                automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso11_Formulario.png")
+            ).use { it.readBytes() }
+            pulsar("Guardar categoría")
+            esperar { existe("Categorías") }
+            val creada = runBlocking { app.repository.observarCategorias().first().single { it.nombre == nombre } }
+            assertTrue(creada.id > 0); assertEquals("wifi", creada.icono); assertFalse(creada.activa)
+            assertEquals(iniciales.size + 1, runBlocking { app.repository.observarCategorias().first().size })
+            mostrarControlSoporte("categorias_lista", "categoria_editar_${creada.id}", atras = true)
+            pulsarTag("categoria_editar_${creada.id}")
+            esperar { existe("Editar categoría") }
+            campoNuevo("categoria_nombre", "Audio editado")
+            pulsarTag("categoria_icono_printer")
+            pulsarTag("categoria_form_activa")
+            pulsar("Guardar categoría")
+            esperar { existe("Categorías") }
+            val editada = runBlocking { app.repository.observarCategorias().first().single { it.id == creada.id } }
+            assertEquals("Audio editado", editada.nombre); assertEquals("printer", editada.icono); assertTrue(editada.activa)
+            mostrarControlSoporte("categorias_lista", "categoria_activa_${creada.id}", atras = true)
+            pulsarTag("categoria_activa_${creada.id}")
+            esperar { existe("Categoría desactivada") }
+            runBlocking {
+                assertFalse(app.repository.observarCategoriasActivas().first().any { it.id == creada.id })
+                assertEquals(iniciales.size + 1, app.repository.observarCategorias().first().size)
+            }
+            inicioListaSoporte("categorias_lista")
+            estabilizar()
+            ParcelFileDescriptor.AutoCloseInputStream(
+                automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso11_Categorias.png")
+            ).use { it.readBytes() }
+            val usada = iniciales.single { it.nombre == "Hardware" }
+            mostrarControlSoporte("categorias_lista", "categoria_eliminar_${usada.id}")
+            pulsarTag("categoria_eliminar_${usada.id}")
+            esperar { existe("Eliminar categoría") }
+            pulsar("Eliminar")
+            esperar { existe("Esta categoría tiene tickets. Desactívala en lugar de eliminarla.") }
+            runBlocking { assertTrue(app.repository.observarTodosLosTickets().first().any { it.ticket.categoriaId == usada.id }) }
+            mostrarControlSoporte("categorias_lista", "categoria_eliminar_${creada.id}", atras = true)
+            pulsarTag("categoria_eliminar_${creada.id}")
+            pulsar("Cancelar")
+            runBlocking { assertTrue(app.repository.observarCategorias().first().any { it.id == creada.id }) }
+            pulsarTag("categoria_eliminar_${creada.id}")
+            pulsar("Eliminar")
+            esperar { existe("Categoría eliminada") }
+            runBlocking { assertFalse(app.repository.observarCategorias().first().any { it.id == creada.id }) }
+            pulsarDescripcion("Volver al panel")
+            esperar { existe("Panel de soporte") }
+        } finally {
+            runBlocking {
+                val nuevas = app.repository.observarCategorias().first().filter { c -> iniciales.none { it.id == c.id } }
+                nuevas.forEach { app.repository.eliminarCategoria(it) }
+                iniciales.forEach { app.repository.guardarCategoria(it) }
+            }
+        }
     }
 
     @Test

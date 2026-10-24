@@ -26,7 +26,7 @@ import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () -> Unit,
-                cerrandoSesion: Boolean = false, errorSesion: String? = null) {
+                cerrandoSesion: Boolean = false, errorSesion: String? = null, onCategorias: () -> Unit) {
     val administrador by vm.administrador.collectAsStateWithLifecycle()
     val cargando by vm.cargando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
@@ -54,6 +54,7 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
                 if (administrador != null) TabRow(selectedTabIndex = pestana) {
                     Tab(selected = pestana == 0, onClick = { pestana = 0 }, text = { Text("Resumen") })
                     Tab(selected = pestana == 1, onClick = { pestana = 1 }, text = { Text("Bandeja") })
+                    Tab(selected = false, onClick = onCategorias, text = { Text("Categorías") })
                 }
             }
         }
