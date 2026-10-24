@@ -791,4 +791,87 @@ class SesionLoginTest {
             estabilizar(); assertFalse(existe("Perfil y ajustes")); assertFalse(existe("soporte@campus.test"))
         } finally { sesionVm.viewModelScope.cancel() }
     }
+
+    @Test
+    fun aceptacionFinalCicloCompletoEntreEstudianteYSoporte() {
+        val titulo = "Aceptación final ${System.currentTimeMillis()}"
+        val respuesta = "Revisamos el equipo y aplicamos la solución solicitada."
+        val recepcionOriginal = runBlocking { app.preferencias.recibirTickets.first() }
+        var ticketId: Int? = null
+        fun cambiarDesdeInicio(soporte: Boolean) {
+            pulsarDescripcion(if (soporte) "Perfil y ajustes" else "Mi perfil")
+            esperar { existe(if (soporte) "soporte@campus.test" else "juan@campus.test") }
+            mostrarControlSoporte("perfil_lista", "perfil_cambiar")
+            pulsarTag("perfil_cambiar"); esperar { existe("Cambiar de perfil de práctica") }; pulsar("Cambiar perfil")
+            esperar { existe(if (soporte) "Mis tickets" else "Panel de soporte") }
+        }
+        fun abrirEnSoporte(id: Int) {
+            pulsar("Bandeja"); esperar { existe("Panel de soporte") }
+            campoNuevo("panel_busqueda", "#$id")
+            esperar { existe(titulo) && existe("1 resultado") }; pulsar(titulo)
+            esperar { existe("Atender ticket #${id.toString().padStart(4, '0')}") }
+        }
+        try {
+            capturaPerfil("AyudaCampus_Paso13_Login")
+            runBlocking { app.preferencias.guardarRecibirTickets(true) }
+            completar("juan@campus.test", "1234"); pulsar("Ingresar")
+            esperar { existe("Mis tickets") }; pulsarDescripcion("Nuevo ticket")
+            esperar { existe("Crear ticket") }
+            campoNuevo("nuevo_titulo", titulo)
+            campoNuevo("nuevo_descripcion", "El equipo del aula no permite iniciar la práctica final.")
+            campoNuevo("nuevo_ubicacion", "Laboratorio de aceptación")
+            pulsarTag("nuevo_categoria"); esperar { existe("Hardware") }; pulsar("Hardware")
+            pulsar("ALTA"); pulsar("Crear ticket")
+            esperar { existe("Mis tickets") && existe(titulo) }
+            val creado = runBlocking { app.repository.observarTodosLosTickets().first().single { it.ticket.titulo == titulo }.ticket }
+            ticketId = creado.id
+            assertEquals("ABIERTO", creado.estado); assertEquals("ALTA", creado.prioridad)
+            cambiarDesdeInicio(soporte = false)
+            abrirEnSoporte(creado.id)
+            mostrarControlSoporte("atender_lista", "atender_estado_EN_PROCESO")
+            pulsarTag("atender_estado_EN_PROCESO"); pulsarTag("atender_prioridad_MEDIA"); pulsar("Guardar cambios")
+            esperar { existe("Cambios guardados") }
+            runBlocking {
+                val actual = app.repository.observarTicket(creado.id).first()!!.ticket
+                assertEquals("EN_PROCESO", actual.estado); assertEquals("MEDIA", actual.prioridad)
+            }
+            mostrarTextoSoporte("atender_lista", "Enviar respuesta")
+            campoNuevo("atender_respuesta", respuesta); pulsar("Enviar respuesta"); esperar { existe("Respuesta enviada") }
+            mostrarControlSoporte("atender_lista", "atender_estado_RESUELTO", atras = true)
+            pulsarTag("atender_estado_RESUELTO"); pulsar("Guardar cambios"); esperar { existe("Cambios guardados") }
+            pulsarDescripcion("Volver al panel"); esperar { existe("Panel de soporte") }
+            cambiarDesdeInicio(soporte = true)
+            esperar { existe(titulo) }; pulsar(titulo)
+            mostrarEnDetalle("Tu incidencia está resuelta")
+            mostrarEnDetalle(respuesta)
+            mostrarEnDetalle("Reabrir ticket", atras = true); pulsar("Reabrir ticket")
+            mostrarEnDetalle("Ticket reabierto")
+            runBlocking {
+                val abierto = app.repository.observarTicket(creado.id).first()!!.ticket
+                assertEquals("ABIERTO", abierto.estado); assertNull(abierto.calificacion); assertNull(abierto.fechaCierre)
+            }
+            pulsarDescripcion("Volver a mis tickets"); esperar { existe("Mis tickets") }
+            cambiarDesdeInicio(soporte = false); abrirEnSoporte(creado.id)
+            mostrarControlSoporte("atender_lista", "atender_estado_RESUELTO")
+            pulsarTag("atender_estado_RESUELTO"); pulsar("Guardar cambios"); esperar { existe("Cambios guardados") }
+            pulsarDescripcion("Volver al panel"); esperar { existe("Panel de soporte") }
+            cambiarDesdeInicio(soporte = true); esperar { existe(titulo) }; pulsar(titulo)
+            mostrarEnDetalle("Calificar y cerrar"); pulsar("Calificar y cerrar")
+            esperar { existe("Calificar y cerrar ticket") }; pulsarDescripcion("4 estrellas"); pulsar("Confirmar y cerrar")
+            mostrarEnDetalle("Ticket cerrado"); mostrarEnDetalle("Calificación: 4 / 5")
+            assertFalse(nodos().any { it.isEditable }); assertFalse(existe("Reabrir ticket"))
+            runBlocking {
+                val final = app.repository.observarTicket(creado.id).first()!!
+                assertEquals("CERRADO", final.ticket.estado); assertEquals(4, final.ticket.calificacion); assertNotNull(final.ticket.fechaCierre)
+                assertEquals("ADMIN", final.comentarios.single { it.texto == respuesta }.autorRol)
+            }
+        } finally {
+            runBlocking {
+                // Solo se retira el registro de prueba creado en este recorrido.
+                val ids = ticketId?.let { listOf(it) } ?: app.repository.observarTodosLosTickets().first().filter { it.ticket.titulo == titulo }.map { it.ticket.id }
+                ids.forEach { app.db.openHelper.writableDatabase.execSQL("DELETE FROM tickets WHERE id = ?", arrayOf(it)) }
+                app.preferencias.guardarRecibirTickets(recepcionOriginal)
+            }
+        }
+    }
 }
