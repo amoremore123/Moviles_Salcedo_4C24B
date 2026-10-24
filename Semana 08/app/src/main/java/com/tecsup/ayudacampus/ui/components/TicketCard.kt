@@ -28,7 +28,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifier = Modifier, mostrarCliente: Boolean = false) {
     val ticket = detalle.ticket
     val fecha = remember(ticket.fecha) {
         SimpleDateFormat("dd MMM · HH:mm", Locale("es", "PE")).format(Date(ticket.fecha))
@@ -53,6 +53,7 @@ fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifie
                     ) { IconoCategoria(detalle.categoria.icono, detalle.categoria.nombre) }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(ticket.titulo, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        if (mostrarCliente) Text("Estudiante: ${detalle.cliente.nombre}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                         Text(detalle.categoria.nombre, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)

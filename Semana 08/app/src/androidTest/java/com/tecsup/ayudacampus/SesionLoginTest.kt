@@ -389,12 +389,86 @@ class SesionLoginTest {
         scenario = ActivityScenario.launch(MainActivity::class.java)
         esperar { existe("Perfil: Soporte TI") }
         assertEquals(0, nodos().count { it.isEditable })
-        pulsar("Cerrar sesión")
+        pulsarDescripcion("Cerrar sesión")
         esperar { nodos().count { it.isEditable } == 2 }
         runBlocking {
             assertEquals("", app.preferencias.perfilActivo.first())
             assertEquals(0, app.preferencias.usuarioId.first())
         }
+    }
+
+    private fun mostrarResumen(texto: String) {
+        esperar {
+            if (existe(texto)) true else {
+                nodos().firstOrNull { it.viewIdResourceName?.endsWith("panel_resumen") == true }
+                    ?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                estabilizar()
+                false
+            }
+        }
+    }
+
+    @Test
+    fun panelDeSoporteMuestraIndicadoresBuscaFiltraYNavega() {
+        pulsar("Soporte TI")
+        completar("soporte@campus.test", "admin")
+        pulsar("Ingresar")
+        esperar { existe("Panel de soporte") && existe("Perfil: Soporte TI") }
+        esperar { nodos().any { it.contentDescription?.toString() == "Abiertos: 2" } }
+        assertTrue(nodos().any { it.contentDescription?.toString() == "En proceso: 2" })
+        assertTrue(nodos().any { it.contentDescription?.toString() == "Resueltos: 1" })
+        assertTrue(nodos().any { it.contentDescription?.toString() == "Cerrados: 1" })
+        assertTrue(existe("Hola, Soporte TI"))
+        esperar { existe("1 ticket ALTA sin atender") }
+        mostrarResumen("Software: 2")
+        mostrarResumen("Impresión: 1")
+        for (paso in 1..8) {
+            val lista = nodos().firstOrNull { it.viewIdResourceName?.endsWith("panel_resumen") == true }
+            if (lista?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != true) break
+            estabilizar()
+        }
+        estabilizar()
+        ParcelFileDescriptor.AutoCloseInputStream(
+            automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso10_Panel.png")
+        ).use { it.readBytes() }
+        pulsar("Bandeja")
+        esperar { existe("6 resultados") && existe("Wi-Fi sin conexión") && existe("Equipo no enciende") }
+        val textos = nodos().mapNotNull { it.text?.toString() }
+        assertTrue(textos.indexOf("Wi-Fi sin conexión") < textos.indexOf("Equipo no enciende"))
+        assertTrue(existe("Estudiante: Juan"))
+        val lista = runBlocking { app.repository.observarTodosLosTickets().first() }
+        val cuenta = lista.single { it.ticket.titulo == "Cuenta de campus bloqueada" }.ticket.id
+        val wifi = lista.single { it.ticket.titulo == "Wi-Fi sin conexión" }.ticket.id
+        campoNuevo("panel_busqueda", "EQUIPO")
+        esperar { existe("Equipo no enciende") && existe("1 resultado") }
+        campoNuevo("panel_busqueda", "#${cuenta.toString().padStart(4, '0')}")
+        esperar { existe("Cuenta de campus bloqueada") && existe("Cerrado") }
+        campoNuevo("panel_busqueda", "JUAN")
+        esperar { existe("6 resultados") }
+        pulsarTag("panel_estado_ABIERTOS")
+        pulsarTag("panel_prioridad_ALTA")
+        esperar { existe("1 resultado") && existe("Wi-Fi sin conexión") }
+        pulsarTag("panel_prioridad_BAJA")
+        esperar { existe("1 resultado") && existe("Impresora sin papel") }
+        pulsarTag("panel_estado_CERRADOS")
+        esperar { existe("No hay tickets con estos filtros") }
+        pulsar("Resumen")
+        esperar { nodos().any { it.contentDescription?.toString() == "Abiertos: 2" } }
+        assertTrue(nodos().any { it.contentDescription?.toString() == "Cerrados: 1" })
+        pulsar("Ver")
+        esperar { existe("Wi-Fi sin conexión") && existe("1 resultado") }
+        pulsar("Wi-Fi sin conexión")
+        esperar { existe("Atender ticket #${wifi.toString().padStart(4, '0')}") }
+        assertTrue(existe("La atención de tickets estará disponible en el Paso 11."))
+        pulsar("Volver al panel")
+        esperar { existe("Panel de soporte") && existe("Wi-Fi sin conexión") }
+        pulsarTag("panel_estado_TODOS")
+        pulsarTag("panel_prioridad_TODAS")
+        esperar { existe("6 resultados") }
+        estabilizar()
+        ParcelFileDescriptor.AutoCloseInputStream(
+            automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso10_Bandeja.png")
+        ).use { it.readBytes() }
     }
 
     @Test

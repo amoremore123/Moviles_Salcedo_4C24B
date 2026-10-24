@@ -17,6 +17,8 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.tecsup.ayudacampus.ui.soporte.PanelScreen
+import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 import com.tecsup.ayudacampus.ui.cliente.LoginScreen
 import com.tecsup.ayudacampus.ui.cliente.MisTicketsScreen
 import com.tecsup.ayudacampus.ui.cliente.DetalleTicketScreen
@@ -113,33 +115,32 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 DetalleTicketScreen(detalleVm, onVolver = { nav.popBackStack() })
             }
         }
-        listOf(Rutas.Panel).forEach { ruta ->
-            composable(ruta) {
-                if (recuperando) PantallaEspera()
-                else usuario?.let { actual ->
-                    Column(
-                        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp).testTag("destino_$ruta"),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
-                    ) {
-                        Text(if (ruta == Rutas.MisTickets) "Mis tickets" else "Panel de soporte", style = MaterialTheme.typography.headlineMedium)
-                        Text("Hola, ${actual.nombre}", style = MaterialTheme.typography.titleLarge)
-                        Text(if (actual.rol == "CLIENTE") "Perfil: Estudiante" else "Perfil: Soporte TI")
-                        Text(actual.correo)
-                        Text("Destino temporal · Paso 6", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
-                        OutlinedButton(onClick = vm::cerrarSesion, enabled = !cargando, modifier = Modifier.testTag("cerrarSesion")) {
-                            Text("Cerrar sesión")
-                        }
-                    }
-                }
+        composable(Rutas.Panel) {
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val panelVm: PanelViewModel = viewModel(
+                    key = "panel_${actual.id}",
+                    factory = PanelViewModel.Factory(app.repository, vm.usuarioActual)
+                )
+                PanelScreen(panelVm,
+                    onTicket = { nav.navigate(Rutas.atenderTicket(it)) { launchSingleTop = true } },
+                    onCerrarSesion = vm::cerrarSesion, cerrandoSesion = cargando, errorSesion = error)
+            }
+        }
+        composable(Rutas.AtenderTicket, arguments = listOf(navArgument(Rutas.TicketId) { type = NavType.IntType })) { entrada ->
+            if (recuperando) PantallaEspera()
+            else if (usuario?.rol == "ADMIN" && (usuario?.id ?: 0) > 0) {
+                val id = entrada.arguments?.getInt(Rutas.TicketId) ?: return@composable
+                DestinoPendiente("Atender ticket #${id.toString().padStart(4, '0')}",
+                    "La atención de tickets estará disponible en el Paso 11.", "Volver al panel") { nav.popBackStack() }
             }
         }
     }
 }
 
 @Composable
-private fun DestinoPendiente(titulo: String, mensaje: String, onVolver: () -> Unit) {
+private fun DestinoPendiente(titulo: String, mensaje: String, textoVolver: String = "Volver a mis tickets", onVolver: () -> Unit) {
     Column(
         Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -147,7 +148,7 @@ private fun DestinoPendiente(titulo: String, mensaje: String, onVolver: () -> Un
     ) {
         Text(titulo, style = MaterialTheme.typography.headlineSmall)
         Text(mensaje)
-        OutlinedButton(onClick = onVolver) { Text("Volver a mis tickets") }
+        OutlinedButton(onClick = onVolver) { Text(textoVolver) }
     }
 }
 
