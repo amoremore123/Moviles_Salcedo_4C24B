@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
@@ -32,15 +33,20 @@ import com.tecsup.ayudacampus.AyudaApp
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 import com.tecsup.ayudacampus.viewmodel.DetalleTicketViewModel
 import com.tecsup.ayudacampus.viewmodel.NuevoTicketViewModel
+import com.tecsup.ayudacampus.ui.cliente.PerfilScreen
+import com.tecsup.ayudacampus.ui.soporte.AjustesScreen
+import com.tecsup.ayudacampus.viewmodel.PerfilViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
 
 @Composable
-fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (String) -> Unit) {
-    val nav = rememberNavController()
+fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (String) -> Unit, nav: NavHostController = rememberNavController()) {
+    var confirmarSalida by remember { mutableStateOf(false) }
+    var confirmarCambio by remember { mutableStateOf(false) }
     val usuario by vm.usuarioActual.collectAsStateWithLifecycle()
     val recuperando by vm.recuperandoSesion.collectAsStateWithLifecycle()
     val cargando by vm.cargando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
+    val mesaAbierta by vm.recibirTickets.collectAsStateWithLifecycle()
     LaunchedEffect(recuperando, usuario) {
         if (!recuperando) {
             val destino = when (usuario?.rol) {
@@ -83,9 +89,10 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     vm = ticketsVm, nombre = actual.nombre,
                     onTicket = { nav.navigate(Rutas.detalleTicket(it)) },
                     onNuevo = { nav.navigate(Rutas.NuevoTicket) { launchSingleTop = true } },
-                    onCerrarSesion = vm::cerrarSesion, cerrandoSesion = cargando,
+                    onCerrarSesion = { confirmarSalida = true }, cerrandoSesion = cargando,
                     ticketCreadoId = ticketCreado,
-                    onTicketMostrado = { entrada.savedStateHandle["ticketCreado"] = null }
+                    onTicketMostrado = { entrada.savedStateHandle["ticketCreado"] = null },
+                    onPerfil = { nav.navigate(Rutas.Perfil) { launchSingleTop = true } }, mesaAbierta = mesaAbierta
                 )
             }
         }
@@ -95,7 +102,7 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 val app = context.applicationContext as AyudaApp
                 val nuevoVm: NuevoTicketViewModel = viewModel(
                     key = "nuevoTicket_${actual.id}",
-                    factory = NuevoTicketViewModel.Factory(app.repository, vm.usuarioActual)
+                    factory = NuevoTicketViewModel.Factory(app.repository, vm.usuarioActual, app.preferencias.recibirTickets)
                 )
                 NuevoTicketScreen(
                     vm = nuevoVm,
@@ -130,8 +137,9 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 )
                 PanelScreen(panelVm,
                     onTicket = { nav.navigate(Rutas.atenderTicket(it)) { launchSingleTop = true } },
-                    onCerrarSesion = vm::cerrarSesion, cerrandoSesion = cargando, errorSesion = error,
-                    onCategorias = { nav.navigate(Rutas.Categorias) { launchSingleTop = true } })
+                    onCerrarSesion = { confirmarSalida = true }, cerrandoSesion = cargando, errorSesion = error,
+                    onCategorias = { nav.navigate(Rutas.Categorias) { launchSingleTop = true } },
+                    onPerfil = { nav.navigate(Rutas.Ajustes) { launchSingleTop = true } })
             }
         }
         composable(Rutas.AtenderTicket, arguments = listOf(navArgument(Rutas.TicketId) { type = NavType.IntType })) { entrada ->
@@ -171,20 +179,37 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 })
             }
         }
+        composable(Rutas.Perfil) {
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "CLIENTE" && it.id > 0 }?.let { actual ->
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val perfilVm: PerfilViewModel = viewModel(key = "perfil_${actual.id}",
+                    factory = PerfilViewModel.Factory(app.repository, app.preferencias, vm.usuarioActual))
+                PerfilScreen(perfilVm, { nav.popBackStack() }, { confirmarSalida = true },
+                    { confirmarCambio = true }, cargando, error)
+            }
+        }
+        composable(Rutas.Ajustes) {
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val ajustesVm: PerfilViewModel = viewModel(key = "ajustes_${actual.id}",
+                    factory = PerfilViewModel.Factory(app.repository, app.preferencias, vm.usuarioActual))
+                AjustesScreen(ajustesVm, { nav.popBackStack() }, { confirmarSalida = true },
+                    { confirmarCambio = true }, cargando, error)
+            }
+        }
     }
-}
-
-@Composable
-private fun DestinoPendiente(titulo: String, mensaje: String, textoVolver: String = "Volver a mis tickets", onVolver: () -> Unit) {
-    Column(
-        Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
-    ) {
-        Text(titulo, style = MaterialTheme.typography.headlineSmall)
-        Text(mensaje)
-        OutlinedButton(onClick = onVolver) { Text(textoVolver) }
-    }
+    if (confirmarSalida && usuario != null) AlertDialog(
+        onDismissRequest = { confirmarSalida = false }, title = { Text("¿Cerrar sesión?") },
+        text = { Text("Tus preferencias y tickets se conservarán.") },
+        confirmButton = { TextButton(onClick = { confirmarSalida = false; vm.cerrarSesion() }) { Text("Cerrar sesión") } },
+        dismissButton = { TextButton(onClick = { confirmarSalida = false }) { Text("Cancelar") } })
+    if (confirmarCambio && usuario != null) AlertDialog(
+        onDismissRequest = { confirmarCambio = false }, title = { Text("Cambiar de perfil de práctica") },
+        text = { Text("Entrarás con el usuario de demostración del otro perfil. Se cerrará la navegación del perfil actual.") },
+        confirmButton = { TextButton(onClick = { confirmarCambio = false; vm.cambiarPerfil() }) { Text("Cambiar perfil") } },
+        dismissButton = { TextButton(onClick = { confirmarCambio = false }) { Text("Cancelar") } })
 }
 
 @Composable

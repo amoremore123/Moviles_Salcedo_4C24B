@@ -18,6 +18,8 @@ class AyudaRepositoryRoom(db: AyudaDatabase) : AyudaRepository {
 
     override suspend fun obtenerUsuario(id: Int): Usuario? = usuarioDao.obtenerPorId(id)
 
+    override suspend fun obtenerUsuarioPorRol(rol: String): Usuario? = usuarioDao.obtenerPorRol(rol)
+
     override suspend fun login(correo: String, clave: String): Usuario? =
         usuarioDao.login(correo, clave)
 

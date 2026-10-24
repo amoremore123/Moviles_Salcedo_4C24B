@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +33,9 @@ fun MisTicketsScreen(
     onCerrarSesion: () -> Unit,
     cerrandoSesion: Boolean = false,
     ticketCreadoId: Long? = null,
-    onTicketMostrado: () -> Unit = {}
+    onTicketMostrado: () -> Unit = {},
+    onPerfil: () -> Unit = {},
+    mesaAbierta: Boolean? = true
 ) {
     val tickets by vm.tickets.collectAsStateWithLifecycle()
     val filtro by vm.filtro.collectAsStateWithLifecycle()
@@ -53,10 +56,11 @@ fun MisTicketsScreen(
         topBar = {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text("Mis tickets", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Text("Perfil: Estudiante", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, contentDescription = "Mi perfil") }
                     IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -67,6 +71,7 @@ fun MisTicketsScreen(
                         Text("$abiertos abiertos", Modifier.padding(horizontal = 12.dp, vertical = 6.dp).testTag("contadorAbiertos"), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
                 }
+                if (mesaAbierta == false) Text("Mesa de ayuda cerrada", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleSmall)
                 OutlinedTextField(
                     value = busqueda, onValueChange = vm::buscar,
                     modifier = Modifier.fillMaxWidth().testTag("buscarTickets"),
@@ -90,7 +95,7 @@ fun MisTicketsScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNuevo, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.testTag("nuevoTicket")) {
+            if (mesaAbierta == true) FloatingActionButton(onClick = onNuevo, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.testTag("nuevoTicket")) {
                 Icon(Icons.Default.Add, contentDescription = "Nuevo ticket")
             }
         }

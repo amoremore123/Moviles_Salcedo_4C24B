@@ -1,5 +1,16 @@
 package com.tecsup.ayudacampus
 
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.*
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewModelScope
+import com.tecsup.ayudacampus.ui.navigation.NavAyuda
+import com.tecsup.ayudacampus.ui.navigation.Rutas
+import com.tecsup.ayudacampus.ui.theme.AyudaTheme
+import com.tecsup.ayudacampus.viewmodel.SesionViewModel
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withTimeout
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
@@ -390,6 +401,8 @@ class SesionLoginTest {
         esperar { existe("Perfil: Soporte TI") }
         assertEquals(0, nodos().count { it.isEditable })
         pulsarDescripcion("Cerrar sesión")
+        esperar { existe("¿Cerrar sesión?") }
+        pulsar("Cerrar sesión")
         esperar { nodos().count { it.isEditable } == 2 }
         runBlocking {
             assertEquals("", app.preferencias.perfilActivo.first())
@@ -653,5 +666,129 @@ class SesionLoginTest {
         scenario = ActivityScenario.launch(MainActivity::class.java)
         esperar { nodos().count { it.isEditable } == 2 }
         runBlocking { assertEquals("", app.preferencias.perfilActivo.first()) }
+    }
+
+    private fun capturaPerfil(nombre: String) {
+        estabilizar()
+        ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("screencap -p /sdcard/Download/$nombre.png")).use { it.readBytes() }
+    }
+    @Test
+    fun perfilEstudiantePersisteAjustesReiniciaYCierraConConfirmacion() {
+        val original = runBlocking { Triple(app.preferencias.modoOscuro.first(), app.preferencias.notificaciones.first(), app.preferencias.recibirTickets.first()) }
+        try {
+            runBlocking { app.preferencias.guardarModoOscuro(false); app.preferencias.guardarNotificaciones(true) }
+            completar("juan@campus.test", "1234"); pulsar("Ingresar")
+            esperar { existe("Mis tickets") }; pulsarDescripcion("Mi perfil")
+            esperar { existe("Mi perfil") && existe("juan@campus.test") }
+            assertTrue(existe("Juan")); assertTrue(existe("Estudiante")); assertTrue(existe("Abiertos")); assertTrue(existe("Resueltos")); assertTrue(existe("Totales"))
+            assertFalse(nodos().any { it.viewIdResourceName?.endsWith("perfil_recibir") == true })
+            pulsarTag("perfil_oscuro")
+            esperar { runBlocking { app.preferencias.modoOscuro.first() } }
+            pulsarTag("perfil_notificaciones")
+            esperar { !runBlocking { app.preferencias.notificaciones.first() } }
+            capturaPerfil("AyudaCampus_Paso12_Perfil")
+            scenario.close(); scenario = ActivityScenario.launch(MainActivity::class.java)
+            esperar { existe("Mis tickets") }; pulsarDescripcion("Mi perfil")
+            esperar { existe("juan@campus.test") }
+            esperar { nodos().firstOrNull { it.viewIdResourceName?.endsWith("perfil_oscuro") == true }?.isChecked == true }
+            assertFalse(nodos().first { it.viewIdResourceName?.endsWith("perfil_notificaciones") == true }.isChecked)
+            mostrarControlSoporte("perfil_lista", "perfil_salir")
+            pulsarTag("perfil_salir"); esperar { existe("¿Cerrar sesión?") }; pulsar("Cancelar")
+            assertTrue(existe("Mi perfil"))
+            pulsarTag("perfil_salir"); esperar { existe("¿Cerrar sesión?") }; pulsar("Cerrar sesión")
+            esperar { nodos().count { it.isEditable } == 2 }
+            runBlocking {
+                assertEquals("", app.preferencias.perfilActivo.first()); assertEquals(0, app.preferencias.usuarioId.first())
+                assertTrue(app.preferencias.modoOscuro.first()); assertFalse(app.preferencias.notificaciones.first())
+                assertEquals(original.third, app.preferencias.recibirTickets.first())
+            }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() } }
+            estabilizar()
+            assertFalse(existe("Mis tickets")); assertFalse(existe("Mi perfil"))
+            scenario.close(); scenario = ActivityScenario.launch(MainActivity::class.java)
+            esperar { nodos().count { it.isEditable } == 2 }
+        } finally {
+            runBlocking { app.preferencias.guardarModoOscuro(original.first); app.preferencias.guardarNotificaciones(original.second); app.preferencias.guardarRecibirTickets(original.third) }
+        }
+    }
+    @Test
+    fun ajustesSoporteCierraMesaYCambiaPerfilSinArrastrarLaPila() {
+        val original = runBlocking { Triple(app.preferencias.modoOscuro.first(), app.preferencias.notificaciones.first(), app.preferencias.recibirTickets.first()) }
+        try {
+            runBlocking { app.preferencias.guardarModoOscuro(false); app.preferencias.guardarRecibirTickets(true) }
+            pulsar("Soporte TI"); completar("soporte@campus.test", "admin"); pulsar("Ingresar")
+            esperar { existe("Panel de soporte") }; pulsarDescripcion("Perfil y ajustes")
+            esperar { existe("soporte@campus.test") }; assertTrue(existe("Soporte TI"))
+            mostrarControlSoporte("perfil_lista", "perfil_recibir")
+            pulsarTag("perfil_recibir"); esperar { !runBlocking { app.preferencias.recibirTickets.first() } }
+            pulsarTag("perfil_oscuro"); esperar { runBlocking { app.preferencias.modoOscuro.first() } }
+            inicioListaSoporte("perfil_lista"); capturaPerfil("AyudaCampus_Paso12_Ajustes")
+            mostrarControlSoporte("perfil_lista", "perfil_cambiar"); pulsarTag("perfil_cambiar")
+            esperar { existe("Cambiar de perfil de práctica") }; pulsar("Cambiar perfil")
+            esperar { existe("Mis tickets") && existe("Mesa de ayuda cerrada") }
+            assertFalse(nodos().any { it.contentDescription?.toString() == "Nuevo ticket" })
+            val juan = runBlocking { app.repository.login("juan@campus.test", "1234")!! }
+            runBlocking { assertEquals("CLIENTE", app.preferencias.perfilActivo.first()); assertEquals(juan.id, app.preferencias.usuarioId.first()) }
+            scenario.close(); scenario = ActivityScenario.launch(MainActivity::class.java)
+            esperar { existe("Mis tickets") && existe("Mesa de ayuda cerrada") }
+            pulsarDescripcion("Mi perfil"); esperar { existe("juan@campus.test") }
+            assertFalse(nodos().any { it.viewIdResourceName?.endsWith("perfil_recibir") == true })
+            mostrarControlSoporte("perfil_lista", "perfil_cambiar"); pulsarTag("perfil_cambiar"); pulsar("Cambiar perfil")
+            esperar { existe("Panel de soporte") }
+            pulsarDescripcion("Perfil y ajustes"); esperar { existe("soporte@campus.test") }
+            mostrarControlSoporte("perfil_lista", "perfil_recibir"); pulsarTag("perfil_recibir")
+            esperar { runBlocking { app.preferencias.recibirTickets.first() } }
+            pulsarDescripcion("Volver al inicio"); esperar { existe("Panel de soporte") }
+            pulsarDescripcion("Cerrar sesión"); pulsar("Cerrar sesión"); esperar { nodos().count { it.isEditable } == 2 }
+            completar("juan@campus.test", "1234"); pulsar("Ingresar")
+            esperar { existe("Mis tickets") }
+            esperar { nodos().any { it.contentDescription?.toString() == "Nuevo ticket" } }
+            assertFalse(existe("Mesa de ayuda cerrada"))
+        } finally {
+            runBlocking { app.preferencias.guardarModoOscuro(original.first); app.preferencias.guardarNotificaciones(original.second); app.preferencias.guardarRecibirTickets(original.third) }
+        }
+    }
+    @Test
+    fun rutasManipuladasNoAbrenPantallasDelOtroRol() {
+        val sesionVm = SesionViewModel(app.repository, app.preferencias)
+        lateinit var nav: NavHostController
+        try {
+            runBlocking { withTimeout(15_000) { sesionVm.recuperandoSesion.first { !it } } }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { sesionVm.login("juan@campus.test", "1234", "CLIENTE") }
+            runBlocking { withTimeout(15_000) { sesionVm.cargando.first { !it } } }
+            scenario.onActivity { activity ->
+                activity.setContent {
+                    val controlador = rememberNavController()
+                    SideEffect { nav = controlador }
+                    val usuario by sesionVm.usuarioActual.collectAsState()
+                    val oscuro by sesionVm.modoOscuro.collectAsState()
+                    AyudaTheme(usuario?.rol ?: "CLIENTE", oscuro) { NavAyuda(sesionVm, "CLIENTE", {}, controlador) }
+                }
+            }
+            esperar { existe("Mis tickets") }
+            for (ruta in listOf(Rutas.Panel, Rutas.Categorias, Rutas.formularioCategoria(), Rutas.atenderTicket(1), Rutas.Ajustes)) {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync { nav.navigate(ruta) }
+                estabilizar()
+                assertFalse(existe("Panel de soporte")); assertFalse(existe("Perfil y ajustes")); assertFalse(existe("Nueva categoría"))
+                assertFalse(nodos().any { it.viewIdResourceName?.endsWith("atender_lista") == true || it.viewIdResourceName?.endsWith("categorias_lista") == true })
+                InstrumentationRegistry.getInstrumentation().runOnMainSync { nav.popBackStack() }
+                esperar { existe("Mis tickets") }
+            }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { sesionVm.cambiarPerfil() }
+            esperar { existe("Panel de soporte") }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { assertNull(nav.previousBackStackEntry) }
+            for (ruta in listOf(Rutas.MisTickets, Rutas.NuevoTicket, Rutas.detalleTicket(1), Rutas.Perfil)) {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync { nav.navigate(ruta) }
+                estabilizar()
+                assertFalse(existe("Mis tickets")); assertFalse(existe("Nuevo ticket")); assertFalse(existe("Mi perfil"))
+                assertFalse(nodos().any { it.viewIdResourceName?.endsWith("detalle_lista") == true })
+                InstrumentationRegistry.getInstrumentation().runOnMainSync { nav.popBackStack() }
+                esperar { existe("Panel de soporte") }
+            }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { sesionVm.cerrarSesion() }
+            esperar { nodos().count { it.isEditable } == 2 }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { assertNull(nav.previousBackStackEntry); nav.navigate(Rutas.Ajustes) }
+            estabilizar(); assertFalse(existe("Perfil y ajustes")); assertFalse(existe("soporte@campus.test"))
+        } finally { sesionVm.viewModelScope.cancel() }
     }
 }

@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             var rolSeleccionado by rememberSaveable { mutableStateOf("CLIENTE") }
             AyudaTheme(rol = usuario?.rol ?: rolSeleccionado, modoOscuro = oscuro) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavAyuda(vm, rolSeleccionado) { rolSeleccionado = it }
+                    NavAyuda(vm, rolSeleccionado, onRolSeleccionado = { rolSeleccionado = it })
                 }
             }
         }

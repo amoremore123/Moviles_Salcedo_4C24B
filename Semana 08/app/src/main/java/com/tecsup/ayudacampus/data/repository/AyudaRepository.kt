@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 interface AyudaRepository {
     suspend fun obtenerUsuario(id: Int): Usuario?
 
+    suspend fun obtenerUsuarioPorRol(rol: String): Usuario?
+
     suspend fun login(correo: String, clave: String): Usuario?
 
     fun observarCategorias(): Flow<List<Categoria>>

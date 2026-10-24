@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,7 +27,7 @@ import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () -> Unit,
-                cerrandoSesion: Boolean = false, errorSesion: String? = null, onCategorias: () -> Unit) {
+                cerrandoSesion: Boolean = false, errorSesion: String? = null, onCategorias: () -> Unit, onPerfil: () -> Unit) {
     val administrador by vm.administrador.collectAsStateWithLifecycle()
     val cargando by vm.cargando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
@@ -47,6 +48,7 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
                             Text("Perfil: Soporte TI", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
+                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, contentDescription = "Perfil y ajustes") }
                     IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
                     }

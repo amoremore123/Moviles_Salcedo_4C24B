@@ -32,6 +32,8 @@ class SesionViewModel(
         viewModelScope, SharingStarted.Eagerly, false
     )
 
+    val recibirTickets = preferencias.recibirTickets.stateIn<Boolean?>(viewModelScope, SharingStarted.Eagerly, null)
+
     init {
         viewModelScope.launch {
             try {
@@ -93,6 +95,29 @@ class SesionViewModel(
             } finally {
                 _cargando.value = false
             }
+        }
+    }
+
+    // Cambio explícito del modo práctica del laboratorio; usa un usuario real de Room.
+    fun cambiarPerfil() {
+        if (_cargando.value || _recuperandoSesion.value) return
+        val actual = _usuarioActual.value ?: return
+        if (actual.id <= 0 || actual.rol !in setOf("CLIENTE", "ADMIN")) return
+        _cargando.value = true
+        _error.value = null
+        viewModelScope.launch {
+            try {
+                val vigente = repository.obtenerUsuario(actual.id)
+                check(vigente?.rol == actual.rol && _usuarioActual.value == actual)
+                val otroRol = if (actual.rol == "CLIENTE") "ADMIN" else "CLIENTE"
+                val destino = repository.obtenerUsuarioPorRol(otroRol)
+                check(destino != null && destino.id > 0 && destino.rol == otroRol)
+                check(_usuarioActual.value == actual)
+                preferencias.guardarSesion(destino.rol, destino.id)
+                _usuarioActual.value = destino
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) { _error.value = "No se pudo cambiar de perfil. La sesión actual se conserva." }
+            finally { _cargando.value = false }
         }
     }
 

@@ -12,10 +12,12 @@ fun AyudaTheme(rol: String, modoOscuro: Boolean, content: @Composable () -> Unit
     val principal = Color(if (soporte) 0xFF7C3AED else 0xFF0891B2)
     val colores = if (modoOscuro) {
         darkColorScheme(
-            primary = principal, onPrimary = Color.White,
+            primary = Color(if (soporte) 0xFFD0BCFF else 0xFF67E8F9), onPrimary = Color(0xFF17212B),
             primaryContainer = Color(if (soporte) 0xFF38205F else 0xFF123B49),
             onPrimaryContainer = Color(if (soporte) 0xFFEDE4FF else 0xFFCFFAFE),
-            background = Color(0xFF101820), surface = Color(0xFF17212B)
+            background = Color(0xFF101820), surface = Color(0xFF17212B),
+            onBackground = Color(0xFFE5EDF4), onSurface = Color(0xFFE5EDF4),
+            onSurfaceVariant = Color(0xFFB9C9D7), outline = Color(0xFF8B9EAF)
         )
     } else {
         lightColorScheme(

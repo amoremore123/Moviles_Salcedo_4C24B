@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 class NuevoTicketViewModel(
     private val repository: AyudaRepository,
-    private val usuarioActual: StateFlow<Usuario?>
+    private val usuarioActual: StateFlow<Usuario?>,
+    private val recepcion: Flow<Boolean> = flowOf(true)
 ) : ViewModel() {
     data class Formulario(
         val categoriaId: Int? = null,
@@ -43,6 +44,8 @@ class NuevoTicketViewModel(
     val ticketCreado: StateFlow<Long?> = _ticketCreado.asStateFlow()
     private val _cargandoCategorias = MutableStateFlow(true)
     val cargandoCategorias: StateFlow<Boolean> = _cargandoCategorias.asStateFlow()
+
+    val recibirTickets = recepcion.map<Boolean, Boolean?> { it }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val categorias = repository.observarCategoriasActivas()
         .onEach { _cargandoCategorias.value = false }
@@ -112,6 +115,14 @@ class NuevoTicketViewModel(
                     _error.value = "La sesión ya no es válida. Vuelve a iniciar sesión."
                     return@launch
                 }
+                if (!recepcion.first()) {
+                    _error.value = "Mesa de ayuda cerrada. Inténtalo cuando se reanude la atención."
+                    return@launch
+                }
+                if (usuarioActual.value?.id != usuario.id || usuarioActual.value?.rol != "CLIENTE") {
+                    _error.value = "La sesión ya no es válida. Vuelve a iniciar sesión."
+                    return@launch
+                }
                 _ticketCreado.value = repository.crearTicket(
                     clienteId = usuario.id, categoriaId = requireNotNull(datos.categoriaId),
                     titulo = datos.titulo.trim(), descripcion = datos.descripcion.trim(),
@@ -129,12 +140,13 @@ class NuevoTicketViewModel(
 
     class Factory(
         private val repository: AyudaRepository,
-        private val usuarioActual: StateFlow<Usuario?>
+        private val usuarioActual: StateFlow<Usuario?>,
+        private val recepcion: Flow<Boolean> = flowOf(true)
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(NuevoTicketViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
-            return NuevoTicketViewModel(repository, usuarioActual) as T
+            return NuevoTicketViewModel(repository, usuarioActual, recepcion) as T
         }
     }
 }

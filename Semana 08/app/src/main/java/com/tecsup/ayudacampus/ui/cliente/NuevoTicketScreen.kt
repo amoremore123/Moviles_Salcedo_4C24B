@@ -31,6 +31,7 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
     val cargando by vm.cargandoCategorias.collectAsStateWithLifecycle()
     val guardando by vm.guardando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
+    val recibiendo by vm.recibirTickets.collectAsStateWithLifecycle()
     val creado by vm.ticketCreado.collectAsStateWithLifecycle()
     var desplegado by remember { mutableStateOf(false) }
     val focus = LocalFocusManager.current
@@ -52,7 +53,7 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
             Surface(color = MaterialTheme.colorScheme.background, tonalElevation = 2.dp) {
                 Button(
                     onClick = { focus.clearFocus(); vm.enviar() },
-                    enabled = !guardando && !cargando && creado == null,
+                    enabled = !guardando && !cargando && creado == null && recibiendo == true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).heightIn(min = 52.dp).testTag("crearTicket"),
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -69,6 +70,7 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (recibiendo == false) Text("Mesa de ayuda cerrada", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
             Text("Cuéntanos qué sucede", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             Text("Describe la incidencia para que Soporte TI pueda ayudarte.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ExposedDropdownMenuBox(

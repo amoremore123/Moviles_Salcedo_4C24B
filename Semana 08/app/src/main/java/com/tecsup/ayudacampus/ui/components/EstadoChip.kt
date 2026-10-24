@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,6 +20,6 @@ fun EstadoChip(estado: String) {
         else -> "Cerrado" to Color(0xFF6B7280)
     }
     Surface(shape = RoundedCornerShape(8.dp), color = color.copy(alpha = .12f)) {
-        Text(texto, Modifier.padding(horizontal = 9.dp, vertical = 4.dp), color = color, style = MaterialTheme.typography.labelSmall)
+        Text(texto, Modifier.padding(horizontal = 9.dp, vertical = 4.dp), color = if (MaterialTheme.colorScheme.background.luminance() < .5f) color.copy(red = (color.red + 1f) / 2f, green = (color.green + 1f) / 2f, blue = (color.blue + 1f) / 2f) else color, style = MaterialTheme.typography.labelSmall)
     }
 }
