@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.soporte
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,10 +35,7 @@ fun CategoriasScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onNueva: () 
         modifier = Modifier.fillMaxSize().safeDrawingPadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !pantalla.operando) { Icon(Icons.Default.ArrowBack, contentDescription = "Volver al panel") }
-                Text("Categorías", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar("Categorías", onVolver, "Volver al panel", !pantalla.operando)
         },
         floatingActionButton = {
             if (!pantalla.cargando && pantalla.errorCarga == null) FloatingActionButton(onClick = onNueva) { Icon(Icons.Default.Add, contentDescription = "Agregar categoría") }

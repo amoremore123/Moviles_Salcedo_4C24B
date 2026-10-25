@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,10 +36,7 @@ fun PerfilScreen(vm: PerfilViewModel, onVolver: () -> Unit, onCerrarSesion: () -
     Scaffold(modifier = Modifier.fillMaxSize().safeDrawingPadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !bloqueado) { Icon(Icons.Default.ArrowBack, "Volver al inicio") }
-                Text(if (soporte) "Perfil y ajustes" else "Mi perfil", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar(if (soporte) "Perfil y ajustes" else "Mi perfil", onVolver, "Volver al inicio", !bloqueado)
         }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).testTag("perfil_lista").padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {

@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -42,12 +43,7 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !guardando) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver a mis tickets")
-                }
-                Text("Nuevo ticket", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar("Nuevo ticket", onVolver, "Volver a mis tickets", !guardando)
         },
         bottomBar = {
             Surface(color = MaterialTheme.colorScheme.background, tonalElevation = 2.dp) {

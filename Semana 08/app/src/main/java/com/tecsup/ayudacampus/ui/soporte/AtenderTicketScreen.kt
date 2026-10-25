@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.soporte
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -42,10 +43,7 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !pantalla.operando) { Icon(Icons.Default.ArrowBack, contentDescription = "Volver al panel") }
-                Text("Atender ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar("Atender ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}", onVolver, "Volver al panel", !pantalla.operando)
         },
         bottomBar = {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

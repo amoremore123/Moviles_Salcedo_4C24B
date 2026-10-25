@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tecsup.ayudacampus.ui.components.*
 import com.tecsup.ayudacampus.ui.components.graficos.GraficoBarras
 import com.tecsup.ayudacampus.ui.components.graficos.GraficoDona
 import com.tecsup.ayudacampus.viewmodel.PanelViewModel
@@ -40,18 +41,13 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Column {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text("Panel de soporte", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                        administrador?.let {
-                            Text("Hola, ${it.nombre}", style = MaterialTheme.typography.bodyMedium)
-                            Text("Perfil: Soporte TI", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, contentDescription = "Perfil y ajustes") }
-                    IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
-                    }
+                AyudaTopAppBar("Panel de soporte") {
+                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, "Perfil y ajustes") }
+                    IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) { Icon(Icons.Default.ExitToApp, "Cerrar sesión") }
+                }
+                administrador?.let {
+                    Text("Hola, ${it.nombre}", Modifier.padding(start = 20.dp, top = 12.dp), style = MaterialTheme.typography.titleMedium)
+                    Text("Perfil: Soporte TI", Modifier.padding(start = 20.dp, bottom = 8.dp), style = MaterialTheme.typography.labelSmall)
                 }
                 if (administrador != null) TabRow(selectedTabIndex = pestana) {
                     Tab(selected = pestana == 0, onClick = { pestana = 0 }, text = { Text("Resumen") })

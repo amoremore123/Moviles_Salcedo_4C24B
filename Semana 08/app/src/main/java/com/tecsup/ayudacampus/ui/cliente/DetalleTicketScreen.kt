@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,13 +46,7 @@ fun DetalleTicketScreen(vm: DetalleTicketViewModel, onVolver: () -> Unit) {
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !estado.operando) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver a mis tickets")
-                }
-                Text("Detalle del ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}",
-                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar("Detalle del ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}", onVolver, "Volver a mis tickets", !estado.operando)
         }
     ) { padding ->
         when {

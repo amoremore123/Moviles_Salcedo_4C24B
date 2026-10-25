@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tecsup.ayudacampus.ui.components.TicketCard
+import com.tecsup.ayudacampus.ui.components.*
 import com.tecsup.ayudacampus.viewmodel.MisTicketsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,17 +54,13 @@ fun MisTicketsScreen(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().testTag("destino_MisTickets"),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Mis tickets", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                        Text("Perfil: Estudiante", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, contentDescription = "Mi perfil") }
-                    IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+            Column {
+                AyudaTopAppBar("Mis tickets") {
+                    IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, "Mi perfil") }
+                    IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) { Icon(Icons.Default.ExitToApp, "Cerrar sesión") }
                 }
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Perfil: Estudiante", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Hola, $nombre", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(20.dp)) {
@@ -91,6 +87,7 @@ fun MisTicketsScreen(
                             )
                         )
                     }
+                }
                 }
             }
         },

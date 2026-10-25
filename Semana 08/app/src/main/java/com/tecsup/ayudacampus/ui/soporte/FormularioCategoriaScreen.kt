@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.soporte
 
+import com.tecsup.ayudacampus.ui.components.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,10 +35,7 @@ fun FormularioCategoriaScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onG
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onVolver, enabled = !pantalla.operando) { Icon(Icons.Default.ArrowBack, contentDescription = "Volver a categorías") }
-                Text(if (categoria.id == 0) "Nueva categoría" else "Editar categoría", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            }
+            AyudaTopAppBar(if (categoria.id == 0) "Nueva categoría" else "Editar categoría", onVolver, "Volver a categorías", !pantalla.operando)
         },
         bottomBar = {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

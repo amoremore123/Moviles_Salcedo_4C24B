@@ -1,6 +1,12 @@
 package com.tecsup.ayudacampus.ui.theme
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -30,5 +36,11 @@ fun AyudaTheme(rol: String, modoOscuro: Boolean, content: @Composable () -> Unit
             outline = Color(0xFF7C8995), outlineVariant = Color(0xFFDAE3E9)
         )
     }
-    MaterialTheme(colorScheme = colores, content = content)
+    MaterialTheme(colorScheme = colores,
+        shapes = Shapes(small = RoundedCornerShape(12.dp), medium = RoundedCornerShape(18.dp), large = RoundedCornerShape(24.dp)),
+        typography = Typography().let { base -> base.copy(
+            headlineLarge = base.headlineLarge.copy(fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold),
+            headlineSmall = base.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            titleMedium = base.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+        ) }, content = content)
 }
