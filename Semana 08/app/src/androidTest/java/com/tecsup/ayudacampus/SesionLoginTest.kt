@@ -264,7 +264,7 @@ class SesionLoginTest {
             esperar { existe("Hardware") && existe("Red / Wi-Fi") }
             assertFalse(existe("Cuenta"))
             pulsar("Red / Wi-Fi")
-            pulsar("ALTA")
+            mostrarTextoSoporte("nuevo_formulario", "ALTA"); pulsar("ALTA")
             nodos().firstOrNull { it.viewIdResourceName == "nuevo_categoria" }?.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_ON_SCREEN.id)
             SystemClock.sleep(500)
             ParcelFileDescriptor.AutoCloseInputStream(
@@ -821,7 +821,7 @@ class SesionLoginTest {
             campoNuevo("nuevo_descripcion", "El equipo del aula no permite iniciar la práctica final.")
             campoNuevo("nuevo_ubicacion", "Laboratorio de aceptación")
             pulsarTag("nuevo_categoria"); esperar { existe("Hardware") }; pulsar("Hardware")
-            pulsar("ALTA"); pulsar("Crear ticket")
+            mostrarTextoSoporte("nuevo_formulario", "ALTA"); pulsar("ALTA"); pulsar("Crear ticket")
             esperar { existe("Mis tickets") && existe(titulo) }
             val creado = runBlocking { app.repository.observarTodosLosTickets().first().single { it.ticket.titulo == titulo }.ticket }
             ticketId = creado.id
@@ -872,6 +872,60 @@ class SesionLoginTest {
                 ids.forEach { app.db.openHelper.writableDatabase.execSQL("DELETE FROM tickets WHERE id = ?", arrayOf(it)) }
                 app.preferencias.guardarRecibirTickets(recepcionOriginal)
             }
+        }
+    }
+
+    @Test
+    fun redisenioNavegacionPorRolesModoOscuroYEvidenciasReales() {
+        val oscuro = runBlocking { app.preferencias.modoOscuro.first() }
+        try {
+            runBlocking { app.preferencias.guardarModoOscuro(false) }
+            capturaPerfil("Fase2_01_LoginCliente")
+            pulsar("Soporte TI"); capturaPerfil("Fase2_02_LoginSoporte"); pulsar("Estudiante")
+            completar("juan@campus.test", "1234"); pulsar("Ingresar")
+            esperar { existe("Mis tickets") && existe("2 abiertos") }
+            capturaPerfil("Fase2_03_MisTickets")
+            pulsarTag("nav_cliente_1"); esperar { existe("Nuevo ticket") && existe("Crear ticket") }
+            capturaPerfil("Fase2_04_NuevoTicket")
+            pulsarDescripcion("Volver a mis tickets"); esperar { existe("Mis tickets") }
+            pulsar("Resueltos"); esperar { existe("Error al abrir el editor") }; pulsar("Error al abrir el editor")
+            mostrarEnDetalle("Tu incidencia está resuelta"); capturaPerfil("Fase2_05_Resuelto")
+            pulsar("Calificar y cerrar"); pulsarDescripcion("4 estrellas"); capturaPerfil("Fase2_06_Calificacion")
+            pulsar("Cancelar"); pulsarDescripcion("Volver a mis tickets")
+            pulsar("Todos"); esperar { existe("Wi-Fi sin conexión") }; pulsar("Wi-Fi sin conexión")
+            esperar { existe("Conversación") }; capturaPerfil("Fase2_07_Detalle")
+            pulsarTag("nav_cliente_2"); esperar { existe("juan@campus.test") }; capturaPerfil("Fase2_08_Perfil")
+            mostrarControlSoporte("perfil_lista", "perfil_oscuro"); pulsarTag("perfil_oscuro")
+            esperar { runBlocking { app.preferencias.modoOscuro.first() } }
+            inicioListaSoporte("perfil_lista"); capturaPerfil("Fase2_09_PerfilOscuro")
+            pulsarTag("nav_cliente_0"); esperar { existe("Mis tickets") }; capturaPerfil("Fase2_10_TicketsOscuro")
+            pulsarTag("nav_cliente_2"); mostrarControlSoporte("perfil_lista", "perfil_cambiar")
+            pulsarTag("perfil_cambiar"); pulsar("Cambiar perfil"); esperar { existe("Panel de soporte") }
+            capturaPerfil("Fase2_11_PanelOscuro")
+            pulsarTag("nav_admin_3"); esperar { existe("soporte@campus.test") }
+            mostrarControlSoporte("perfil_lista", "perfil_oscuro"); pulsarTag("perfil_oscuro")
+            esperar { !runBlocking { app.preferencias.modoOscuro.first() } }
+            inicioListaSoporte("perfil_lista"); capturaPerfil("Fase2_12_Ajustes")
+            pulsarTag("nav_admin_0"); esperar { existe("Panel de soporte") }
+            capturaPerfil("Fase2_13_Panel")
+            mostrarResumen("Software: 2"); mostrarResumen("Impresión: 1"); capturaPerfil("Fase2_14_Graficos")
+            pulsarTag("nav_admin_1"); esperar { existe("Bandeja de tickets") && existe("6 resultados") }
+            capturaPerfil("Fase2_15_Bandeja")
+            pulsar("Wi-Fi sin conexión"); esperar { existe("Estudiante: Juan") }; capturaPerfil("Fase2_16_Atender")
+            pulsarDescripcion("Volver al panel"); esperar { existe("Bandeja de tickets") }
+            pulsarTag("nav_admin_2"); esperar { existe("Hardware") }; capturaPerfil("Fase2_17_Categorias")
+            pulsarDescripcion("Agregar categoría"); esperar { existe("Nueva categoría") }
+            campoNuevo("categoria_nombre", "Laboratorios"); pulsarTag("categoria_icono_pc")
+            capturaPerfil("Fase2_18_NuevaCategoria")
+            pulsarDescripcion("Volver a categorías"); esperar { existe("Hardware") }
+            val hardware = runBlocking { app.repository.observarCategorias().first().first { it.nombre == "Hardware" } }
+            pulsarTag("categoria_editar_${hardware.id}"); esperar { existe("Editar categoría") }
+            capturaPerfil("Fase2_19_EditarCategoria")
+            // No submit: visiting forms and changing stars must not mutate Room.
+            assertEquals(6, runBlocking { app.repository.observarTodosLosTickets().first().size })
+            assertFalse(runBlocking { app.repository.observarCategorias().first().any { it.nombre == "Laboratorios" } })
+        } finally {
+            runBlocking { app.preferencias.guardarModoOscuro(oscuro) }
         }
     }
 }

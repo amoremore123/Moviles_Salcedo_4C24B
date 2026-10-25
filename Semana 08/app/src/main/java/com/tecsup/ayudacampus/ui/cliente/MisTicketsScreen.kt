@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
@@ -44,9 +45,12 @@ fun MisTicketsScreen(
     val cargando by vm.cargando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
     val listaState = rememberLazyListState()
+    val avisos = remember { SnackbarHostState() }
+    LaunchedEffect(filtro, busqueda) { listaState.scrollToItem(0) }
     LaunchedEffect(ticketCreadoId, tickets) {
         if (ticketCreadoId != null && tickets.any { it.ticket.id.toLong() == ticketCreadoId }) {
             listaState.scrollToItem(0)
+            avisos.showSnackbar("Ticket creado correctamente")
             onTicketMostrado()
         }
     }
@@ -79,7 +83,7 @@ fun MisTicketsScreen(
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     singleLine = true, shape = RoundedCornerShape(14.dp)
                 )
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().animateContentSize().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MisTicketsViewModel.Filtro.entries.forEach { opcion ->
                         FilterChip(
                             selected = filtro == opcion, onClick = { vm.seleccionarFiltro(opcion) },
@@ -95,6 +99,7 @@ fun MisTicketsScreen(
                 }
             }
         },
+        snackbarHost = { SnackbarHost(avisos) },
         bottomBar = { BarraInferior(!cerrandoSesion) },
         floatingActionButton = {
             if (mesaAbierta == true) FloatingActionButton(onClick = onNuevo, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.testTag("nuevoTicket")) {

@@ -1,10 +1,12 @@
 package com.tecsup.ayudacampus.ui.components.graficos
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -62,11 +64,12 @@ fun GraficoBarras(datos: List<DatoGrafico>, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
         if (datos.isEmpty()) Text("Sin categorías registradas", style = MaterialTheme.typography.bodySmall)
         datos.forEach { dato ->
+            val proporcion by animateFloatAsState(dato.cantidad.coerceAtLeast(0).toFloat() / maximo, label = "barraCategoria")
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("${dato.etiqueta}: ${dato.cantidad}", style = MaterialTheme.typography.bodySmall)
                 Canvas(Modifier.fillMaxWidth().height(10.dp)) {
                     drawRoundRect(fondo, cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
-                    val ancho = size.width * dato.cantidad.coerceAtLeast(0).toFloat() / maximo
+                    val ancho = size.width * proporcion
                     if (ancho > 0f) drawRoundRect(principal, size = Size(ancho, size.height), cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
                 }
             }

@@ -244,14 +244,18 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
 
 @Composable
 private fun PantallaEspera() {
-    Column(
-        Modifier.fillMaxSize().safeDrawingPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-    ) {
-        Text("AyudaCampus", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(24.dp))
-        CircularProgressIndicator()
-        Spacer(Modifier.height(16.dp))
-        Text("Recuperando tu sesión…", style = MaterialTheme.typography.bodyMedium)
+    Box(Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.Center) {
+        Column(Modifier.widthIn(max = 420.dp).padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            TarjetaBienvenida("AyudaCampus", "Tu campus, siempre conectado.")
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                IconoCategoria("pc", "Equipos")
+                IconoCategoria("wifi", "Conexión")
+                IconoCategoria("printer", "Impresión")
+            }
+            CircularProgressIndicator(Modifier.size(28.dp), strokeWidth = 3.dp)
+            Text("Recuperando tu sesión…", style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }

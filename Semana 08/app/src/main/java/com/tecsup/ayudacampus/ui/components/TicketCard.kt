@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -34,7 +35,7 @@ fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifie
         SimpleDateFormat("dd MMM · HH:mm", Locale("es", "PE")).format(Date(ticket.fecha))
     }
     Card(
-        onClick = onClick, modifier = modifier.fillMaxWidth().testTag("ticket_${ticket.id}"),
+        onClick = onClick, modifier = modifier.fillMaxWidth().animateContentSize().testTag("ticket_${ticket.id}"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),

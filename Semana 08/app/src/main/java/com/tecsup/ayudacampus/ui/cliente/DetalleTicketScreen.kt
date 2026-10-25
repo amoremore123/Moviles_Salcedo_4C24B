@@ -1,6 +1,7 @@
 package com.tecsup.ayudacampus.ui.cliente
 
 import com.tecsup.ayudacampus.ui.components.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,10 +81,10 @@ fun DetalleTicketScreen(vm: DetalleTicketViewModel, onVolver: () -> Unit) {
                     }
                 }
                 if (detalle.ticket.estado == "RESUELTO") item {
-                    Surface(shape = RoundedCornerShape(16.dp), color = Color(0xFFDCFCE7)) {
+                    Surface(shape = RoundedCornerShape(16.dp), color = Color(0xFF16A34A).copy(alpha = .14f)) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Tu incidencia está resuelta", color = Color(0xFF166534), fontWeight = FontWeight.Bold)
-                            Text("Puedes dejar un comentario final, calificar la atención y cerrar, o reabrir si el problema continúa.", color = Color(0xFF166534))
+                            Text("Tu incidencia está resuelta", color = colorAccesible(Color(0xFF16A34A)), fontWeight = FontWeight.Bold)
+                            Text("Puedes dejar un comentario final, calificar la atención y cerrar, o reabrir si el problema continúa.", color = colorAccesible(Color(0xFF16A34A)))
                             Button(onClick = { estrellas = 0; dialogo = true }, enabled = !estado.operando) { Text("Calificar y cerrar") }
                             OutlinedButton(onClick = vm::reabrir, enabled = !estado.operando) { Text("Reabrir ticket") }
                         }
@@ -161,7 +162,8 @@ private fun StepperTicket(estado: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         pasos.forEachIndexed { indice, paso ->
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                LinearProgressIndicator(progress = if (indice <= actual) 1f else 0f, modifier = Modifier.fillMaxWidth())
+                val progreso by animateFloatAsState(if (indice <= actual) 1f else 0f, label = "progresoTicket")
+                LinearProgressIndicator(progress = progreso, modifier = Modifier.fillMaxWidth())
                 Text(paso.second, Modifier.padding(top = 6.dp), style = MaterialTheme.typography.labelSmall,
                     color = if (indice <= actual) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -174,7 +176,7 @@ internal fun BurbujaComentario(comentario: Comentario, propia: Boolean) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (propia) Arrangement.End else Arrangement.Start) {
         Surface(modifier = Modifier.fillMaxWidth(.92f), shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = if (propia) 4.dp else 18.dp, bottomStart = if (propia) 18.dp else 4.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            color = if (propia) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface) {
+            color = if (propia) MaterialTheme.colorScheme.primaryContainer else androidx.compose.ui.graphics.Color(0xFF7C3AED).copy(alpha = .1f)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("${comentario.autorNombre} · ${if (comentario.autorRol == "ADMIN") "Soporte TI" else "Estudiante"}",
                     style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)

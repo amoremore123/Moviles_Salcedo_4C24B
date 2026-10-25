@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
@@ -108,12 +110,13 @@ fun BotonPrincipal(texto: String, onClick: () -> Unit, modifier: Modifier = Modi
         shape = RoundedCornerShape(16.dp)) { Text(texto, fontWeight = FontWeight.SemiBold) }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AyudaNavigationBar(soporte: Boolean, seleccionado: Int, habilitado: Boolean = true, onSeleccionar: (Int) -> Unit) {
     val etiquetas = if (soporte) listOf("Panel", "Tickets", "Categorías", "Ajustes") else listOf("Tickets", "Nuevo", "Perfil")
     val iconos = if (soporte) listOf(Icons.Default.Home, Icons.Default.List, Icons.Default.Edit, Icons.Default.Settings)
         else listOf(Icons.Default.List, Icons.Default.Add, Icons.Default.Person)
-    NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 3.dp, windowInsets = WindowInsets(0)) {
+    NavigationBar(modifier = Modifier.semantics { testTagsAsResourceId = true }, containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 3.dp, windowInsets = WindowInsets(0)) {
         etiquetas.forEachIndexed { i, texto ->
             NavigationBarItem(enabled = habilitado, selected = seleccionado == i, onClick = { onSeleccionar(i) },
                 icon = { Icon(iconos[i], null) }, label = { Text(texto) }, modifier = Modifier.testTag("nav_${if (soporte) "admin" else "cliente"}_$i"),

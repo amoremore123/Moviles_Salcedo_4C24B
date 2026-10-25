@@ -66,7 +66,7 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
         }
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).testTag("nuevo_formulario").padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (recibiendo == false) Text("Mesa de ayuda cerrada", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)

@@ -1,5 +1,6 @@
 package com.tecsup.ayudacampus.ui.soporte
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,7 +36,7 @@ fun BandejaScreen(vm: BandejaViewModel, onTicket: (Int) -> Unit, modifier: Modif
             singleLine = true, shape = RoundedCornerShape(14.dp),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("panel_busqueda")
         )
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().animateContentSize().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BandejaViewModel.FiltroEstado.entries.forEach { opcion ->
                 FilterChip(selected = estado == opcion, onClick = { vm.seleccionarEstado(opcion) },
                     shape = RoundedCornerShape(20.dp), colors = FilterChipDefaults.filterChipColors(
@@ -44,7 +45,7 @@ fun BandejaScreen(vm: BandejaViewModel, onTicket: (Int) -> Unit, modifier: Modif
             }
         }
         Text("Prioridad", style = MaterialTheme.typography.labelMedium)
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().animateContentSize().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BandejaViewModel.FiltroPrioridad.entries.forEach { opcion ->
                 FilterChip(selected = prioridad == opcion, onClick = { vm.seleccionarPrioridad(opcion) },
                     shape = RoundedCornerShape(20.dp), colors = FilterChipDefaults.filterChipColors(

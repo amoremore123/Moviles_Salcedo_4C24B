@@ -21,13 +21,22 @@ fun AyudaTheme(rol: String, modoOscuro: Boolean, content: @Composable () -> Unit
             primary = Color(if (soporte) 0xFFD0BCFF else 0xFF67E8F9), onPrimary = Color(0xFF17212B),
             primaryContainer = Color(if (soporte) 0xFF38205F else 0xFF123B49),
             onPrimaryContainer = Color(if (soporte) 0xFFEDE4FF else 0xFFCFFAFE),
-            background = Color(0xFF101820), surface = Color(0xFF17212B),
+            background = Color(if (soporte) 0xFF151020 else 0xFF0D1B22),
+            surface = Color(if (soporte) 0xFF211A30 else 0xFF152A34),
+            surfaceVariant = Color(if (soporte) 0xFF30263F else 0xFF263C46),
+            secondary = Color(if (soporte) 0xFFD0BCFF else 0xFF67E8F9),
+            secondaryContainer = Color(if (soporte) 0xFF38205F else 0xFF123B49),
+            onSecondaryContainer = Color(if (soporte) 0xFFEDE4FF else 0xFFCFFAFE),
+            outlineVariant = Color(if (soporte) 0xFF473A58 else 0xFF34505C),
             onBackground = Color(0xFFE5EDF4), onSurface = Color(0xFFE5EDF4),
             onSurfaceVariant = Color(0xFFB9C9D7), outline = Color(0xFF8B9EAF)
         )
     } else {
         lightColorScheme(
             primary = principal, onPrimary = Color.White,
+            secondary = principal, secondaryContainer = Color(if (soporte) 0xFFEDE4FF else 0xFFCFFAFE),
+            onSecondaryContainer = Color(if (soporte) 0xFF4C1D95 else 0xFF155E75),
+            surfaceVariant = Color(if (soporte) 0xFFF0EAF8 else 0xFFEAF5F7),
             primaryContainer = Color(if (soporte) 0xFFEDE4FF else 0xFFCFFAFE),
             onPrimaryContainer = Color(if (soporte) 0xFF4C1D95 else 0xFF155E75),
             background = Color(if (soporte) 0xFFFAF8FF else 0xFFF7FDFE),
