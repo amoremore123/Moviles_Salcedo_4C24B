@@ -61,12 +61,16 @@ fun MisTicketsScreen(
                 }
                 Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Perfil: Estudiante", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Hola, $nombre", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                     Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(20.dp)) {
-                        Text("$abiertos abiertos", Modifier.padding(horizontal = 12.dp, vertical = 6.dp).testTag("contadorAbiertos"), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text("Hola, $nombre", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text("Estamos para ayudarte", style = MaterialTheme.typography.bodySmall)
+                            }
+                            Text("$abiertos abiertos", Modifier.testTag("contadorAbiertos"), style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
                     }
-                }
                 if (mesaAbierta == false) Text("Mesa de ayuda cerrada", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleSmall)
                 OutlinedTextField(
                     value = busqueda, onValueChange = vm::buscar,
@@ -91,6 +95,7 @@ fun MisTicketsScreen(
                 }
             }
         },
+        bottomBar = { BarraInferior(!cerrandoSesion) },
         floatingActionButton = {
             if (mesaAbierta == true) FloatingActionButton(onClick = onNuevo, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.testTag("nuevoTicket")) {
                 Icon(Icons.Default.Add, contentDescription = "Nuevo ticket")
@@ -100,14 +105,8 @@ fun MisTicketsScreen(
         when {
             cargando -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             error != null -> Box(Modifier.fillMaxSize().padding(padding).padding(24.dp), contentAlignment = Alignment.Center) { Text(error!!, color = MaterialTheme.colorScheme.error) }
-            tickets.isEmpty() -> Column(
-                Modifier.fillMaxSize().padding(padding).padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-            ) {
-                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.height(16.dp))
-                Text("No tienes tickets aquí", style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("sinTickets"))
-                Text("Prueba con otro filtro o búsqueda.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            tickets.isEmpty() -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                EstadoVacio("No tienes tickets aquí", "Prueba con otro filtro o búsqueda.", "sinTickets")
             }
             else -> LazyColumn(
                 Modifier.fillMaxSize().padding(padding).testTag("listaTickets"),

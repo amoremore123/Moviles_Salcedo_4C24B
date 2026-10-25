@@ -35,12 +35,13 @@ fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifie
     }
     Card(
         onClick = onClick, modifier = modifier.fillMaxWidth().testTag("ticket_${ticket.id}"),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = .16f))
     ) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-            Box(Modifier.width(4.dp).fillMaxHeight().background(colorPrioridad(ticket.prioridad)))
+            Box(Modifier.width(5.dp).fillMaxHeight().background(colorPrioridad(ticket.prioridad)))
             Column(Modifier.weight(1f).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("#${ticket.id.toString().padStart(4, '0')}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
@@ -48,7 +49,7 @@ fun TicketCard(detalle: TicketConDetalle, onClick: () -> Unit, modifier: Modifie
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(
-                        Modifier.size(40.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)),
+                        Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)),
                         contentAlignment = Alignment.Center
                     ) { IconoCategoria(detalle.categoria.icono, detalle.categoria.nombre) }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {

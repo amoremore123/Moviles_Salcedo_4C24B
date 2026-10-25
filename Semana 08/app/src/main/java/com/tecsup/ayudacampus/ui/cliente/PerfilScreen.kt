@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +35,7 @@ fun PerfilScreen(vm: PerfilViewModel, onVolver: () -> Unit, onCerrarSesion: () -
     BackHandler(enabled = bloqueado) { }
     Scaffold(modifier = Modifier.fillMaxSize().safeDrawingPadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = { BarraInferior(!bloqueado) },
         topBar = {
             AyudaTopAppBar(if (soporte) "Perfil y ajustes" else "Mi perfil", onVolver, "Volver al inicio", !bloqueado)
         }) { padding ->
@@ -45,23 +46,14 @@ fun PerfilScreen(vm: PerfilViewModel, onVolver: () -> Unit, onCerrarSesion: () -
                 Text(perfil.error ?: "Perfil no disponible", color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = vm::reintentar) { Text("Reintentar") }
             } else {
-                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.primaryContainer) {
-                    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(usuario.nombre, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text(usuario.correo, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text(if (soporte) "Soporte TI" else "Estudiante", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    }
-                }
+                TarjetaBienvenida(usuario.nombre, "${usuario.correo}\n${if (soporte) "Soporte TI" else "Estudiante"}")
                 if (!soporte) {
                     Text("Tus tickets", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("Abiertos" to perfil.abiertos, "Resueltos" to perfil.resueltos, "Totales" to perfil.total).forEach { (etiqueta, cantidad) ->
-                            Surface(Modifier.weight(1f), color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp)) {
-                                Column(Modifier.padding(vertical = 16.dp, horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(cantidad.toString(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
-                                    Text(etiqueta, style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
+                        listOf(Triple("Abiertos", perfil.abiertos, androidx.compose.ui.graphics.Color(0xFFD97706)),
+                            Triple("Resueltos", perfil.resueltos, androidx.compose.ui.graphics.Color(0xFF16A34A)),
+                            Triple("Totales", perfil.total, MaterialTheme.colorScheme.primary)).forEach { (etiqueta, cantidad, color) ->
+                            TarjetaIndicador(etiqueta, cantidad, color, Modifier.weight(1f))
                         }
                     }
                 }
@@ -81,7 +73,7 @@ fun PerfilScreen(vm: PerfilViewModel, onVolver: () -> Unit, onCerrarSesion: () -
                 OutlinedButton(onClick = onCambiarPerfil, enabled = !bloqueado, modifier = Modifier.fillMaxWidth().testTag("perfil_cambiar")) {
                     Text(if (soporte) "Cambiar a Estudiante" else "Cambiar a Soporte TI")
                 }
-                Button(onClick = onCerrarSesion, enabled = !bloqueado, modifier = Modifier.fillMaxWidth().testTag("perfil_salir")) { Text("Cerrar sesión") }
+                OutlinedButton(onClick = onCerrarSesion, enabled = !bloqueado, modifier = Modifier.fillMaxWidth().testTag("perfil_salir"), colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Cerrar sesión") }
                 Spacer(Modifier.height(12.dp))
             }
         }
@@ -91,6 +83,10 @@ fun PerfilScreen(vm: PerfilViewModel, onVolver: () -> Unit, onCerrarSesion: () -
 private fun Preferencia(titulo: String, descripcion: String, valor: Boolean, habilitado: Boolean, tag: String, cambiar: (Boolean) -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                Icon(if (tag == "perfil_oscuro") Icons.Default.Settings else Icons.Default.Notifications, null,
+                    Modifier.padding(10.dp).size(20.dp), tint = MaterialTheme.colorScheme.primary)
+            }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(titulo, style = MaterialTheme.typography.titleSmall)
                 Text(descripcion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

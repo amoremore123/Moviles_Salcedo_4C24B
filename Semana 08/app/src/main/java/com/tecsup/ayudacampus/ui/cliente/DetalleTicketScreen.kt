@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,6 +45,7 @@ fun DetalleTicketScreen(vm: DetalleTicketViewModel, onVolver: () -> Unit) {
     Scaffold(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = { BarraInferior(!estado.operando) },
         topBar = {
             AyudaTopAppBar("Detalle del ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}", onVolver, "Volver a mis tickets", !estado.operando)
         }
@@ -60,7 +61,9 @@ fun DetalleTicketScreen(vm: DetalleTicketViewModel, onVolver: () -> Unit) {
                 contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(detalle.ticket.titulo, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             EstadoChip(detalle.ticket.estado)
@@ -73,6 +76,7 @@ fun DetalleTicketScreen(vm: DetalleTicketViewModel, onVolver: () -> Unit) {
                             Text(detalle.ticket.descripcion, Modifier.fillMaxWidth().padding(16.dp))
                         }
                         StepperTicket(detalle.ticket.estado)
+                    }
                     }
                 }
                 if (detalle.ticket.estado == "RESUELTO") item {
@@ -166,9 +170,10 @@ private fun StepperTicket(estado: String) {
 }
 
 @Composable
-private fun BurbujaComentario(comentario: Comentario, propia: Boolean) {
+internal fun BurbujaComentario(comentario: Comentario, propia: Boolean) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (propia) Arrangement.End else Arrangement.Start) {
-        Surface(modifier = Modifier.fillMaxWidth(.92f), shape = RoundedCornerShape(16.dp),
+        Surface(modifier = Modifier.fillMaxWidth(.92f), shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = if (propia) 4.dp else 18.dp, bottomStart = if (propia) 18.dp else 4.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             color = if (propia) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("${comentario.autorNombre} · ${if (comentario.autorRol == "ADMIN") "Soporte TI" else "Estudiante"}",

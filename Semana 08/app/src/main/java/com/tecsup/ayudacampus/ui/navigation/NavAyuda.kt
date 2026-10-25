@@ -15,6 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.tecsup.ayudacampus.ui.components.*
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -62,6 +64,20 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
             }
         }
     }
+    val entradaActual by nav.currentBackStackEntryAsState()
+    val rutaActual = entradaActual?.destination?.route
+    CompositionLocalProvider(LocalBarraInferior provides { habilitado ->
+        if (usuario?.rol == "CLIENTE") {
+            val seleccionado = when (rutaActual) { Rutas.NuevoTicket -> 1; Rutas.Perfil -> 2; else -> 0 }
+            AyudaNavigationBar(false, seleccionado, habilitado) { indice ->
+                val destino = listOf(Rutas.MisTickets, Rutas.NuevoTicket, Rutas.Perfil)[indice]
+                if (destino != rutaActual) nav.navigate(destino) {
+                    popUpTo(Rutas.MisTickets) { inclusive = false }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }) {
     NavHost(navController = nav, startDestination = Rutas.Splash) {
         composable(Rutas.Splash) {
             PantallaEspera()
@@ -199,6 +215,7 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     { confirmarCambio = true }, cargando, error)
             }
         }
+    }
     }
     if (confirmarSalida && usuario != null) AlertDialog(
         onDismissRequest = { confirmarSalida = false }, title = { Text("¿Cerrar sesión?") },

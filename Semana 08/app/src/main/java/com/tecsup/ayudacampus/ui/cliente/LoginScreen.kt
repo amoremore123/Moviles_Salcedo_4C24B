@@ -1,5 +1,9 @@
 package com.tecsup.ayudacampus.ui.cliente
 
+import com.tecsup.ayudacampus.ui.components.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -39,18 +43,18 @@ fun LoginScreen(
         onLogin(correo, clave, rolSeleccionado)
     }
     Box(
-        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer.copy(alpha = .6f), MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)))
             .safeDrawingPadding().imePadding().verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp)) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text("A", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.Email, null, Modifier.padding(12.dp), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
                 Column {
@@ -59,8 +63,18 @@ fun LoginScreen(
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Tu campus,\nsiempre conectado.", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                Text("Ingresa para conectar con el soporte de tu campus.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(if (rolSeleccionado == "ADMIN") "Soluciones que\nconectan tu campus." else "Tu campus,\nsiempre conectado.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(if (rolSeleccionado == "ADMIN") "Gestiona incidencias y acompaña a tu comunidad." else "Reporta una incidencia. Nosotros te acompañamos.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf("pc" to "Equipos", "wifi" to "Conexión", "printer" to "Impresión").forEach { (tipo, nombre) ->
+                    Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            IconoCategoria(tipo, nombre)
+                            Text(nombre, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -81,6 +95,7 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = correo, onValueChange = { correo = it; onEditar() },
                         modifier = Modifier.fillMaxWidth().testTag("correo"),
+                        leadingIcon = { Icon(Icons.Default.Email, null) },
                         label = { Text("Correo") }, placeholder = { Text("tu.correo@campus.test") },
                         enabled = !cargando, singleLine = true, shape = RoundedCornerShape(12.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
@@ -88,6 +103,7 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = clave, onValueChange = { clave = it; onEditar() },
                         modifier = Modifier.fillMaxWidth().testTag("clave"),
+                        leadingIcon = { Icon(Icons.Default.Lock, null) },
                         label = { Text("Contraseña") }, enabled = !cargando, singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         visualTransformation = if (mostrarClave) VisualTransformation.None else PasswordVisualTransformation(),

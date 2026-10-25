@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -46,7 +46,8 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
             AyudaTopAppBar("Nuevo ticket", onVolver, "Volver a mis tickets", !guardando)
         },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.background, tonalElevation = 2.dp) {
+            Column {
+            Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
                 Button(
                     onClick = { focus.clearFocus(); vm.enviar() },
                     enabled = !guardando && !cargando && creado == null && recibiendo == true,
@@ -60,6 +61,8 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
                     Text(if (guardando) "Creando ticket…" else "Crear ticket", fontWeight = FontWeight.SemiBold)
                 }
             }
+            BarraInferior(!guardando)
+            }
         }
     ) { padding ->
         Column(
@@ -67,8 +70,8 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (recibiendo == false) Text("Mesa de ayuda cerrada", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-            Text("Cuéntanos qué sucede", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-            Text("Describe la incidencia para que Soporte TI pueda ayudarte.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TarjetaBienvenida("Cuéntanos qué sucede", "Describe la incidencia. Soporte TI te acompañará.", Icons.Default.Edit)
+            EncabezadoSeccion("01 · Clasifica tu solicitud", "Elige el tema que mejor describe el problema")
             ExposedDropdownMenuBox(
                 expanded = desplegado,
                 onExpandedChange = { if (!guardando && !cargando) desplegado = !desplegado }
@@ -95,11 +98,12 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
             else if (categorias.isEmpty() && error == null) {
                 Text("No hay categorías activas disponibles.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            EncabezadoSeccion("02 · Detalles de la incidencia")
             CampoTicket("Título", datos.titulo, vm::actualizarTitulo, errores.titulo, "Ej. Wi-Fi sin conexión", !guardando, "nuevo_titulo")
             CampoTicket("Descripción", datos.descripcion, vm::actualizarDescripcion, errores.descripcion, "¿Qué ocurre y desde cuándo?", !guardando, "nuevo_descripcion", multilinea = true)
             CampoTicket("Ubicación", datos.ubicacion, vm::actualizarUbicacion, errores.ubicacion, "Ej. Laboratorio 3 · Pabellón B", !guardando, "nuevo_ubicacion")
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Prioridad", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                EncabezadoSeccion("03 · Prioridad", "Indica el impacto de la incidencia")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Prioridad.entries.forEach { prioridad ->
                         FilterChip(
@@ -108,8 +112,8 @@ fun NuevoTicketScreen(vm: NuevoTicketViewModel, onVolver: () -> Unit, onGuardado
                             label = { Text(prioridad.name) }, modifier = Modifier.weight(1f).heightIn(min = 44.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                selectedContainerColor = colorPrioridad(prioridad.name),
+                                selectedLabelColor = androidx.compose.ui.graphics.Color.White
                             )
                         )
                     }
@@ -133,6 +137,7 @@ private fun CampoTicket(
     OutlinedTextField(
         value = valor, onValueChange = onCambio,
         modifier = Modifier.fillMaxWidth().testTag(tag),
+        leadingIcon = { Icon(when (etiqueta) { "Ubicación" -> Icons.Default.LocationOn; "Título" -> Icons.Default.Edit; else -> Icons.Default.List }, null) },
         label = { Text(etiqueta) }, placeholder = { Text(ayuda) },
         enabled = habilitado, singleLine = !multilinea, minLines = if (multilinea) 3 else 1,
         shape = RoundedCornerShape(14.dp), isError = error != null,
