@@ -247,3 +247,8 @@ Estas imágenes se obtuvieron del emulador durante las verificaciones de los pas
 Se conserva el historial real de AyudaCampus, incluidos sus dos primeros commits y los commits de consolidación, pruebas y funcionalidades posteriores. La distribución de esos commits no reproduce uno por uno el orden sugerido en el PDF. El trabajo se hizo con asistencia de IA en esta conversación; no se presenta como un historial realizado sin IA.
 
 Este cierre corresponde al Paso 13 de la implementación principal. No incluye push ni la rama `mejora-ia`; la fase de mejoras requiere una autorización posterior.
+
+
+## Fase 2: rediseño visual con IA
+
+La rama `mejora-ia` incorpora la modernización visual por rol y la navegación inferior sin cambiar la capa de datos. Consulta el [registro del rediseño](REDISENO_IA.md), los [prompts y decisiones asistidas](PROMPTS.md) y las [capturas reales por perfil y modo](capturas/fase2/README.md). El resultado final de pruebas se documenta en el registro del rediseño; esta fase no se publica sin autorización.
