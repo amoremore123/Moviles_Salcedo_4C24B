@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -36,6 +37,7 @@ fun MisTicketsScreen(
     ticketCreadoId: Long? = null,
     onTicketMostrado: () -> Unit = {},
     onPerfil: () -> Unit = {},
+    onNotificaciones: () -> Unit = {},
     mesaAbierta: Boolean? = true
 ) {
     val tickets by vm.tickets.collectAsStateWithLifecycle()
@@ -60,6 +62,7 @@ fun MisTicketsScreen(
         topBar = {
             Column {
                 AyudaTopAppBar("Mis tickets") {
+                    IconButton(onClick = onNotificaciones, enabled = !cerrandoSesion) { Icon(Icons.Default.Notifications, "Notificaciones") }
                     IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, "Mi perfil") }
                     IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) { Icon(Icons.Default.ExitToApp, "Cerrar sesión") }
                 }

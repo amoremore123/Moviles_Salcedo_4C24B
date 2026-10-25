@@ -3,6 +3,7 @@ package com.tecsup.ayudacampus.data.repository
 import com.tecsup.ayudacampus.data.local.AyudaDatabase
 import com.tecsup.ayudacampus.data.local.entity.Categoria
 import com.tecsup.ayudacampus.data.local.entity.Comentario
+import com.tecsup.ayudacampus.data.local.entity.Notificacion
 import com.tecsup.ayudacampus.data.local.entity.Ticket
 import com.tecsup.ayudacampus.data.local.entity.Usuario
 import com.tecsup.ayudacampus.data.local.relation.TicketConDetalle
@@ -15,6 +16,7 @@ class AyudaRepositoryRoom(db: AyudaDatabase) : AyudaRepository {
     private val categoriaDao = db.categoriaDao()
     private val usuarioDao = db.usuarioDao()
     private val ticketDao = db.ticketDao()
+    private val notificacionDao = db.notificacionDao()
 
     override suspend fun obtenerUsuario(id: Int): Usuario? = usuarioDao.obtenerPorId(id)
 
@@ -62,6 +64,8 @@ class AyudaRepositoryRoom(db: AyudaDatabase) : AyudaRepository {
 
     override fun observarTicket(id: Int): Flow<TicketConDetalle?> = ticketDao.observarUno(id)
 
+    override suspend fun obtenerTicketPorId(id: Int): TicketConDetalle? = ticketDao.obtenerPorTicket(id)
+
     override suspend fun cambiarEstado(ticketId: Int, estado: EstadoTicket) =
         ticketDao.actualizarEstado(ticketId, estado.name)
 
@@ -84,7 +88,84 @@ class AyudaRepositoryRoom(db: AyudaDatabase) : AyudaRepository {
                 fecha = System.currentTimeMillis()
             )
         )
+        val ticket = ticketDao.observarUno(ticketId).first()
+        ticket?.ticket?.clienteId?.let { clienteId ->
+            val esDelCliente = autor.id != clienteId
+            if (esDelCliente) {
+                val adminNombre = autor.nombre
+                generarNotificacion(
+                    destinatarioId = clienteId,
+                    tipo = "COMENTARIO",
+                    origenId = autor.id,
+                    origenNombre = adminNombre,
+                    ticketId = ticketId,
+                    mensaje = "$adminNombre comentó en tu ticket #${ticketId.toString().padStart(4, '0')}"
+                )
+            } else {
+                ticketDao.observarPorCliente(clienteId).first()
+                    .find { it.ticket.id == ticketId }
+                    ?.let { detalle ->
+                        ticketDao.ultimoComentarioDe(ticketId, detalle.ticket.clienteId)
+                            ?.let { ultimo ->
+                                if (ultimo.autorId != detalle.ticket.clienteId) {
+                                    generarNotificacion(
+                                        destinatarioId = detalle.ticket.clienteId,
+                                        tipo = "COMENTARIO",
+                                        origenId = autor.id,
+                                        origenNombre = autor.nombre,
+                                        ticketId = ticketId,
+                                        mensaje = "${autor.nombre} respondió a tu ticket #${ticketId.toString().padStart(4, '0')}"
+                                    )
+                                }
+                            }
+                    }
+            }
+        }
     }
+
+    override suspend fun obtenerUsuarioPorCorreo(correo: String): Usuario? =
+        usuarioDao.obtenerPorCorreo(correo)
+
+    override suspend fun registrarUsuario(nombre: String, correo: String, clave: String, rol: String): Long {
+        val existente = usuarioDao.obtenerPorCorreo(correo)
+        if (existente != null) {
+            throw IllegalArgumentException("Ya existe una cuenta con ese correo")
+        }
+        return usuarioDao.insertar(
+            Usuario(nombre = nombre, correo = correo, clave = clave, rol = rol)
+        )
+    }
+
+    override fun observarNotificaciones(destinatarioId: Int): Flow<List<Notificacion>> =
+        notificacionDao.observarPorDestinatario(destinatarioId)
+
+    override suspend fun marcarComoLeida(id: Int) = notificacionDao.marcarComoLeida(id)
+
+    override suspend fun marcarTodasComoLeidas(destinatarioId: Int) =
+        notificacionDao.marcarTodasComoLeidas(destinatarioId)
+
+    override suspend fun eliminarNoLeidas(destinatarioId: Int) =
+        notificacionDao.eliminarNoLeidas(destinatarioId)
+
+    override suspend fun generarNotificacion(
+        destinatarioId: Int,
+        tipo: String,
+        origenId: Int,
+        origenNombre: String,
+        ticketId: Int,
+        mensaje: String
+    ): Long = notificacionDao.insertar(
+        Notificacion(
+            destinatarioId = destinatarioId,
+            tipo = tipo,
+            origenId = origenId,
+            origenNombre = origenNombre,
+            ticketId = ticketId,
+            mensaje = mensaje,
+            leida = false,
+            fecha = System.currentTimeMillis()
+        )
+    )
 
     override fun observarCantidadPorEstado(estado: EstadoTicket): Flow<Int> =
         ticketDao.contarPorEstado(estado.name)
@@ -93,4 +174,6 @@ class AyudaRepositoryRoom(db: AyudaDatabase) : AyudaRepository {
         ticketDao.contarPorCategoria()
 
     override fun observarAltasSinAtender(limite: Long): Flow<Int> = ticketDao.contarAltasSinAtender(limite)
+
+    override fun contarAltasSinAtender(limite: Long): Flow<Int> = ticketDao.contarAltasSinAtender(limite)
 }

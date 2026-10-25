@@ -56,6 +56,13 @@ class MisTicketsViewModel(
     fun seleccionarFiltro(filtro: Filtro) { _filtro.value = filtro }
     fun buscar(texto: String) { _busqueda.value = texto }
 
+    fun seleccionarTicket(id: Int) = viewModelScope.launch {
+        repository.observerTicket(id).first()?.let { }
+    }
+
+    fun agregarComentario(ticketId: Int, autor: com.tecsup.ayudacampus.data.local.entity.Usuario, texto: String) =
+        viewModelScope.launch { repository.agregarComentario(ticketId, autor, texto) }
+
     class Factory(private val repository: AyudaRepository, private val clienteId: Int) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(MisTicketsViewModel::class.java))

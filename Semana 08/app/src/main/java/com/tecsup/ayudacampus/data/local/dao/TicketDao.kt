@@ -50,4 +50,12 @@ interface TicketDao {
 
     @Query("SELECT COUNT(*) FROM tickets WHERE prioridad = 'ALTA' AND estado = 'ABIERTO' AND fecha < :limite")
     fun contarAltasSinAtender(limite: Long): Flow<Int>
+
+    @Transaction
+    @Query("SELECT * FROM tickets WHERE id = :ticketId")
+    suspend fun obtenerPorTicket(ticketId: Int): TicketConDetalle?
+
+    @Transaction
+    @Query("SELECT * FROM comentarios WHERE ticketId = :ticketId ORDER BY fecha DESC LIMIT 1")
+    suspend fun ultimoComentarioDe(ticketId: Int, clienteId: Int): Comentario?
 }

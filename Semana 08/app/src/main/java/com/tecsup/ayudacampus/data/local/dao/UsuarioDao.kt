@@ -17,7 +17,10 @@ interface UsuarioDao {
     suspend fun obtenerPorRol(rol: String): Usuario?
 
     @Insert
-    suspend fun insertarTodos(lista: List<Usuario>): List<Long>
+    suspend fun insertar(usuario: Usuario): Long
+
+    @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
+    suspend fun obtenerPorCorreo(correo: String): Usuario?
 
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int

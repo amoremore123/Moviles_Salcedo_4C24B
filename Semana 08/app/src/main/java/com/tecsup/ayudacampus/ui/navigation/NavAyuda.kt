@@ -39,6 +39,10 @@ import com.tecsup.ayudacampus.ui.cliente.PerfilScreen
 import com.tecsup.ayudacampus.ui.soporte.AjustesScreen
 import com.tecsup.ayudacampus.viewmodel.PerfilViewModel
 import com.tecsup.ayudacampus.viewmodel.SesionViewModel
+import com.tecsup.ayudacampus.viewmodel.RegistroViewModel
+import com.tecsup.ayudacampus.viewmodel.NotificacionesViewModel
+import com.tecsup.ayudacampus.ui.cliente.RegistroScreen
+import com.tecsup.ayudacampus.ui.cliente.NotificacionesScreen
 
 @Composable
 fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (String) -> Unit, nav: NavHostController = rememberNavController()) {
@@ -119,7 +123,9 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     onCerrarSesion = { confirmarSalida = true }, cerrandoSesion = cargando,
                     ticketCreadoId = ticketCreado,
                     onTicketMostrado = { entrada.savedStateHandle["ticketCreado"] = null },
-                    onPerfil = { nav.navigate(Rutas.Perfil) { launchSingleTop = true } }, mesaAbierta = mesaAbierta
+                    onPerfil = { nav.navigate(Rutas.Perfil) { launchSingleTop = true } },
+                    onNotificaciones = { nav.navigate(Rutas.Notificaciones) { launchSingleTop = true } },
+                    mesaAbierta = mesaAbierta
                 )
             }
         }
@@ -216,6 +222,31 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     factory = PerfilViewModel.Factory(app.repository, app.preferencias, vm.usuarioActual))
                 PerfilScreen(perfilVm, { nav.popBackStack() }, { confirmarSalida = true },
                     { confirmarCambio = true }, cargando, error)
+            }
+        }
+        composable(Rutas.Registro) {
+            if (recuperando) PantallaEspera()
+            else {
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val registroVm: RegistroViewModel = viewModel(
+                    factory = RegistroViewModel.Factory(app.repository)
+                )
+                RegistroScreen(
+                    vm = registroVm,
+                    onVolver = { nav.popBackStack(Rutas.Login, false) },
+                    onRegistroExitoso = { nav.popBackStack(Rutas.Login, false) }
+                )
+            }
+        }
+        composable(Rutas.Notificaciones) {
+            if (recuperando) PantallaEspera()
+            else usuario?.takeIf { it.rol == "CLIENTE" && it.id > 0 }?.let { actual ->
+                val app = LocalContext.current.applicationContext as AyudaApp
+                val notifVm: NotificacionesViewModel = viewModel(
+                    key = "notif_${actual.id}",
+                    factory = NotificacionesViewModel.Factory(app.repository, actual.id)
+                )
+                NotificacionesScreen(notifVm, onVolver = { nav.popBackStack() })
             }
         }
         composable(Rutas.Ajustes) {
