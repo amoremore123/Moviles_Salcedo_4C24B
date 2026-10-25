@@ -64,10 +64,10 @@ fun GraficoBarras(datos: List<DatoGrafico>, modifier: Modifier = Modifier) {
         datos.forEach { dato ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("${dato.etiqueta}: ${dato.cantidad}", style = MaterialTheme.typography.bodySmall)
-                Canvas(Modifier.fillMaxWidth().height(6.dp)) {
-                    drawRoundRect(fondo)
+                Canvas(Modifier.fillMaxWidth().height(10.dp)) {
+                    drawRoundRect(fondo, cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
                     val ancho = size.width * dato.cantidad.coerceAtLeast(0).toFloat() / maximo
-                    if (ancho > 0f) drawRoundRect(principal, size = Size(ancho, size.height))
+                    if (ancho > 0f) drawRoundRect(principal, size = Size(ancho, size.height), cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
                 }
             }
         }

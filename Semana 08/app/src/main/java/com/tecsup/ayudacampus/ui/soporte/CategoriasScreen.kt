@@ -41,10 +41,13 @@ fun CategoriasScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onNueva: () 
             if (!pantalla.cargando && pantalla.errorCarga == null) FloatingActionButton(onClick = onNueva) { Icon(Icons.Default.Add, contentDescription = "Agregar categoría") }
         },
         bottomBar = {
+            Column {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (pantalla.operando) LinearProgressIndicator(Modifier.fillMaxWidth())
                 pantalla.error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 pantalla.confirmacion?.let { Text(it, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall) }
+            }
+            BarraInferior(!pantalla.operando)
             }
         }
     ) { padding ->
@@ -56,10 +59,10 @@ fun CategoriasScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onNueva: () 
             }
             else -> LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("categorias_lista"),
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                item { Text("Organiza los temas de atención. Las categorías inactivas se conservan en los tickets existentes.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                item { TarjetaBienvenida("Todo en su lugar", "Organiza las categorías de atención de tu campus.") }
                 if (pantalla.categorias.isEmpty()) item { Text("Todavía no hay categorías") }
                 items(pantalla.categorias, key = { it.id }) { categoria ->
-                    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
+                    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(22.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = .16f))) {
                         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(12.dp)) {

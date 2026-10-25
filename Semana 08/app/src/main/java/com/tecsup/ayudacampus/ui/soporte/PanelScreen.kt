@@ -28,7 +28,7 @@ import com.tecsup.ayudacampus.viewmodel.PanelViewModel
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () -> Unit,
-                cerrandoSesion: Boolean = false, errorSesion: String? = null, onCategorias: () -> Unit, onPerfil: () -> Unit) {
+                cerrandoSesion: Boolean = false, errorSesion: String? = null, onCategorias: () -> Unit, onPerfil: () -> Unit, seccionSolicitada: Int? = null, onSeccionMostrada: () -> Unit = {}) {
     val administrador by vm.administrador.collectAsStateWithLifecycle()
     val cargando by vm.cargando.collectAsStateWithLifecycle()
     val error by vm.error.collectAsStateWithLifecycle()
@@ -36,24 +36,28 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
     val cargandoDatos by vm.cargandoIndicadores.collectAsStateWithLifecycle()
     val errorDatos by vm.errorIndicadores.collectAsStateWithLifecycle()
     var pestana by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(seccionSolicitada) {
+        seccionSolicitada?.let { pestana = it; onSeccionMostrada() }
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding().semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Column {
-                AyudaTopAppBar("Panel de soporte") {
+                AyudaTopAppBar(if (pestana == 0) "Panel de soporte" else "Bandeja de tickets") {
                     IconButton(onClick = onPerfil, enabled = !cerrandoSesion) { Icon(Icons.Default.Person, "Perfil y ajustes") }
                     IconButton(onClick = onCerrarSesion, enabled = !cerrandoSesion) { Icon(Icons.Default.ExitToApp, "Cerrar sesión") }
                 }
                 administrador?.let {
-                    Text("Hola, ${it.nombre}", Modifier.padding(start = 20.dp, top = 12.dp), style = MaterialTheme.typography.titleMedium)
-                    Text("Perfil: Soporte TI", Modifier.padding(start = 20.dp, bottom = 8.dp), style = MaterialTheme.typography.labelSmall)
+                    Text("Hola, ${it.nombre}", Modifier.padding(start = 20.dp, top = 10.dp), style = MaterialTheme.typography.titleMedium)
+                    Text("Perfil: Soporte TI", Modifier.padding(start = 20.dp, bottom = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                if (administrador != null) TabRow(selectedTabIndex = pestana) {
-                    Tab(selected = pestana == 0, onClick = { pestana = 0 }, text = { Text("Resumen") })
-                    Tab(selected = pestana == 1, onClick = { pestana = 1 }, text = { Text("Bandeja") })
-                    Tab(selected = false, onClick = onCategorias, text = { Text("Categorías") })
-                }
+
+            }
+        },
+        bottomBar = {
+            if (administrador != null) AyudaNavigationBar(true, pestana, !cerrandoSesion) { indice ->
+                when (indice) { 0 -> pestana = 0; 1 -> pestana = 1; 2 -> onCategorias(); 3 -> onPerfil() }
             }
         }
     ) { padding ->
@@ -73,11 +77,18 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
                         OutlinedButton(onClick = vm::reintentar) { Text("Reintentar") }
                     } else {
                         item {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Indicador("Abiertos", datos.abiertos, Color(0xFFD97706), Modifier.weight(1f))
-                                Indicador("En proceso", datos.enProceso, Color(0xFF2563EB), Modifier.weight(1f))
-                                Indicador("Resueltos", datos.resueltos, Color(0xFF16A34A), Modifier.weight(1f))
-                                Indicador("Cerrados", datos.cerrados, Color(0xFF6B7280), Modifier.weight(1f))
+                            TarjetaBienvenida("Tu mesa de ayuda, al día", "Supervisa incidencias y prioriza lo importante.")
+                        }
+                        item {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    TarjetaIndicador("Abiertos", datos.abiertos, Color(0xFFD97706), Modifier.weight(1f))
+                                    TarjetaIndicador("En proceso", datos.enProceso, Color(0xFF2563EB), Modifier.weight(1f))
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    TarjetaIndicador("Resueltos", datos.resueltos, Color(0xFF16A34A), Modifier.weight(1f))
+                                    TarjetaIndicador("Cerrados", datos.cerrados, Color(0xFF6B7280), Modifier.weight(1f))
+                                }
                             }
                         }
                         if (datos.altasSinAtender > 0) item {
@@ -108,19 +119,8 @@ fun PanelScreen(vm: PanelViewModel, onTicket: (Int) -> Unit, onCerrarSesion: () 
 }
 
 @Composable
-private fun Indicador(titulo: String, cantidad: Int, color: Color, modifier: Modifier) {
-    Surface(modifier = modifier.semantics(mergeDescendants = true) { contentDescription = "$titulo: $cantidad" },
-        shape = RoundedCornerShape(14.dp), color = color.copy(alpha = .12f)) {
-        Column(Modifier.padding(horizontal = 8.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(cantidad.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = color)
-            Text(titulo, Modifier.heightIn(min = 28.dp), style = MaterialTheme.typography.labelSmall, color = color)
-        }
-    }
-}
-
-@Composable
 private fun TarjetaGrafico(titulo: String, contenido: @Composable () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
+    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(22.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(titulo, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             contenido()

@@ -1,6 +1,7 @@
 package com.tecsup.ayudacampus.ui.soporte
 
 import com.tecsup.ayudacampus.ui.components.*
+import com.tecsup.ayudacampus.ui.cliente.BurbujaComentario
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -46,10 +47,13 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
             AyudaTopAppBar("Atender ticket #${detalle?.ticket?.id?.toString()?.padStart(4, '0') ?: "----"}", onVolver, "Volver al panel", !pantalla.operando)
         },
         bottomBar = {
+            Column {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (pantalla.operando) LinearProgressIndicator(Modifier.fillMaxWidth())
                 pantalla.error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 pantalla.confirmacion?.let { Text(it, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall) }
+            }
+            BarraInferior(!pantalla.operando)
             }
         }
     ) { padding ->
@@ -62,7 +66,9 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
             else -> LazyColumn(Modifier.fillMaxSize().padding(padding).testTag("atender_lista"),
                 contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(detalle.ticket.titulo, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { EstadoChip(detalle.ticket.estado); PrioridadChip(detalle.ticket.prioridad) }
                         Text("Estudiante: ${detalle.cliente.nombre}", style = MaterialTheme.typography.titleSmall)
@@ -72,6 +78,7 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
                         Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
                             Text(detalle.ticket.descripcion, Modifier.fillMaxWidth().padding(16.dp))
                         }
+                    }
                     }
                 }
                 item {
@@ -90,6 +97,7 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
                             Prioridad.entries.forEach { prioridad ->
                                 FilterChip(selected = pantalla.prioridadSeleccionada == prioridad,
                                     onClick = { vm.cambiarPrioridad(prioridad) }, enabled = !cerrado && !pantalla.operando,
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = colorPrioridad(prioridad.name), selectedLabelColor = androidx.compose.ui.graphics.Color.White),
                                     label = { Text(prioridad.name) }, modifier = Modifier.weight(1f).testTag("atender_prioridad_${prioridad.name}"))
                             }
                         }
@@ -107,16 +115,7 @@ fun AtenderTicketScreen(vm: AtenderViewModel, onVolver: () -> Unit) {
                 item { Text("Conversación", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
                 if (detalle.comentarios.isEmpty()) item { Text("Aún no hay comentarios", color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 items(detalle.comentarios.sortedWith(compareBy({ it.fecha }, { it.id })), key = { it.id }) { comentario ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (comentario.autorId == pantalla.autorId) Arrangement.End else Arrangement.Start) {
-                        Surface(modifier = Modifier.fillMaxWidth(.92f), shape = RoundedCornerShape(16.dp),
-                            color = if (comentario.autorId == pantalla.autorId) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface) {
-                            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("${comentario.autorNombre} · ${if (comentario.autorRol == "ADMIN") "Soporte TI" else "Estudiante"}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                                Text(comentario.texto)
-                                Text(fechaAtencion(comentario.fecha), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
+                    BurbujaComentario(comentario, propia = comentario.autorId == pantalla.autorId)
                 }
                 if (!cerrado) item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

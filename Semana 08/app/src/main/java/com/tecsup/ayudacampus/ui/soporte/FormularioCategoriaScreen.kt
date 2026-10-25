@@ -38,11 +38,14 @@ fun FormularioCategoriaScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onG
             AyudaTopAppBar(if (categoria.id == 0) "Nueva categoría" else "Editar categoría", onVolver, "Volver a categorías", !pantalla.operando)
         },
         bottomBar = {
+            Column {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 pantalla.error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 if (pantalla.operando) LinearProgressIndicator(Modifier.fillMaxWidth())
                 Button(onClick = { focus.clearFocus(); vm.guardar() }, enabled = !pantalla.operando && !pantalla.cargando && pantalla.errorCarga == null && !pantalla.guardado,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("categoria_guardar")) { Text("Guardar categoría") }
+            }
+            BarraInferior(!pantalla.operando)
             }
         }
     ) { padding ->
@@ -53,7 +56,7 @@ fun FormularioCategoriaScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onG
                 OutlinedButton(onClick = vm::reintentar) { Text("Reintentar") }
             }
             else -> Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                Text("Define cómo se mostrará esta categoría al crear y consultar tickets.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                TarjetaBienvenida("Organiza la atención", "Una categoría clara ayuda a resolver mejor.")
                 OutlinedTextField(value = categoria.nombre, onValueChange = vm::actualizarNombre,
                     label = { Text("Nombre de la categoría") }, singleLine = true, enabled = !pantalla.operando,
                     modifier = Modifier.fillMaxWidth().testTag("categoria_nombre"), shape = RoundedCornerShape(14.dp))
@@ -63,7 +66,8 @@ fun FormularioCategoriaScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onG
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         fila.forEach { (codigo, etiqueta) ->
                             FilterChip(selected = categoria.icono == codigo, onClick = { vm.seleccionarIcono(codigo) }, enabled = !pantalla.operando,
-                                label = { Text(etiqueta) }, modifier = Modifier.weight(1f).testTag("categoria_icono_$codigo"))
+                                leadingIcon = { IconoCategoria(codigo, etiqueta) }, shape = RoundedCornerShape(14.dp),
+                                label = { Text(etiqueta, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.weight(1f).testTag("categoria_icono_$codigo"))
                         }
                     }
                 }
@@ -74,8 +78,8 @@ fun FormularioCategoriaScreen(vm: CategoriasViewModel, onVolver: () -> Unit, onG
                     }
                     Switch(checked = categoria.activa, onCheckedChange = vm::establecerActiva, enabled = !pantalla.operando, modifier = Modifier.testTag("categoria_form_activa"))
                 }
-                Text("Vista previa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
+                EncabezadoSeccion("Vista previa", "Así la verá tu comunidad")
+                Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(22.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = .16f))) {
                     Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         IconoCategoria(categoria.icono, categoria.nombre.ifBlank { "Nombre de categoría" })
                         Column {

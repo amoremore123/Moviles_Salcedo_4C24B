@@ -38,6 +38,8 @@ fun BandejaScreen(vm: BandejaViewModel, onTicket: (Int) -> Unit, modifier: Modif
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BandejaViewModel.FiltroEstado.entries.forEach { opcion ->
                 FilterChip(selected = estado == opcion, onClick = { vm.seleccionarEstado(opcion) },
+                    shape = RoundedCornerShape(20.dp), colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary),
                     label = { Text(opcion.etiqueta) }, modifier = Modifier.testTag("panel_estado_${opcion.name}"))
             }
         }
@@ -45,6 +47,8 @@ fun BandejaScreen(vm: BandejaViewModel, onTicket: (Int) -> Unit, modifier: Modif
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BandejaViewModel.FiltroPrioridad.entries.forEach { opcion ->
                 FilterChip(selected = prioridad == opcion, onClick = { vm.seleccionarPrioridad(opcion) },
+                    shape = RoundedCornerShape(20.dp), colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary),
                     label = { Text(opcion.etiqueta) }, modifier = Modifier.testTag("panel_prioridad_${opcion.name}"))
             }
         }

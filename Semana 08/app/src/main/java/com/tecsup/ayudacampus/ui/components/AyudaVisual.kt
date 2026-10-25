@@ -71,7 +71,7 @@ fun TarjetaBienvenida(titulo: String, detalle: String, icono: ImageVector = Icon
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(titulo, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text(detalle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                detalle.lines().forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
     }

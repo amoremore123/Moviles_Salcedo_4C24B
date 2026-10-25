@@ -444,7 +444,7 @@ class SesionLoginTest {
         ParcelFileDescriptor.AutoCloseInputStream(
             automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso10_Panel.png")
         ).use { it.readBytes() }
-        pulsar("Bandeja")
+        pulsarTag("nav_admin_1")
         esperar { existe("6 resultados") && existe("Wi-Fi sin conexión") && existe("Equipo no enciende") }
         val textos = nodos().mapNotNull { it.text?.toString() }
         assertTrue(textos.indexOf("Wi-Fi sin conexión") < textos.indexOf("Equipo no enciende"))
@@ -465,7 +465,7 @@ class SesionLoginTest {
         esperar { existe("1 resultado") && existe("Impresora sin papel") }
         pulsarTag("panel_estado_CERRADOS")
         esperar { existe("No hay tickets con estos filtros") }
-        pulsar("Resumen")
+        pulsarTag("nav_admin_0")
         esperar { nodos().any { it.contentDescription?.toString() == "Abiertos: 2" } }
         assertTrue(nodos().any { it.contentDescription?.toString() == "Cerrados: 1" })
         pulsar("Ver")
@@ -474,7 +474,7 @@ class SesionLoginTest {
         esperar { existe("Atender ticket #${wifi.toString().padStart(4, '0')}") }
         esperar { existe("Estudiante: Juan") && existe("Wi-Fi sin conexión") }
         pulsarDescripcion("Volver al panel")
-        esperar { existe("Panel de soporte") && existe("Wi-Fi sin conexión") }
+        esperar { existe("Bandeja de tickets") && existe("Wi-Fi sin conexión") }
         pulsarTag("panel_estado_TODOS")
         pulsarTag("panel_prioridad_TODAS")
         esperar { existe("6 resultados") }
@@ -521,7 +521,7 @@ class SesionLoginTest {
             completar("soporte@campus.test", "admin")
             pulsar("Ingresar")
             esperar { existe("Perfil: Soporte TI") }
-            pulsar("Bandeja")
+            pulsarTag("nav_admin_1")
             esperar { existe(inicial.ticket.titulo) }
             pulsar(inicial.ticket.titulo)
             esperar { existe("Atender ticket #${inicial.ticket.id.toString().padStart(4, '0')}") }
@@ -557,8 +557,8 @@ class SesionLoginTest {
                 automation.executeShellCommand("screencap -p /sdcard/Download/AyudaCampus_Paso11_Atender.png")
             ).use { it.readBytes() }
             pulsarDescripcion("Volver al panel")
-            esperar { existe("Panel de soporte") }
-            pulsar("Resumen")
+            esperar { existe("Bandeja de tickets") }
+            pulsarTag("nav_admin_0")
             esperar { nodos().any { it.contentDescription?.toString() == "Abiertos: 1" } && nodos().any { it.contentDescription?.toString() == "En proceso: 3" } }
         } finally {
             runBlocking {
@@ -806,7 +806,7 @@ class SesionLoginTest {
             esperar { existe(if (soporte) "Mis tickets" else "Panel de soporte") }
         }
         fun abrirEnSoporte(id: Int) {
-            pulsar("Bandeja"); esperar { existe("Panel de soporte") }
+            pulsarTag("nav_admin_1"); esperar { existe("Bandeja de tickets") }
             campoNuevo("panel_busqueda", "#$id")
             esperar { existe(titulo) && existe("1 resultado") }; pulsar(titulo)
             esperar { existe("Atender ticket #${id.toString().padStart(4, '0')}") }
@@ -839,7 +839,7 @@ class SesionLoginTest {
             campoNuevo("atender_respuesta", respuesta); pulsar("Enviar respuesta"); esperar { existe("Respuesta enviada") }
             mostrarControlSoporte("atender_lista", "atender_estado_RESUELTO", atras = true)
             pulsarTag("atender_estado_RESUELTO"); pulsar("Guardar cambios"); esperar { existe("Cambios guardados") }
-            pulsarDescripcion("Volver al panel"); esperar { existe("Panel de soporte") }
+            pulsarDescripcion("Volver al panel"); esperar { existe("Bandeja de tickets") }
             cambiarDesdeInicio(soporte = true)
             esperar { existe(titulo) }; pulsar(titulo)
             mostrarEnDetalle("Tu incidencia está resuelta")
@@ -854,7 +854,7 @@ class SesionLoginTest {
             cambiarDesdeInicio(soporte = false); abrirEnSoporte(creado.id)
             mostrarControlSoporte("atender_lista", "atender_estado_RESUELTO")
             pulsarTag("atender_estado_RESUELTO"); pulsar("Guardar cambios"); esperar { existe("Cambios guardados") }
-            pulsarDescripcion("Volver al panel"); esperar { existe("Panel de soporte") }
+            pulsarDescripcion("Volver al panel"); esperar { existe("Bandeja de tickets") }
             cambiarDesdeInicio(soporte = true); esperar { existe(titulo) }; pulsar(titulo)
             mostrarEnDetalle("Calificar y cerrar"); pulsar("Calificar y cerrar")
             esperar { existe("Calificar y cerrar ticket") }; pulsarDescripcion("4 estrellas"); pulsar("Confirmar y cerrar")

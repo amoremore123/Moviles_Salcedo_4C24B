@@ -76,6 +76,17 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     launchSingleTop = true
                 }
             }
+        } else if (usuario?.rol == "ADMIN") {
+            val seleccionado = when (rutaActual) { Rutas.Categorias, Rutas.FormularioCategoria -> 2; Rutas.Ajustes -> 3; Rutas.AtenderTicket -> 1; else -> 0 }
+            AyudaNavigationBar(true, seleccionado, habilitado) { indice ->
+                if (indice < 2) {
+                    nav.getBackStackEntry(Rutas.Panel).savedStateHandle["seccionSoporte"] = indice
+                    nav.popBackStack(Rutas.Panel, false)
+                } else {
+                    val destino = if (indice == 2) Rutas.Categorias else Rutas.Ajustes
+                    if (rutaActual != destino) nav.navigate(destino) { popUpTo(Rutas.Panel); launchSingleTop = true }
+                }
+            }
         }
     }) {
     NavHost(navController = nav, startDestination = Rutas.Splash) {
@@ -143,7 +154,7 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                 DetalleTicketScreen(detalleVm, onVolver = { nav.popBackStack() })
             }
         }
-        composable(Rutas.Panel) {
+        composable(Rutas.Panel) { entrada ->
             if (recuperando) PantallaEspera()
             else usuario?.takeIf { it.rol == "ADMIN" && it.id > 0 }?.let { actual ->
                 val app = LocalContext.current.applicationContext as AyudaApp
@@ -151,7 +162,9 @@ fun NavAyuda(vm: SesionViewModel, rolSeleccionado: String, onRolSeleccionado: (S
                     key = "panel_${actual.id}",
                     factory = PanelViewModel.Factory(app.repository, vm.usuarioActual)
                 )
-                PanelScreen(panelVm,
+                val seccionSolicitada by entrada.savedStateHandle.getStateFlow<Int?>("seccionSoporte", null).collectAsStateWithLifecycle()
+                PanelScreen(panelVm, seccionSolicitada = seccionSolicitada,
+                    onSeccionMostrada = { entrada.savedStateHandle["seccionSoporte"] = null },
                     onTicket = { nav.navigate(Rutas.atenderTicket(it)) { launchSingleTop = true } },
                     onCerrarSesion = { confirmarSalida = true }, cerrandoSesion = cargando, errorSesion = error,
                     onCategorias = { nav.navigate(Rutas.Categorias) { launchSingleTop = true } },
