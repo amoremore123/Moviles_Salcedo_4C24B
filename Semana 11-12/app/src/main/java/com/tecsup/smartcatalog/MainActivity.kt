@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import com.tecsup.smartcatalog.ui.lista.ListaScreen
+import com.tecsup.smartcatalog.ui.navigation.AppNav
 import com.tecsup.smartcatalog.ui.lista.ListaViewModel
 import com.tecsup.smartcatalog.ui.theme.SmartCatalogTheme
 
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SmartCatalogTheme {
-                ListaScreen(viewModel = listaViewModel, imageLoader = container.imageLoader)
+                AppNav(container = container, listaViewModel = listaViewModel)
             }
         }
     }

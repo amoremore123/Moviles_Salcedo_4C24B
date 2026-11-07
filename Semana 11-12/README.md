@@ -30,3 +30,13 @@ APK: `app/build/outputs/apk/debug/app-debug.apk`.
 Las 15 pruebas anteriores permanecen y se añaden pruebas de repositorio remoto y ViewModel con API y repositorio falsos, sin Internet. Cubren carga, éxito, error, reintento, respuesta vacía, cancelación, IDs inválidos, consultas simultáneas y conservación de datos ante una actualización fallida.
 
 Las evidencias reales de H6 se guardan en `evidencias/h6/`, excluidas de Git. `docs/H5_API.md` conserva el registro histórico de H5, cuando la API aún no estaba conectada. No se incorpora Room, Firebase, login, detalle, favoritos persistentes, administración ni notificaciones.
+
+## H7: detalle remoto y navegación
+
+`AppNav` utiliza Navigation Compose 2.7.7 con los destinos `lista` y `detalle/{id}`. Solo se pasa el ID numérico. Cada entrada de detalle dispone de su propio `DetalleViewModel`, creado con una fábrica de AppContainer; este depende únicamente de ItemRepository e inicia la consulta una sola vez. El botón superior y Atrás del dispositivo permiten regresar. Las pulsaciones rápidas se filtran por destino y estado RESUMED, además de launchSingleTop.
+
+`obtenerDetalle` llama realmente a `GET products/{id}` mediante Retrofit en Dispatchers.IO, valida y mapea la respuesta, sin alterar la lista ni utilizarla como respaldo si falla la red. Los IDs inválidos, los errores HTTP y las respuestas que pertenecen a otro ID producen un Result.failure. La cancelación se propaga.
+
+El ViewModel de la lista se conserva en la actividad y el estado de desplazamiento se conserva mediante Navigation Compose, evitando recargas al regresar. DetalleScreen reutiliza Cargando y ErrorView y mantiene siempre visible la opción de regresar. Coil 2.7.0 presenta la imagen grande con progreso, respaldo local y ContentScale.Fit, sin caché en disco. Los precios mantienen el formato neutral de H6.
+
+Se conservan las 28 pruebas anteriores y se añaden pruebas de DetalleViewModel y del repositorio de detalle mediante objetos falsos, sin Internet. Las capturas reales de H7 se guardan en `evidencias/h7/`, excluidas de Git. El registro histórico de H6 permanece en `docs/H6_VERIFICACION.md`.

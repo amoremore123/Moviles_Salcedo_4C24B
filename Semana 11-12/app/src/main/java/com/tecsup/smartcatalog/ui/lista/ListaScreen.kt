@@ -47,11 +47,11 @@ import com.tecsup.smartcatalog.ui.components.EstadoVacio
 import com.tecsup.smartcatalog.ui.components.ItemCard
 
 @Composable
-fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, modifier: Modifier = Modifier) {
+fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, onItemClick: (Int) -> Unit, modifier: Modifier = Modifier) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val actualizando by viewModel.actualizando.collectAsStateWithLifecycle()
     val mensaje by viewModel.mensajeActualizacion.collectAsStateWithLifecycle()
-    ListaContenido(estado, actualizando, mensaje, viewModel::actualizar, viewModel::reintentar, imageLoader, modifier)
+    ListaContenido(estado, actualizando, mensaje, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, modifier)
 }
 
 @Composable
@@ -62,6 +62,7 @@ private fun ListaContenido(
     onActualizar: () -> Unit,
     onReintentar: () -> Unit,
     imageLoader: ImageLoader,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -104,7 +105,7 @@ private fun ListaContenido(
                                         }
                                     }
                                 }
-                                items(estado.datos, key = { it.id }) { item -> ItemCard(item, imageLoader) }
+                                items(estado.datos, key = { it.id }) { item -> ItemCard(item, imageLoader, onClick = { onItemClick(item.id) }) }
                                 item(key = "nota") {
                                     Text("Importes de la API · Sin conversión de moneda", modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                                 }
