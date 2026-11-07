@@ -4,9 +4,8 @@ import com.tecsup.smartcatalog.domain.model.Item
 
 /** Datos ficticios para demostraciones de H4. No son resultados de DummyJSON. */
 object DatosPrueba {
-    // Imagen ilustrativa local ya incluida en la app; no requiere acceso a Internet.
-    private const val IMAGEN_EJEMPLO =
-        "android.resource://com.tecsup.smartcatalog/drawable/ic_smartcatalog"
+    // Ilustraciones locales; no requiere acceso a Internet.
+    private const val RECURSOS = "android.resource://com.tecsup.smartcatalog/drawable/"
 
     val smartphones: List<Item> = listOf(
         Item(
@@ -14,7 +13,7 @@ object DatosPrueba {
             nombre = "Aurora One",
             descripcion = "Smartphone ficticio con pantalla de 6,4 pulgadas y almacenamiento de 128 GB.",
             precio = 499.90,
-            imagen = IMAGEN_EJEMPLO,
+            imagen = RECURSOS + "smartphone_aurora",
             categoria = "smartphones"
         ),
         Item(
@@ -22,7 +21,7 @@ object DatosPrueba {
             nombre = "Andino Pro",
             descripcion = "Modelo ilustrativo con cámara triple y almacenamiento de 256 GB.",
             precio = 749.90,
-            imagen = IMAGEN_EJEMPLO,
+            imagen = RECURSOS + "smartphone_andino",
             categoria = "smartphones"
         ),
         Item(
@@ -30,7 +29,7 @@ object DatosPrueba {
             nombre = "Costa Lite",
             descripcion = "Smartphone ficticio compacto para tareas cotidianas, con 64 GB de almacenamiento.",
             precio = 299.90,
-            imagen = IMAGEN_EJEMPLO,
+            imagen = RECURSOS + "smartphone_costa",
             categoria = "smartphones"
         ),
         Item(
@@ -38,7 +37,7 @@ object DatosPrueba {
             nombre = "Sierra Max",
             descripcion = "Modelo ilustrativo de pantalla amplia, batería de larga duración y 128 GB.",
             precio = 599.90,
-            imagen = IMAGEN_EJEMPLO,
+            imagen = RECURSOS + "smartphone_sierra",
             categoria = "smartphones"
         )
     )

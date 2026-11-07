@@ -1,28 +1,31 @@
 # SmartCatalog — Laboratorio 11-12
 
-Proyecto base individual de Programación en Móviles (H1).
+Aplicación individual de Programación en Móviles. Paquete: `com.tecsup.smartcatalog`.
 
-- Aplicación: SmartCatalog
-- Paquete: com.tecsup.smartcatalog
-- Kotlin: 2.2.10
-- Android Gradle Plugin: 8.13.2
-- Gradle: 8.13
-- Android SDK: compileSdk/targetSdk 36; minSdk 24
-- Interfaz: Jetpack Compose y Material 3
+## H4: catálogo con datos ficticios
 
-## Compilar
+`MainActivity` crea `ListaViewModel` mediante su fábrica e inyecta `ItemRepositoryPrueba`. El ViewModel depende del contrato `ItemRepository`, observa su flujo y expone `StateFlow<UiState<List<Item>>>`. `ListaScreen` recoge el estado con Lifecycle y presenta carga, error con reintento, lista vacía o una `LazyColumn` con tarjetas `ItemCard`.
 
-Usar JDK 17 (instalado en este equipo) y Android SDK 36. Configurar la ruta del SDK en `local.properties`, que no se incluye en Git.
+La colección de cuatro smartphones es ilustrativa. Los precios de ejemplo se muestran en soles (PEN); las ilustraciones son vectores locales con una imagen de respaldo. El repositorio funciona exclusivamente en memoria y recarga la colección estática. No existe persistencia ni sincronización real. La interfaz no ofrece acciones de detalle ni favoritos.
 
-Desde esta carpeta, en PowerShell:
+## Herramientas y compilación
+
+- Kotlin 2.2.10, Android Gradle Plugin 8.13.2 y Gradle 8.13.
+- Android SDK: compileSdk/targetSdk 36; minSdk 24.
+- JDK 17, Jetpack Compose y Material 3.
+- Lifecycle 2.7.0 para ViewModel y observación del estado.
+
+Configurar el SDK en `local.properties` (excluido de Git). Desde esta carpeta, en PowerShell:
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot'
-.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:assembleDebug :app:testDebugUnitTest
 ```
 
-El APK se genera en `app/build/outputs/apk/debug/app-debug.apk`.
+APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Alcance de H1
+Las pruebas verifican la colección, el resultado para IDs inexistentes, la recarga en memoria y las transiciones de carga/error/éxito del ViewModel, incluido el reintento.
 
-Pantalla inicial con los textos SmartCatalog, Catálogo de smartphones y Bienvenido; tema claro/oscuro y recursos básicos. La API DummyJSON se integrará en un hito posterior. Este proyecto utiliza el repositorio Git del curso y no contiene un repositorio Git interno.
+## Evidencias
+
+Las capturas reales del emulador se guardan en `evidencias/h4/`. Esta carpeta se excluye de Git, al igual que los registros locales de verificación. El proyecto utiliza el repositorio Git del curso, sin un repositorio interno.
