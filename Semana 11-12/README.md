@@ -29,3 +29,9 @@ Las pruebas verifican la colección, el resultado para IDs inexistentes, la reca
 ## Evidencias
 
 Las capturas reales del emulador se guardan en `evidencias/h4/`. Esta carpeta se excluye de Git, al igual que los registros locales de verificación. El proyecto utiliza el repositorio Git del curso, sin un repositorio interno.
+
+## H5: cliente de API preparado, catálogo de H4 conservado
+
+Se configuraron Retrofit/converter-gson 2.11.0, Gson 2.11.0 y OkHttp 4.12.0, junto con DTO, mappers y permiso de Internet. La API todavía no alimenta la pantalla: siguen apareciendo los cuatro smartphones ficticios de H4.
+
+La comprobación HTTP real, el esquema observado, la política de campos ausentes y las pruebas sin Internet se documentan en `docs/H5_API.md`. Ejecutar el mismo comando de compilación y pruebas indicado arriba incluye tanto las pruebas de H4 como las nuevas de H5.
