@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SmartCatalog</string>
+    <string name="catalog_description">Catálogo de smartphones</string>
+    <string name="welcome">Bienvenido</string>
+</resources>
