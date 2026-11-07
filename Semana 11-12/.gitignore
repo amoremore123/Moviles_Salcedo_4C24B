@@ -21,3 +21,7 @@ captures/
 .cxx/
 .h1-verification/
 evidencias/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal

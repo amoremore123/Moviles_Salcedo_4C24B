@@ -1,5 +1,6 @@
 package com.tecsup.smartcatalog.data.mapper
 
+import com.tecsup.smartcatalog.data.local.ItemEntity
 import com.tecsup.smartcatalog.data.remote.dto.ProductoDto
 import com.tecsup.smartcatalog.domain.model.Item
 
@@ -19,3 +20,24 @@ fun ProductoDto.toItem(): Item {
 
 /** Entrada segura para DTO inválidos: informa el fallo sin inventar un ID ni lanzar al consumidor. */
 fun ProductoDto.toItemSeguro(): Result<Item> = runCatching { toItem() }
+
+/** Conversión local pura; conserva favorito y no realiza ninguna operación de base de datos. */
+fun Item.toEntity(): ItemEntity = ItemEntity(
+    id = id,
+    nombre = nombre,
+    descripcion = descripcion,
+    precio = precio,
+    imagen = imagen,
+    categoria = categoria,
+    favorito = favorito
+)
+
+fun ItemEntity.toItem(): Item = Item(
+    id = id,
+    nombre = nombre,
+    descripcion = descripcion,
+    precio = precio,
+    imagen = imagen,
+    categoria = categoria,
+    favorito = favorito
+)

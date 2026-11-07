@@ -40,3 +40,22 @@ Las evidencias reales de H6 se guardan en `evidencias/h6/`, excluidas de Git. `d
 El ViewModel de la lista se conserva en la actividad y el estado de desplazamiento se conserva mediante Navigation Compose, evitando recargas al regresar. DetalleScreen reutiliza Cargando y ErrorView y mantiene siempre visible la opción de regresar. Coil 2.7.0 presenta la imagen grande con progreso, respaldo local y ContentScale.Fit, sin caché en disco. Los precios mantienen el formato neutral de H6.
 
 Se conservan las 28 pruebas anteriores y se añaden pruebas de DetalleViewModel y del repositorio de detalle mediante objetos falsos, sin Internet. Las capturas reales de H7 se guardan en `evidencias/h7/`, excluidas de Git. El registro histórico de H6 permanece en `docs/H6_VERIFICACION.md`.
+
+## H8: base de datos Room preparada, sin integración con el catálogo
+
+Se añade Room 2.7.2 con Runtime, KTX, Compiler y soporte de pruebas. KSP 2.2.10-2.0.2 corresponde a Kotlin 2.2.10 y se ejecuta con KSP2; no se cambian Kotlin, AGP, Gradle ni JDK.
+
+`ItemEntity` representa la tabla `items` con clave primaria `id` y todos los campos del dominio, incluido `favorito`. `ItemDao` expone Flow de todos los productos y favoritos, búsqueda por ID, inserción/actualización, cambio de favorito, conteos y borrado explícito. La inserción/actualización es transaccional: se insertan los IDs nuevos y se actualizan solo los datos descriptivos de los existentes. Su estado favorito permanece intacto; se modifica explícitamente mediante actualizarFavorito. No se borran y recrean las filas para actualizar sus datos.
+
+`AppDatabase` tiene versión 1, nombre `smartcatalog.db` y exportSchema=true. El esquema JSON exportado en `app/schemas/` se versiona para preparar futuras migraciones; no se versionan las clases generadas por KSP en build. No hay migración destructiva ni borrado al iniciar.
+
+AppContainer proporciona la base de datos y el DAO mediante propiedades lazy con contexto de aplicación. El catálogo y el detalle siguen usando exclusivamente ItemRepositoryRemoto: Room no se abre ni consulta desde la interfaz en H8. Los mappers locales conservan favorito en ambos sentidos y no alteran el mapeo remoto existente.
+
+Las pruebas instrumentadas usan Room.inMemoryDatabaseBuilder y cierran la base al finalizar cada prueba, sin tocar una base real ni consultar Internet. Cubren inserción, búsqueda, favoritos, conteos, borrado, cambios de Flow y preservación de favoritos al actualizar. Se mantienen las 40 pruebas anteriores y se añaden pruebas unitarias de mappers locales.
+
+```powershell
+.\gradlew.bat :app:assembleDebug :app:testDebugUnitTest
+.\gradlew.bat :app:connectedDebugAndroidTest
+```
+
+En H8 no se conecta Retrofit con Room, no se añade persistencia al catálogo ni un modo offline persistente, y no se implementan favoritos en la interfaz, Firebase, login, roles, administración ni notificaciones.
