@@ -2,20 +2,23 @@
 
 Aplicación individual de Programación en Móviles. Paquete: `com.tecsup.smartcatalog`.
 
-## H4: catálogo con datos ficticios
+## H6: catálogo conectado a DummyJSON
 
-`MainActivity` crea `ListaViewModel` mediante su fábrica e inyecta `ItemRepositoryPrueba`. El ViewModel depende del contrato `ItemRepository`, observa su flujo y expone `StateFlow<UiState<List<Item>>>`. `ListaScreen` recoge el estado con Lifecycle y presenta carga, error con reintento, lista vacía o una `LazyColumn` con tarjetas `ItemCard`.
+`MainActivity` utiliza `AppContainer` para obtener la fábrica de `ListaViewModel`. El contenedor proporciona `ApiService`, `ItemRepositoryRemoto` y un `ImageLoader` compartido. El ViewModel solo conoce `ItemRepository`: inicia una consulta, observa los productos y expone `StateFlow<UiState<List<Item>>>`, progreso y un mensaje de actualización.
 
-La colección de cuatro smartphones es ilustrativa. Los precios de ejemplo se muestran en soles (PEN); las ilustraciones son vectores locales con una imagen de respaldo. El repositorio funciona exclusivamente en memoria y recarga la colección estática. No existe persistencia ni sincronización real. La interfaz no ofrece acciones de detalle ni favoritos.
+El repositorio consulta `GET products/category/smartphones`, convierte DTO con los mappers de H5 y retiene el resultado únicamente en memoria. El número de modelos se calcula a partir de la lista recibida y validada, sin fijar una cantidad. Una respuesta vacía correcta produce el estado vacío. Un fallo inicial muestra Error y Reintentar; un fallo al actualizar conserva los productos visibles y muestra un aviso con reintento. La consulta se protege frente a solicitudes simultáneas. No se ejecutan solicitudes por recomposición.
 
-## Herramientas y compilación
+Los IDs inválidos y repetidos se filtran. Un contenedor sin `products` o una lista no vacía formada solo por DTO inválidos produce un error controlado y conserva los datos anteriores. `obtenerDetalle` solo busca en memoria en H6; no hay pantalla de detalle. Favoritos, conteos y limpieza cumplen el contrato temporalmente en memoria y no implican persistencia.
 
-- Kotlin 2.2.10, Android Gradle Plugin 8.13.2 y Gradle 8.13.
-- Android SDK: compileSdk/targetSdk 36; minSdk 24.
-- JDK 17, Jetpack Compose y Material 3.
-- Lifecycle 2.7.0 para ViewModel y observación del estado.
+## Imágenes y precios
 
-Configurar el SDK en `local.properties` (excluido de Git). Desde esta carpeta, en PowerShell:
+Coil Compose 2.7.0 carga las URL reales con proporciones conservadas, imagen provisional y respaldo en caso de error. Los recursos locales de los ejemplos siguen siendo compatibles. El contenedor desactiva la caché en disco de Coil y las solicitudes también la deshabilitan: no se implementa almacenamiento persistente ni un modo offline real.
+
+Los precios se presentan como números bajo «Precio de referencia», sin símbolo de soles, sin atribuir una moneda a DummyJSON y sin realizar conversiones. El encabezado identifica la fuente y el pie aclara que son importes de la API sin conversión de moneda.
+
+## Herramientas y verificación
+
+Kotlin 2.2.10, AGP 8.13.2, Gradle 8.13, JDK 17, Android compileSdk/targetSdk 36 y minSdk 24. Se conservan Retrofit/Gson/OkHttp y Lifecycle configurados en hitos anteriores. Configurar el SDK en `local.properties`, excluido de Git.
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot'
@@ -24,14 +27,6 @@ $env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot'
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-Las pruebas verifican la colección, el resultado para IDs inexistentes, la recarga en memoria y las transiciones de carga/error/éxito del ViewModel, incluido el reintento.
+Las 15 pruebas anteriores permanecen y se añaden pruebas de repositorio remoto y ViewModel con API y repositorio falsos, sin Internet. Cubren carga, éxito, error, reintento, respuesta vacía, cancelación, IDs inválidos, consultas simultáneas y conservación de datos ante una actualización fallida.
 
-## Evidencias
-
-Las capturas reales del emulador se guardan en `evidencias/h4/`. Esta carpeta se excluye de Git, al igual que los registros locales de verificación. El proyecto utiliza el repositorio Git del curso, sin un repositorio interno.
-
-## H5: cliente de API preparado, catálogo de H4 conservado
-
-Se configuraron Retrofit/converter-gson 2.11.0, Gson 2.11.0 y OkHttp 4.12.0, junto con DTO, mappers y permiso de Internet. La API todavía no alimenta la pantalla: siguen apareciendo los cuatro smartphones ficticios de H4.
-
-La comprobación HTTP real, el esquema observado, la política de campos ausentes y las pruebas sin Internet se documentan en `docs/H5_API.md`. Ejecutar el mismo comando de compilación y pruebas indicado arriba incluye tanto las pruebas de H4 como las nuevas de H5.
+Las evidencias reales de H6 se guardan en `evidencias/h6/`, excluidas de Git. `docs/H5_API.md` conserva el registro histórico de H5, cuando la API aún no estaba conectada. No se incorpora Room, Firebase, login, detalle, favoritos persistentes, administración ni notificaciones.
