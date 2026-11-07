@@ -1,4 +1,11 @@
 package com.tecsup.smartcatalog.domain.model
 
-/** Modelo mínimo; los datos del producto se definirán en el hito correspondiente. */
-data class Item(val id: Int)
+data class Item(
+    val id: Int,
+    val nombre: String,
+    val descripcion: String,
+    val precio: Double,
+    val imagen: String,
+    val categoria: String,
+    val favorito: Boolean = false
+)
