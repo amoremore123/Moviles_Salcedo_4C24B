@@ -39,6 +39,10 @@ interface ItemDao {
     @Query("UPDATE items SET favorito = :favorito WHERE id = :id")
     suspend fun actualizarFavorito(id: Int, favorito: Boolean)
 
+    // Una sola sentencia evita perder alternancias concurrentes por leer y escribir por separado.
+    @Query("UPDATE items SET favorito = NOT favorito WHERE id = :id")
+    suspend fun alternarFavorito(id: Int)
+
     @Query("SELECT COUNT(*) FROM items")
     suspend fun contarItems(): Int
 

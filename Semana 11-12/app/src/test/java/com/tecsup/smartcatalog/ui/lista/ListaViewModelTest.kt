@@ -46,6 +46,7 @@ class ListaViewModelTest {
     @Test
     fun reintentarRecuperaUnErrorDelRepositorio() = runTest {
         val base = ItemRepositoryPrueba()
+        base.limpiarCache() // Error inicial sin datos locales; refrescar() recuperará los ejemplos.
         var intentos = 0
         val repository = object : ItemRepository by base {
             override suspend fun refrescar(): Result<Int> {

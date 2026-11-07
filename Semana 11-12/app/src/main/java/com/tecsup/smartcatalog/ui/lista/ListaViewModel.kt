@@ -23,12 +23,20 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     val mensajeActualizacion: StateFlow<String?> = mensajeMutable.asStateFlow()
     private var consulta: Job? = null
     private var cargaInicialCompleta = false
+    private var productosLocales: List<Item>? = null
+    private var errorSincronizacion: Exception? = null
 
     init {
         viewModelScope.launch {
             try {
                 repository.items.collect { items ->
-                    if (cargaInicialCompleta) estadoMutable.value = UiState.Exito(items)
+                    productosLocales = items
+                    if (items.isNotEmpty() || (cargaInicialCompleta && errorSincronizacion == null)) {
+                        estadoMutable.value = UiState.Exito(items)
+                        mensajeMutable.value = errorSincronizacion?.let { mensajeDeError(it) }
+                    } else if (errorSincronizacion != null) {
+                        estadoMutable.value = UiState.Error(mensajeDeError(requireNotNull(errorSincronizacion)))
+                    }
                 }
             } catch (cancelacion: CancellationException) {
                 throw cancelacion
@@ -45,12 +53,15 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     private fun consultar() {
         if (consulta?.isActive == true) return
         mensajeMutable.value = null
+        errorSincronizacion = null
+        cargaInicialCompleta = false
         actualizandoMutable.value = true
-        if (!cargaInicialCompleta) estadoMutable.value = UiState.Cargando
+        if (productosLocales.isNullOrEmpty()) estadoMutable.value = UiState.Cargando
         consulta = viewModelScope.launch {
             try {
                 repository.refrescar().getOrThrow()
                 val productos = repository.items.first()
+                productosLocales = productos
                 cargaInicialCompleta = true
                 estadoMutable.value = UiState.Exito(productos)
             } catch (cancelacion: CancellationException) {
@@ -64,11 +75,17 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     }
 
     private fun informarError(error: Exception) {
-        val mensaje = error.message?.takeIf { it.isNotBlank() }
-            ?: "No pudimos cargar los smartphones. Inténtalo nuevamente."
-        if (cargaInicialCompleta) mensajeMutable.value = mensaje
-        else estadoMutable.value = UiState.Error(mensaje)
+        cargaInicialCompleta = true
+        errorSincronizacion = error
+        val productos = productosLocales.orEmpty()
+        if (productos.isNotEmpty()) {
+            estadoMutable.value = UiState.Exito(productos)
+            mensajeMutable.value = mensajeDeError(error)
+        } else estadoMutable.value = UiState.Error(mensajeDeError(error))
     }
+
+    private fun mensajeDeError(error: Exception): String = error.message?.takeIf { it.isNotBlank() }
+        ?: "No pudimos cargar los smartphones. Inténtalo nuevamente."
 
     class Factory(private val repository: ItemRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

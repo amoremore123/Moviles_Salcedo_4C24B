@@ -59,3 +59,15 @@ Las pruebas instrumentadas usan Room.inMemoryDatabaseBuilder y cierran la base a
 ```
 
 En H8 no se conecta Retrofit con Room, no se añade persistencia al catálogo ni un modo offline persistente, y no se implementan favoritos en la interfaz, Firebase, login, roles, administración ni notificaciones.
+
+## H9: catálogo respaldado por Room
+
+El catálogo de ejecución utiliza ahora `ItemRepositoryImpl`, inyectado por `AppContainer` en los ViewModels de la actividad. La lista y los favoritos del contrato proceden exclusivamente de los Flow de `ItemDao`, convertidos con los mappers locales. No se publican respuestas HTTP directamente en Compose.
+
+La carga inicial observa inmediatamente los datos guardados y ejecuta una única sincronización. La actualización manual conserva el diseño existente. Si falla la red con datos locales, estos siguen visibles junto al aviso de error ya existente; una primera emisión vacía no se considera una carga finalizada.
+
+La sincronización valida todo el lote antes de escribir y usa `insertarTodos`, cuya transacción conserva el favorito de cada ID existente. Un error no borra registros y un fallo durante la escritura revierte todo el lote. Una lista vacía válida devuelve éxito con cantidad cero y conserva los datos existentes; tampoco se eliminan automáticamente IDs ausentes de una respuesta posterior. No se interpreta esta API como una orden de borrado.
+
+Los conteos, la alternancia atómica de favorito y `limpiarCache()` operan sobre Room. No tienen nuevos controles en la UI. El detalle sigue consultando `products/{id}` y devuelve un fallo si esa consulta falla, sin sustitución local. Los repositorios anteriores se conservan para las pruebas de regresión existentes y no se inyectan en la aplicación.
+
+No se han cambiado versiones, esquema ni versión de la base de datos. Las pruebas de integración utilizan Room en memoria y una API falsa, sin Internet. La verificación real de H9 se documenta en `docs/H9_VERIFICACION.md`.
