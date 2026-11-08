@@ -97,3 +97,15 @@ Los ViewModels siguen dependiendo únicamente del repositorio. Favoritos mantien
 Las pruebas instrumentadas de la actividad sustituyen únicamente la Application del APK de pruebas por una implementación con API falsa y Room en memoria; la aplicación instalada normalmente utiliza DummyJSON y `smartcatalog.db`. La prueba de recreación comprueba el mismo ViewModel y una sola consulta pendiente, sin Internet real.
 
 Verificación y capturas de H11: `docs/H11_VERIFICACION.md` y `evidencias/h11/`. No se implementan funciones de H12.
+
+## H12: Firebase Auth y roles preparados
+
+Se añaden Firebase BoM 34.18.0, los módulos principales Auth/Firestore y Google Services 4.5.0, sin cambiar Kotlin, Gradle, AGP, Room ni KSP. El plugin Google Services solo se aplica cuando existe el archivo real `app/google-services.json`, excluido de Git. Sin él la app compila y conserva el catálogo; no se fabrica una configuración Firebase.
+
+`AppContainer.authRepository` es perezoso y proporciona `AuthRepositoryFirebase` cuando hay configuración. Autentica con Email/Password y verifica `usuarios/{uid}` contra Firestore SERVER. Acepta únicamente `admin` o `usuario`, valida el correo contra Auth y rechaza perfiles ausentes, inválidos o no verificables. La sesión actual se vuelve a verificar con el servidor; no se concede admin desde datos antiguos. Los errores públicos no retienen mensajes internos ni causas del SDK. No se guardan contraseñas en Room o propiedades del repositorio y no hay registro desde la aplicación.
+
+`firestore.rules` permite obtener únicamente el perfil propio autenticado y deniega todas las escrituras de perfiles y roles desde el cliente, incluso admin. La preparación de las dos cuentas y sus perfiles corresponde a Firebase Console o a un entorno administrativo confiable. El repositorio de productos y la navegación siguen intactos; no hay pantalla de login, panel Admin ni notificaciones.
+
+**Configuración real pendiente:** no existe un `google-services.json` de SmartCatalog en esta copia y no se ha verificado Firebase en la nube. Sigue `docs/FIREBASE_CONFIGURACION.md` para registrar el paquete `com.tecsup.smartcatalog`, habilitar Email/Password, crear las dos cuentas que elijas, publicar las reglas y preparar sus documentos por UID. No copies configuración de otros laboratorios ni guardes contraseñas en archivos versionados.
+
+Verificación local y evidencias de H12: `docs/H12_VERIFICACION.md` y `evidencias/h12/`. No se avanza a H13.

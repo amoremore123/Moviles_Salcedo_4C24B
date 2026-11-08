@@ -4,6 +4,8 @@ import android.content.Context
 import coil.ImageLoader
 import com.tecsup.smartcatalog.data.local.AppDatabase
 import com.tecsup.smartcatalog.data.local.ItemDao
+import com.tecsup.smartcatalog.data.auth.AuthRepository
+import com.tecsup.smartcatalog.data.auth.FabricaAuthFirebase
 import com.tecsup.smartcatalog.data.remote.ApiService
 import com.tecsup.smartcatalog.data.remote.RetrofitClient
 import com.tecsup.smartcatalog.data.repository.ItemRepository
@@ -23,6 +25,7 @@ class AppContainer(
     val database: AppDatabase by lazy { crearDatabase(applicationContext) }
     val itemDao: ItemDao by lazy { database.itemDao() }
     val itemRepository: ItemRepository by lazy { ItemRepositoryImpl(apiService, itemDao) }
+    val authRepository: AuthRepository by lazy { FabricaAuthFirebase.crear(applicationContext) }
     val listaViewModelFactory: ListaViewModel.Factory by lazy { ListaViewModel.Factory(itemRepository) }
     val favoritosViewModelFactory: FavoritosViewModel.Factory by lazy { FavoritosViewModel.Factory(itemRepository) }
     fun detalleViewModelFactory(id: Int): DetalleViewModel.Factory = DetalleViewModel.Factory(itemRepository, id)

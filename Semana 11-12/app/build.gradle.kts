@@ -3,7 +3,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services") apply false
 }
+
+// La configuración real se descarga de Firebase Console; no se genera una configuración ficticia.
+val firebaseConfigurado = file("google-services.json").isFile
+if (firebaseConfigurado) apply(plugin = "com.google.gms.google-services")
 
 android {
     namespace = "com.tecsup.smartcatalog"
@@ -16,6 +21,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "com.tecsup.smartcatalog.testing.SmartCatalogTestRunner"
+        buildConfigField("boolean", "FIREBASE_CONFIGURADO", firebaseConfigurado.toString())
     }
 
     compileOptions {
@@ -24,6 +30,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -40,6 +47,10 @@ ksp {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.18.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")

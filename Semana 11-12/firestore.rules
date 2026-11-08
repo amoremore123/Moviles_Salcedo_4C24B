@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid} {
+      // El cliente solo puede obtener su propio perfil; no puede enumerar otros usuarios.
+      allow get: if request.auth != null && request.auth.uid == uid;
+      // Incluso un cliente admin no prepara cuentas ni modifica roles desde la app.
+      // Crear/editar perfiles corresponde a Firebase Console o a un servidor administrativo con IAM.
+      allow list, create, update, delete: if false;
+    }
+    // Denegación por defecto para cualquier otra colección o subcolección.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
