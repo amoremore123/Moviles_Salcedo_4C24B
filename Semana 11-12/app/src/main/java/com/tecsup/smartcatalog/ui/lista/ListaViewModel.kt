@@ -50,6 +50,18 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     fun reintentar() = consultar()
     fun actualizar() = consultar()
 
+    fun alternarFavorito(id: Int) {
+        viewModelScope.launch {
+            try {
+                repository.alternarFavorito(id)
+            } catch (cancelacion: CancellationException) {
+                throw cancelacion
+            } catch (_: Exception) {
+                mensajeMutable.value = "No se pudo actualizar el favorito. Inténtalo nuevamente."
+            }
+        }
+    }
+
     private fun consultar() {
         if (consulta?.isActive == true) return
         mensajeMutable.value = null

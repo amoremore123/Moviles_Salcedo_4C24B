@@ -47,11 +47,11 @@ import com.tecsup.smartcatalog.ui.components.EstadoVacio
 import com.tecsup.smartcatalog.ui.components.ItemCard
 
 @Composable
-fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, onItemClick: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, onItemClick: (Int) -> Unit, onFavoritos: () -> Unit, modifier: Modifier = Modifier) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val actualizando by viewModel.actualizando.collectAsStateWithLifecycle()
     val mensaje by viewModel.mensajeActualizacion.collectAsStateWithLifecycle()
-    ListaContenido(estado, actualizando, mensaje, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, modifier)
+    ListaContenido(estado, actualizando, mensaje, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, viewModel::alternarFavorito, onFavoritos, modifier)
 }
 
 @Composable
@@ -63,12 +63,14 @@ private fun ListaContenido(
     onReintentar: () -> Unit,
     imageLoader: ImageLoader,
     onItemClick: (Int) -> Unit,
+    onAlternarFavorito: (Int) -> Unit,
+    onFavoritos: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { EncabezadoCatalogo(actualizando, onActualizar) }
+        topBar = { EncabezadoCatalogo(actualizando, onActualizar, onFavoritos) }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (actualizando && estado is UiState.Exito) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -105,7 +107,9 @@ private fun ListaContenido(
                                         }
                                     }
                                 }
-                                items(estado.datos, key = { it.id }) { item -> ItemCard(item, imageLoader, onClick = { onItemClick(item.id) }) }
+                                items(estado.datos, key = { it.id }) { item ->
+                                    ItemCard(item, imageLoader, onClick = { onItemClick(item.id) }, onAlternarFavorito = { onAlternarFavorito(item.id) })
+                                }
                                 item(key = "nota") {
                                     Text("Importes de la API · Sin conversión de moneda", modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                                 }
@@ -119,7 +123,7 @@ private fun ListaContenido(
 }
 
 @Composable
-private fun EncabezadoCatalogo(actualizando: Boolean, onActualizar: () -> Unit) {
+private fun EncabezadoCatalogo(actualizando: Boolean, onActualizar: () -> Unit, onFavoritos: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface) {
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 24.dp, vertical = 20.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -136,6 +140,11 @@ private fun EncabezadoCatalogo(actualizando: Boolean, onActualizar: () -> Unit) 
             Text("Explora nuestros smartphones", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(6.dp))
             Text("DummyJSON · Precios de referencia", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TextButton(onClick = onFavoritos, modifier = Modifier.align(Alignment.End)) {
+                Icon(painterResource(R.drawable.ic_favorito), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(8.dp))
+                Text("Mis favoritos")
+            }
         }
     }
 }

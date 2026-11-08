@@ -71,3 +71,15 @@ La sincronización valida todo el lote antes de escribir y usa `insertarTodos`, 
 Los conteos, la alternancia atómica de favorito y `limpiarCache()` operan sobre Room. No tienen nuevos controles en la UI. El detalle sigue consultando `products/{id}` y devuelve un fallo si esa consulta falla, sin sustitución local. Los repositorios anteriores se conservan para las pruebas de regresión existentes y no se inyectan en la aplicación.
 
 No se han cambiado versiones, esquema ni versión de la base de datos. Las pruebas de integración utilizan Room en memoria y una API falsa, sin Internet. La verificación real de H9 se documenta en `docs/H9_VERIFICACION.md`.
+
+## H10: favoritos persistentes
+
+El corazón de cada tarjeta y del detalle utiliza el campo `favorito` de la tabla `items` existente. La operación SQL atómica `favorito = NOT favorito` lee y cambia el valor almacenado en una sola sentencia; las pulsaciones rápidas no utilizan copias optimistas ni generan solicitudes HTTP. Un ID ausente no crea filas ni cierra la aplicación.
+
+Los ViewModels observan los Flow del repositorio. La pantalla `Mis favoritos` reutiliza `ItemCard` y `EstadoVacio`, permite quitar productos y abrir el detalle, y regresa al catálogo. Al quitar con pulsaciones repetidas, un mutex y una consulta local actual evitan volver a agregar accidentalmente el producto. La navegación utiliza destinos únicos y conserva el estado de las listas al regresar.
+
+El contenido del detalle sigue procediendo del segundo endpoint real. Solo el corazón se obtiene de Room; una emisión local no oculta un error HTTP. El control queda deshabilitado si el producto no está guardado en el catálogo. Los fallos de lectura o escritura se manejan en el ViewModel sin cerrar la aplicación.
+
+No se crean otra tabla ni otra base de datos de producción, ni se cambian dependencias o versiones. La sincronización de H9 conserva los favoritos existentes. Las pruebas instrumentadas adicionales usan exclusivamente bases de prueba con nombres únicos, eliminadas al terminar, para comprobar reapertura y persistencia sin tocar `smartcatalog.db`.
+
+Resultados y capturas reales de H10: `docs/H10_VERIFICACION.md` y `evidencias/h10/`. No se implementan funciones de H11 ni servicios de autenticación, administración o notificaciones.

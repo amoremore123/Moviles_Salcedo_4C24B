@@ -16,11 +16,55 @@ import kotlinx.coroutines.launch
 class DetalleViewModel(private val repository: ItemRepository, private val id: Int) : ViewModel() {
     private val estadoMutable = MutableStateFlow<UiState<Item>>(UiState.Cargando)
     val estado: StateFlow<UiState<Item>> = estadoMutable.asStateFlow()
+    private val mensajeMutable = MutableStateFlow<String?>(null)
+    val mensajeFavorito = mensajeMutable.asStateFlow()
+    private val habilitadoMutable = MutableStateFlow(false)
+    val puedeAlternarFavorito = habilitadoMutable.asStateFlow()
+    private var detalleRemoto: Item? = null
+    private var favoritoLocal = false
+    private var observacion: Job? = null
     private var consulta: Job? = null
 
-    init { consultar() }
+    init { observarFavorito(); consultar() }
 
-    fun reintentar() = consultar()
+    fun reintentar() { observarFavorito(); consultar() }
+
+    private fun observarFavorito() {
+        if (id <= 0 || observacion?.isActive == true) return
+        observacion = viewModelScope.launch {
+            try {
+                repository.items.collect { items ->
+                    val local = items.firstOrNull { it.id == id }
+                    favoritoLocal = local?.favorito ?: false
+                    habilitadoMutable.value = local != null
+                    publicarDetalle()
+                }
+            } catch (cancelacion: CancellationException) {
+                throw cancelacion
+            } catch (_: Exception) {
+                habilitadoMutable.value = false
+                mensajeMutable.value = "No se pudo consultar el estado de favorito. Inténtalo nuevamente."
+            }
+        }
+    }
+
+    fun alternarFavorito() {
+        if (!habilitadoMutable.value) return
+        mensajeMutable.value = null
+        viewModelScope.launch {
+            try {
+                repository.alternarFavorito(id)
+            } catch (cancelacion: CancellationException) {
+                throw cancelacion
+            } catch (_: Exception) {
+                mensajeMutable.value = "No se pudo actualizar el favorito. Inténtalo nuevamente."
+            }
+        }
+    }
+
+    private fun publicarDetalle() {
+        detalleRemoto?.let { estadoMutable.value = UiState.Exito(it.copy(favorito = favoritoLocal)) }
+    }
 
     private fun consultar() {
         if (id <= 0) {
@@ -28,12 +72,14 @@ class DetalleViewModel(private val repository: ItemRepository, private val id: I
             return
         }
         if (consulta?.isActive == true) return
+        detalleRemoto = null // Una emisión local no debe convertir un reintento HTTP fallido en éxito.
         estadoMutable.value = UiState.Cargando
         consulta = viewModelScope.launch {
             try {
                 val producto = repository.obtenerDetalle(id).getOrThrow()
                 require(producto.id == id) { "El detalle recibido no corresponde al producto solicitado." }
-                estadoMutable.value = UiState.Exito(producto)
+                detalleRemoto = producto
+                publicarDetalle()
             } catch (cancelacion: CancellationException) {
                 throw cancelacion
             } catch (error: Exception) {

@@ -40,7 +40,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun ItemCard(item: Item, imageLoader: ImageLoader, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ItemCard(item: Item, imageLoader: ImageLoader, onClick: () -> Unit, onAlternarFavorito: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(24.dp),
@@ -52,12 +52,12 @@ fun ItemCard(item: Item, imageLoader: ImageLoader, onClick: () -> Unit, modifier
             if (maxWidth < 300.dp) {
                 Column {
                     ImagenProducto(item, imageLoader, Modifier.fillMaxWidth().height(180.dp))
-                    InformacionProducto(item, Modifier.fillMaxWidth())
+                    InformacionProducto(item, onAlternarFavorito, Modifier.fillMaxWidth())
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ImagenProducto(item, imageLoader, Modifier.width(anchoImagen).height(206.dp))
-                    InformacionProducto(item, Modifier.weight(1f))
+                    InformacionProducto(item, onAlternarFavorito, Modifier.weight(1f))
                 }
             }
         }
@@ -95,7 +95,7 @@ private fun ImagenProducto(item: Item, imageLoader: ImageLoader, modifier: Modif
 }
 
 @Composable
-private fun InformacionProducto(item: Item, modifier: Modifier) {
+private fun InformacionProducto(item: Item, onAlternarFavorito: () -> Unit, modifier: Modifier) {
     val precio = remember(item.precio) {
         NumberFormat.getNumberInstance(Locale.forLanguageTag("es-PE")).apply {
             minimumFractionDigits = 2
@@ -103,12 +103,16 @@ private fun InformacionProducto(item: Item, modifier: Modifier) {
         }.format(item.precio)
     }
     Column(modifier = modifier.padding(16.dp)) {
-        Text(
-            text = item.categoria.uppercase(Locale.ROOT),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = item.categoria.uppercase(Locale.ROOT),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            BotonFavorito(item.favorito, item.nombre, onAlternarFavorito)
+        }
         Spacer(Modifier.height(7.dp))
         Text(item.nombre, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(7.dp))

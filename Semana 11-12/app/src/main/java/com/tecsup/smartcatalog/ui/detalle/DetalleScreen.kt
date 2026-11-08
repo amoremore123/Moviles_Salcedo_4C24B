@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
@@ -44,12 +45,15 @@ import com.tecsup.smartcatalog.domain.model.Item
 import com.tecsup.smartcatalog.ui.UiState
 import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
+import com.tecsup.smartcatalog.ui.components.BotonFavorito
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolver: () -> Unit) {
+fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolver: () -> Unit, descripcionVolver: String = "Volver al catálogo") {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val mensaje by viewModel.mensajeFavorito.collectAsStateWithLifecycle()
+    val habilitado by viewModel.puedeAlternarFavorito.collectAsStateWithLifecycle()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -60,18 +64,28 @@ fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolve
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     IconButton(onClick = onVolver) {
-                        Icon(painterResource(R.drawable.ic_volver), contentDescription = "Volver al catálogo", tint = MaterialTheme.colorScheme.primary)
+                        Icon(painterResource(R.drawable.ic_volver), contentDescription = descripcionVolver, tint = MaterialTheme.colorScheme.primary)
                     }
-                    Text("Detalle del smartphone", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("Detalle del smartphone", modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    (estado as? UiState.Exito<Item>)?.datos?.let { item ->
+                        BotonFavorito(item.favorito, item.nombre, viewModel::alternarFavorito, habilitado)
+                    }
                 }
             }
         }
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
-            when (val actual = estado) {
-                UiState.Cargando -> Cargando(mensaje = "Cargando detalle...")
-                is UiState.Error -> ErrorView(mensaje = actual.mensaje, onReintentar = viewModel::reintentar)
-                is UiState.Exito -> DetalleContenido(actual.datos, imageLoader)
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            mensaje?.let { texto ->
+                Surface(color = MaterialTheme.colorScheme.errorContainer, modifier = Modifier.fillMaxWidth()) {
+                    Text(texto, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.TopCenter) {
+                when (val actual = estado) {
+                    UiState.Cargando -> Cargando(mensaje = "Cargando detalle...")
+                    is UiState.Error -> ErrorView(mensaje = actual.mensaje, onReintentar = viewModel::reintentar)
+                    is UiState.Exito -> DetalleContenido(actual.datos, imageLoader)
+                }
             }
         }
     }

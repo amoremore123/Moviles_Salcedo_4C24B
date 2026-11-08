@@ -15,9 +15,12 @@ import com.tecsup.smartcatalog.ui.detalle.DetalleScreen
 import com.tecsup.smartcatalog.ui.detalle.DetalleViewModel
 import com.tecsup.smartcatalog.ui.lista.ListaScreen
 import com.tecsup.smartcatalog.ui.lista.ListaViewModel
+import com.tecsup.smartcatalog.ui.favoritos.FavoritosScreen
+import com.tecsup.smartcatalog.ui.favoritos.FavoritosViewModel
 
 private const val LISTA = "lista"
 private const val DETALLE = "detalle/{id}"
+private const val FAVORITOS = "favoritos"
 
 @Composable
 fun AppNav(container: AppContainer, listaViewModel: ListaViewModel, modifier: Modifier = Modifier) {
@@ -27,9 +30,32 @@ fun AppNav(container: AppContainer, listaViewModel: ListaViewModel, modifier: Mo
             ListaScreen(
                 viewModel = listaViewModel,
                 imageLoader = container.imageLoader,
+                onFavoritos = {
+                    val actual = navController.currentBackStackEntry
+                    if (actual?.destination?.route == LISTA && actual.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(FAVORITOS) { launchSingleTop = true }
+                    }
+                },
                 onItemClick = { id ->
                     val actual = navController.currentBackStackEntry
                     if (actual?.destination?.route == LISTA && actual?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate("detalle/$id") { launchSingleTop = true }
+                    }
+                }
+            )
+        }
+        composable(FAVORITOS) { entry ->
+            val favoritosViewModel: FavoritosViewModel = viewModel(viewModelStoreOwner = entry, factory = container.favoritosViewModelFactory)
+            FavoritosScreen(
+                viewModel = favoritosViewModel,
+                imageLoader = container.imageLoader,
+                onVolver = {
+                    val actual = navController.currentBackStackEntry
+                    if (actual?.destination?.route == FAVORITOS && actual.lifecycle.currentState == Lifecycle.State.RESUMED) navController.popBackStack()
+                },
+                onItemClick = { id ->
+                    val actual = navController.currentBackStackEntry
+                    if (actual?.destination?.route == FAVORITOS && actual.lifecycle.currentState == Lifecycle.State.RESUMED) {
                         navController.navigate("detalle/$id") { launchSingleTop = true }
                     }
                 }
@@ -46,6 +72,7 @@ fun AppNav(container: AppContainer, listaViewModel: ListaViewModel, modifier: Mo
             DetalleScreen(
                 viewModel = detalleViewModel,
                 imageLoader = container.imageLoader,
+                descripcionVolver = if (navController.previousBackStackEntry?.destination?.route == FAVORITOS) "Volver a favoritos" else "Volver al catálogo",
                 onVolver = {
                     val actual = navController.currentBackStackEntry
                     if (actual?.destination?.route == DETALLE && actual?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
