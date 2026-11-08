@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.tecsup.smartcatalog.data.repository.ItemRepository
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.OrigenDetalle
 import com.tecsup.smartcatalog.ui.UiState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -20,7 +21,9 @@ class DetalleViewModel(private val repository: ItemRepository, private val id: I
     val mensajeFavorito = mensajeMutable.asStateFlow()
     private val habilitadoMutable = MutableStateFlow(false)
     val puedeAlternarFavorito = habilitadoMutable.asStateFlow()
-    private var detalleRemoto: Item? = null
+    private val origenMutable = MutableStateFlow<OrigenDetalle?>(null)
+    val origen = origenMutable.asStateFlow()
+    private var detalleActual: Item? = null
     private var favoritoLocal = false
     private var observacion: Job? = null
     private var consulta: Job? = null
@@ -37,6 +40,13 @@ class DetalleViewModel(private val repository: ItemRepository, private val id: I
                     val local = items.firstOrNull { it.id == id }
                     favoritoLocal = local?.favorito ?: false
                     habilitadoMutable.value = local != null
+                    if (origenMutable.value == OrigenDetalle.LOCAL) {
+                        if (local == null) {
+                            detalleActual = null
+                            origenMutable.value = null
+                            estadoMutable.value = UiState.Error("No hay información guardada para este smartphone. Reintenta con Internet.")
+                        } else detalleActual = local
+                    }
                     publicarDetalle()
                 }
             } catch (cancelacion: CancellationException) {
@@ -63,7 +73,7 @@ class DetalleViewModel(private val repository: ItemRepository, private val id: I
     }
 
     private fun publicarDetalle() {
-        detalleRemoto?.let { estadoMutable.value = UiState.Exito(it.copy(favorito = favoritoLocal)) }
+        detalleActual?.let { estadoMutable.value = UiState.Exito(it.copy(favorito = favoritoLocal)) }
     }
 
     private fun consultar() {
@@ -72,13 +82,16 @@ class DetalleViewModel(private val repository: ItemRepository, private val id: I
             return
         }
         if (consulta?.isActive == true) return
-        detalleRemoto = null // Una emisión local no debe convertir un reintento HTTP fallido en éxito.
+        detalleActual = null
+        origenMutable.value = null
         estadoMutable.value = UiState.Cargando
         consulta = viewModelScope.launch {
             try {
-                val producto = repository.obtenerDetalle(id).getOrThrow()
+                val resultado = repository.obtenerDetalleConRespaldo(id).getOrThrow()
+                val producto = resultado.item
                 require(producto.id == id) { "El detalle recibido no corresponde al producto solicitado." }
-                detalleRemoto = producto
+                detalleActual = producto
+                origenMutable.value = resultado.origen
                 publicarDetalle()
             } catch (cancelacion: CancellationException) {
                 throw cancelacion

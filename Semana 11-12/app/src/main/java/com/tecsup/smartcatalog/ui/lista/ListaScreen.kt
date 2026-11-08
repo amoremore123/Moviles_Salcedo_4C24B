@@ -45,13 +45,15 @@ import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
 import com.tecsup.smartcatalog.ui.components.EstadoVacio
 import com.tecsup.smartcatalog.ui.components.ItemCard
+import com.tecsup.smartcatalog.ui.components.AvisoDatosGuardados
 
 @Composable
 fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, onItemClick: (Int) -> Unit, onFavoritos: () -> Unit, modifier: Modifier = Modifier) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val actualizando by viewModel.actualizando.collectAsStateWithLifecycle()
     val mensaje by viewModel.mensajeActualizacion.collectAsStateWithLifecycle()
-    ListaContenido(estado, actualizando, mensaje, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, viewModel::alternarFavorito, onFavoritos, modifier)
+    val sincronizacion by viewModel.sincronizacion.collectAsStateWithLifecycle()
+    ListaContenido(estado, actualizando, mensaje, sincronizacion, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, viewModel::alternarFavorito, onFavoritos, modifier)
 }
 
 @Composable
@@ -59,6 +61,7 @@ private fun ListaContenido(
     estado: UiState<List<Item>>,
     actualizando: Boolean,
     mensaje: String?,
+    sincronizacion: EstadoSincronizacion,
     onActualizar: () -> Unit,
     onReintentar: () -> Unit,
     imageLoader: ImageLoader,
@@ -74,7 +77,13 @@ private fun ListaContenido(
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (actualizando && estado is UiState.Exito) LinearProgressIndicator(Modifier.fillMaxWidth())
-            if (mensaje != null) {
+            val fallo = (sincronizacion as? EstadoSincronizacion.Fallo)?.mensaje
+                ?: (sincronizacion as? EstadoSincronizacion.Actualizando)?.falloAnterior
+            val mostrarGuardados = fallo != null && estado is UiState.Exito && estado.datos.isNotEmpty()
+            if (mostrarGuardados) {
+                AvisoDatosGuardados("No se pudo actualizar el catálogo. Mostrando productos guardados.", onActualizar, habilitado = !actualizando)
+            }
+            if (mensaje != null && (!mostrarGuardados || mensaje != fallo)) {
                 Surface(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(16.dp),
@@ -89,7 +98,10 @@ private fun ListaContenido(
             Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.TopCenter) {
                 when (estado) {
                     UiState.Cargando -> Cargando(mensaje = "Consultando smartphones...")
-                    is UiState.Error -> ErrorView(mensaje = estado.mensaje, onReintentar = onReintentar)
+                    is UiState.Error -> ErrorView(
+                        mensaje = "${estado.mensaje}\n\nNecesitas Internet para descargar los productos por primera vez.",
+                        onReintentar = onReintentar
+                    )
                     is UiState.Exito -> {
                         if (estado.datos.isEmpty()) {
                             EstadoVacio("Sin smartphones por ahora", "El servicio no devolvió productos en esta categoría.")

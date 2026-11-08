@@ -83,3 +83,17 @@ El contenido del detalle sigue procediendo del segundo endpoint real. Solo el co
 No se crean otra tabla ni otra base de datos de producción, ni se cambian dependencias o versiones. La sincronización de H9 conserva los favoritos existentes. Las pruebas instrumentadas adicionales usan exclusivamente bases de prueba con nombres únicos, eliminadas al terminar, para comprobar reapertura y persistencia sin tocar `smartcatalog.db`.
 
 Resultados y capturas reales de H10: `docs/H10_VERIFICACION.md` y `evidencias/h10/`. No se implementan funciones de H11 ni servicios de autenticación, administración o notificaciones.
+
+## H11: modo sin conexión y recuperación
+
+`EstadoSincronizacion` distingue consulta en curso, éxito y fallo real del repositorio. El catálogo solo avisa que muestra productos guardados cuando hay registros de Room y una sincronización ha fallado. Durante un reintento conserva ese aviso y muestra progreso; tras una sincronización correcta lo retira. Leer datos de Room durante una carga normal no los etiqueta como desactualizados. No se utiliza ConnectivityManager para inferir la disponibilidad de DummyJSON.
+
+Sin datos locales, un fallo muestra ErrorView, Reintentar y la indicación de que se necesita Internet para la primera descarga. Una respuesta vacía válida sigue siendo un éxito vacío y no se confunde con ese error. Los fallos no borran productos ni favoritos.
+
+El nuevo contrato `obtenerDetalleConRespaldo()` devuelve `DetalleConOrigen`: intenta el segundo endpoint y, si falla, consulta Room. El respaldo se identifica como `LOCAL` y se muestra con el aviso «Detalle guardado. No se pudo consultar la versión actual». Reintentar vuelve a consultar el endpoint; un éxito se identifica como `REMOTO` y retira el aviso. Sin respaldo se muestra ErrorView. El método remoto anterior conserva su contrato para consumidores y pruebas existentes. Cancelar una consulta no se convierte en un respaldo local.
+
+Los ViewModels siguen dependiendo únicamente del repositorio. Favoritos mantiene sus lecturas y cambios locales sin llamadas HTTP. `SmartCatalogApplication` conserva un único contenedor, repositorio y base Room por proceso, compartidos al recrear o rotar la actividad. No hay otra caché paralela ni cambios de esquema o versiones.
+
+Las pruebas instrumentadas de la actividad sustituyen únicamente la Application del APK de pruebas por una implementación con API falsa y Room en memoria; la aplicación instalada normalmente utiliza DummyJSON y `smartcatalog.db`. La prueba de recreación comprueba el mismo ViewModel y una sola consulta pendiente, sin Internet real.
+
+Verificación y capturas de H11: `docs/H11_VERIFICACION.md` y `evidencias/h11/`. No se implementan funciones de H12.

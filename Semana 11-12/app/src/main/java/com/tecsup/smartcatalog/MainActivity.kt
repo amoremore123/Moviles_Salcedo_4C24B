@@ -10,8 +10,7 @@ import com.tecsup.smartcatalog.ui.lista.ListaViewModel
 import com.tecsup.smartcatalog.ui.theme.SmartCatalogTheme
 
 class MainActivity : ComponentActivity() {
-    // AppContainer proporciona ItemRepositoryImpl (Retrofit + Room) a ambos ViewModels.
-    private val container by lazy { AppContainer(applicationContext) }
+    private val container get() = (application as SmartCatalogApplication).container
     private val listaViewModel: ListaViewModel by viewModels { container.listaViewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {

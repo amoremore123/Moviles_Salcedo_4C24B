@@ -42,10 +42,12 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.OrigenDetalle
 import com.tecsup.smartcatalog.ui.UiState
 import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
 import com.tecsup.smartcatalog.ui.components.BotonFavorito
+import com.tecsup.smartcatalog.ui.components.AvisoDatosGuardados
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -54,6 +56,7 @@ fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolve
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val mensaje by viewModel.mensajeFavorito.collectAsStateWithLifecycle()
     val habilitado by viewModel.puedeAlternarFavorito.collectAsStateWithLifecycle()
+    val origen by viewModel.origen.collectAsStateWithLifecycle()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -75,6 +78,9 @@ fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolve
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            if (origen == OrigenDetalle.LOCAL && estado is UiState.Exito) {
+                AvisoDatosGuardados("Detalle guardado. No se pudo consultar la versión actual.", viewModel::reintentar)
+            }
             mensaje?.let { texto ->
                 Surface(color = MaterialTheme.colorScheme.errorContainer, modifier = Modifier.fillMaxWidth()) {
                     Text(texto, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)

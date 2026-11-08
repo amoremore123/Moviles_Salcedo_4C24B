@@ -21,6 +21,8 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     val actualizando: StateFlow<Boolean> = actualizandoMutable.asStateFlow()
     private val mensajeMutable = MutableStateFlow<String?>(null)
     val mensajeActualizacion: StateFlow<String?> = mensajeMutable.asStateFlow()
+    private val sincronizacionMutable = MutableStateFlow<EstadoSincronizacion>(EstadoSincronizacion.Inicial)
+    val sincronizacion = sincronizacionMutable.asStateFlow()
     private var consulta: Job? = null
     private var cargaInicialCompleta = false
     private var productosLocales: List<Item>? = null
@@ -68,6 +70,9 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
         errorSincronizacion = null
         cargaInicialCompleta = false
         actualizandoMutable.value = true
+        val falloAnterior = (sincronizacionMutable.value as? EstadoSincronizacion.Fallo)?.mensaje
+            ?: (sincronizacionMutable.value as? EstadoSincronizacion.Actualizando)?.falloAnterior
+        sincronizacionMutable.value = EstadoSincronizacion.Actualizando(falloAnterior)
         if (productosLocales.isNullOrEmpty()) estadoMutable.value = UiState.Cargando
         consulta = viewModelScope.launch {
             try {
@@ -75,10 +80,12 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
                 val productos = repository.items.first()
                 productosLocales = productos
                 cargaInicialCompleta = true
+                sincronizacionMutable.value = EstadoSincronizacion.Correcta
                 estadoMutable.value = UiState.Exito(productos)
             } catch (cancelacion: CancellationException) {
                 throw cancelacion
             } catch (error: Exception) {
+                sincronizacionMutable.value = EstadoSincronizacion.Fallo(mensajeDeError(error))
                 informarError(error)
             } finally {
                 actualizandoMutable.value = false

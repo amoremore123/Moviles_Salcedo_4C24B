@@ -6,6 +6,8 @@ import com.tecsup.smartcatalog.data.mapper.toItem
 import com.tecsup.smartcatalog.data.mapper.toItemSeguro
 import com.tecsup.smartcatalog.data.remote.ApiService
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.DetalleConOrigen
+import com.tecsup.smartcatalog.domain.model.OrigenDetalle
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -63,6 +65,23 @@ class ItemRepositoryImpl(
     }
 
     override suspend fun alternarFavorito(id: Int) = withContext(dispatcher) { dao.alternarFavorito(id) }
+
+    override suspend fun obtenerDetalleConRespaldo(id: Int): Result<DetalleConOrigen> {
+        if (id <= 0) return Result.failure(IllegalArgumentException("El identificador del smartphone no es válido."))
+        val remoto = obtenerDetalle(id) // Siempre intenta primero el segundo endpoint, con su validación existente.
+        remoto.getOrNull()?.let { return Result.success(DetalleConOrigen(it, OrigenDetalle.REMOTO)) }
+        return withContext(dispatcher) {
+            try {
+                val local = dao.obtenerPorId(id)
+                if (local != null) Result.success(DetalleConOrigen(local.toItem(), OrigenDetalle.LOCAL))
+                else Result.failure(requireNotNull(remoto.exceptionOrNull()))
+            } catch (cancelacion: CancellationException) {
+                throw cancelacion
+            } catch (error: Exception) {
+                Result.failure(IllegalStateException("No se pudo consultar el detalle ni su información guardada. Inténtalo nuevamente.", error))
+            }
+        }
+    }
     override suspend fun cantidadGuardada(): Int = withContext(dispatcher) { dao.contarItems() }
     override suspend fun cantidadFavoritos(): Int = withContext(dispatcher) { dao.contarFavoritos() }
     override suspend fun limpiarCache() = withContext(dispatcher) {
