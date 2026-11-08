@@ -52,9 +52,9 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
                     IconButton(onClick = onVolver) {
                         Icon(painterResource(R.drawable.ic_volver), "Volver al catálogo", tint = MaterialTheme.colorScheme.primary)
                     }
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text("Mis favoritos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("Tus smartphones elegidos", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Guardados en este dispositivo · compartidos entre cuentas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

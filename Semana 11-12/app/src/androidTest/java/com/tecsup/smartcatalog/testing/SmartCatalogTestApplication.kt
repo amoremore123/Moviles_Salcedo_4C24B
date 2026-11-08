@@ -12,8 +12,9 @@ import kotlinx.coroutines.CompletableDeferred
 
 class SmartCatalogTestApplication : SmartCatalogApplication() {
     val api = ApiDePrueba()
+    val auth = AuthDePrueba()
     override val container by lazy {
-        AppContainer(this, api, crearDatabase = { Room.inMemoryDatabaseBuilder(it, AppDatabase::class.java).build() })
+        AppContainer(this, api, crearDatabase = { Room.inMemoryDatabaseBuilder(it, AppDatabase::class.java).build() }, crearAuth = { auth })
     }
 
     class ApiDePrueba : ApiService {
