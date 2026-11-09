@@ -13,6 +13,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,6 +28,8 @@ class ItemRepositoryImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ItemRepository {
     private val sincronizacion = Mutex()
+    private val ultimaSincronizacionMutable = MutableStateFlow<Long?>(null)
+    val ultimaSincronizacion = ultimaSincronizacionMutable.asStateFlow()
     override val items: Flow<List<Item>> = dao.observarTodos().map { lista -> lista.map { it.toItem() } }
     override val favoritos: Flow<List<Item>> = dao.observarFavoritos().map { lista -> lista.map { it.toItem() } }
 
@@ -39,6 +43,7 @@ class ItemRepositoryImpl(
                 // Una respuesta vacía es un éxito sin cambios. No se eliminan IDs ausentes de la API.
                 if (productos.isNotEmpty()) dao.insertarTodos(productos.map { it.toEntity() })
                 // insertarTodos es transaccional y conserva favorito de los IDs ya almacenados.
+                ultimaSincronizacionMutable.value = System.currentTimeMillis()
                 Result.success(productos.size)
             } catch (cancelacion: CancellationException) {
                 throw cancelacion

@@ -11,12 +11,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.smartcatalog.AppContainer
 import com.tecsup.smartcatalog.domain.model.Rol
 import com.tecsup.smartcatalog.domain.model.Sesion
-import com.tecsup.smartcatalog.ui.admin.BienvenidaAdminScreen
+import com.tecsup.smartcatalog.ui.admin.PanelAdminScreen
+import com.tecsup.smartcatalog.ui.admin.PanelAdminViewModel
 import com.tecsup.smartcatalog.ui.auth.*
 import com.tecsup.smartcatalog.ui.detalle.DetalleScreen
 import com.tecsup.smartcatalog.ui.detalle.DetalleViewModel
@@ -53,6 +55,7 @@ private fun NavegacionAutenticada(
     modifier: Modifier
 ) {
     val navController = rememberNavController()
+    val entradaActual by navController.currentBackStackEntryAsState()
     fun navegar(destino: DestinoProtegido, ruta: String) {
         val actual = navController.currentBackStackEntry
         if (AccesoRutas.permite(sesionActual(), destino) && actual?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
@@ -61,9 +64,15 @@ private fun NavegacionAutenticada(
     }
     Column(modifier.fillMaxSize()) {
         NavHost(navController, startDestination = if (AccesoRutas.inicial(sesion) == DestinoProtegido.ADMIN) ADMIN else LISTA, modifier = Modifier.weight(1f)) {
-            composable(ADMIN) {
+            composable(ADMIN) { entry ->
                 DestinoConPermiso(sesionActual(), DestinoProtegido.ADMIN) {
-                    BienvenidaAdminScreen { navegar(DestinoProtegido.CATALOGO, LISTA) }
+                    val panel: PanelAdminViewModel = viewModel(viewModelStoreOwner = entry, factory = container.panelAdminFactory)
+                    PanelAdminScreen(
+                        panel = panel,
+                        sesionActual = sesionActual,
+                        onCatalogo = { navegar(DestinoProtegido.CATALOGO, LISTA) },
+                        onCerrarSesion = onCerrarSesion
+                    )
                 }
             }
             composable(LISTA) {
@@ -104,12 +113,16 @@ private fun NavegacionAutenticada(
                 }
             }
         }
-        Surface(tonalElevation = 3.dp) {
+        if (entradaActual?.destination?.route != ADMIN) Surface(tonalElevation = 3.dp) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(if (sesion.rol == Rol.ADMIN) "Administrador" else "Usuario", Modifier.weight(1f).padding(top = 14.dp), style = MaterialTheme.typography.labelLarge)
                     if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN)) {
-                        TextButton(onClick = { navegar(DestinoProtegido.ADMIN, ADMIN) }) { Text("Administración") }
+                        TextButton(onClick = {
+                            if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN) &&
+                                navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED
+                            ) navController.popBackStack(ADMIN, inclusive = false)
+                        }) { Text("Administración") }
                     }
                     TextButton(onClick = onCerrarSesion) { Text("Cerrar sesión") }
                 }
