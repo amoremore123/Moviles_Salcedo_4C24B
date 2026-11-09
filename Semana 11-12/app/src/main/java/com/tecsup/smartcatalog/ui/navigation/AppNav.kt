@@ -69,6 +69,7 @@ private fun NavegacionAutenticada(
                     val panel: PanelAdminViewModel = viewModel(viewModelStoreOwner = entry, factory = container.panelAdminFactory)
                     PanelAdminScreen(
                         panel = panel,
+                        notificaciones = container.notificacionesCatalogo,
                         sesionActual = sesionActual,
                         onCatalogo = { navegar(DestinoProtegido.CATALOGO, LISTA) },
                         onCerrarSesion = onCerrarSesion

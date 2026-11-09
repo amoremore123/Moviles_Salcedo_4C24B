@@ -1,0 +1,9 @@
+<resources>
+    <string name="canal_catalogo">Actualizaciones del catálogo</string>
+    <string name="canal_catalogo_descripcion">Notificaciones sobre sincronizaciones correctas del catálogo.</string>
+    <string name="aviso_catalogo_titulo">Catálogo actualizado</string>
+    <plurals name="aviso_catalogo_productos">
+        <item quantity="one">Se guardó %d producto correctamente.</item>
+        <item quantity="other">Se guardaron %d productos correctamente.</item>
+    </plurals>
+</resources>

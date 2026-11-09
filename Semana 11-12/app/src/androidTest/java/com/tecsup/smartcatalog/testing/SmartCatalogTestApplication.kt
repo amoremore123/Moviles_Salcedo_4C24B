@@ -8,6 +8,7 @@ import com.tecsup.smartcatalog.data.remote.ApiService
 import com.tecsup.smartcatalog.data.remote.dto.ProductoDto
 import com.tecsup.smartcatalog.data.remote.dto.ProductosResponseDto
 import java.util.concurrent.atomic.AtomicInteger
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 
 class SmartCatalogTestApplication : SmartCatalogApplication() {
@@ -21,9 +22,11 @@ class SmartCatalogTestApplication : SmartCatalogApplication() {
         val consultasLista = AtomicInteger()
         val consultasDetalle = AtomicInteger()
         var pendiente: CompletableDeferred<Unit>? = null
+        var errorLista: IOException? = null
         override suspend fun obtenerSmartphones(): ProductosResponseDto {
             consultasLista.incrementAndGet()
             pendiente?.await()
+            errorLista?.let { throw it }
             return ProductosResponseDto(listOf(ProductoDto(id = 1, title = "Modelo de prueba", category = "smartphones")))
         }
         override suspend fun obtenerDetalle(id: Int): ProductoDto {

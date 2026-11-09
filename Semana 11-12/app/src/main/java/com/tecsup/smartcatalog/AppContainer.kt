@@ -2,6 +2,7 @@ package com.tecsup.smartcatalog
 
 import android.content.Context
 import coil.ImageLoader
+import com.tecsup.smartcatalog.data.notificaciones.NotificacionesCatalogo
 import com.tecsup.smartcatalog.data.local.AppDatabase
 import com.tecsup.smartcatalog.data.local.ItemDao
 import com.tecsup.smartcatalog.data.auth.AuthRepository
@@ -33,8 +34,9 @@ class AppContainer(
     val sesionViewModelFactory: SesionViewModel.Factory by lazy { SesionViewModel.Factory(authRepository) }
     val listaViewModelFactory: ListaViewModel.Factory by lazy { ListaViewModel.Factory(itemRepository) }
     val favoritosViewModelFactory: FavoritosViewModel.Factory by lazy { FavoritosViewModel.Factory(itemRepository) }
+    val notificacionesCatalogo by lazy { NotificacionesCatalogo(applicationContext) }
     val panelAdminFactory by lazy {
-        PanelAdminViewModel.Factory(itemRepository, repositorioLocal.ultimaSincronizacion) {
+        PanelAdminViewModel.Factory(itemRepository, repositorioLocal.ultimaSincronizacion, notificacionesCatalogo) {
             requireNotNull(imageLoader.memoryCache).clear()
         }
     }

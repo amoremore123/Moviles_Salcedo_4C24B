@@ -1,5 +1,12 @@
 package com.tecsup.smartcatalog.ui.admin
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -8,11 +15,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.tecsup.smartcatalog.R
+import com.tecsup.smartcatalog.data.notificaciones.NotificacionesCatalogo
 import com.tecsup.smartcatalog.domain.model.Sesion
 import java.text.DateFormat
 import java.util.Date
@@ -20,6 +32,7 @@ import java.util.Date
 @Composable
 fun PanelAdminScreen(
     panel: PanelAdminViewModel,
+    notificaciones: NotificacionesCatalogo,
     sesionActual: () -> Sesion?,
     onCatalogo: () -> Unit,
     onCerrarSesion: () -> Unit
@@ -102,6 +115,7 @@ fun PanelAdminScreen(
                 }
             }
         }
+        item { PreferenciaAvisos(notificaciones) }
     }
 
     if (confirmar) AlertDialog(
@@ -116,6 +130,57 @@ fun PanelAdminScreen(
         },
         dismissButton = { TextButton(onClick = { confirmar = false }) { Text("Cancelar") } }
     )
+}
+
+@Composable
+private fun PreferenciaAvisos(notificaciones: NotificacionesCatalogo) {
+    val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    var habilitados by remember { mutableStateOf(notificaciones.avisosHabilitados()) }
+    var puedeSolicitar by remember { mutableStateOf(notificaciones.puedeSolicitarPermiso()) }
+    val actualizar = {
+        habilitados = notificaciones.avisosHabilitados()
+        puedeSolicitar = notificaciones.puedeSolicitarPermiso()
+    }
+    val permiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { actualizar() }
+    DisposableEffect(lifecycle, notificaciones) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) actualizar()
+        }
+        lifecycle.addObserver(observador)
+        onDispose { lifecycle.removeObserver(observador) }
+    }
+
+    OutlinedCard {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Avisos de sincronización", style = MaterialTheme.typography.titleMedium)
+            Text(
+                if (habilitados) "Activados. Android te avisará al guardar productos desde el panel."
+                else "Opcionales. Android puede avisarte al guardar productos. El catálogo se sincroniza aunque desactives los avisos."
+            )
+            if (!habilitados) {
+                if (puedeSolicitar) {
+                    TextButton(onClick = {
+                        if (notificaciones.puedeSolicitarPermiso()) {
+                            notificaciones.registrarSolicitud()
+                            puedeSolicitar = false
+                            permiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }) { Text("Activar avisos") }
+                } else {
+                    TextButton(onClick = {
+                        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        } else {
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
+                        }
+                        context.startActivity(intent)
+                    }) { Text("Ajustes de notificaciones") }
+                }
+            }
+        }
+    }
 }
 
 @Composable

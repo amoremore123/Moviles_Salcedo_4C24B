@@ -3,12 +3,15 @@ package com.tecsup.smartcatalog.ui.admin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.tecsup.smartcatalog.data.notificaciones.NotificadorCatalogo
 import com.tecsup.smartcatalog.data.repository.ItemRepository
 import com.tecsup.smartcatalog.domain.model.Sesion
 import com.tecsup.smartcatalog.ui.navigation.AccesoRutas
 import com.tecsup.smartcatalog.ui.navigation.DestinoProtegido
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +35,7 @@ enum class ResultadoCache { INICIAL, LIMPIADA, ERROR }
 class PanelAdminViewModel(
     private val repositorio: ItemRepository,
     val ultimaSincronizacion: StateFlow<Long?>,
+    private val notificador: NotificadorCatalogo = NotificadorCatalogo {},
     private val limpiarImagenes: () -> Unit
 ) : ViewModel() {
     private val almacenamientoMutable = MutableStateFlow<AlmacenamientoCatalogo>(AlmacenamientoCatalogo.Cargando)
@@ -61,15 +65,18 @@ class PanelAdminViewModel(
         ) return
         sincronizacionMutable.value = SincronizacionAdmin.EnCurso
         viewModelScope.launch {
-            try {
-                val cantidad = repositorio.refrescar().getOrThrow()
-                sincronizacionMutable.value = SincronizacionAdmin.Correcta(cantidad)
+            val cantidad = try {
+                repositorio.refrescar().getOrThrow()
             } catch (cancelacion: CancellationException) {
                 sincronizacionMutable.value = SincronizacionAdmin.Inicial
                 throw cancelacion
             } catch (error: Exception) {
                 sincronizacionMutable.value = SincronizacionAdmin.Fallida(error is IOException || error.cause is IOException)
+                return@launch
             }
+            currentCoroutineContext().ensureActive()
+            sincronizacionMutable.value = SincronizacionAdmin.Correcta(cantidad)
+            if (cantidad > 0) notificador.publicar(cantidad)
         }
     }
 
@@ -88,12 +95,13 @@ class PanelAdminViewModel(
     class Factory(
         private val repositorio: ItemRepository,
         private val ultimaSincronizacion: StateFlow<Long?>,
+        private val notificador: NotificadorCatalogo,
         private val limpiarImagenes: () -> Unit
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(PanelAdminViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
-            return PanelAdminViewModel(repositorio, ultimaSincronizacion, limpiarImagenes) as T
+            return PanelAdminViewModel(repositorio, ultimaSincronizacion, notificador, limpiarImagenes) as T
         }
     }
 }

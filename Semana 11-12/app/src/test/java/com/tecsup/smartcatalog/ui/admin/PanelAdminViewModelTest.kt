@@ -1,6 +1,7 @@
 package com.tecsup.smartcatalog.ui.admin
 
 import androidx.lifecycle.viewModelScope
+import com.tecsup.smartcatalog.data.notificaciones.NotificadorCatalogo
 import com.tecsup.smartcatalog.data.repository.ItemRepository
 import com.tecsup.smartcatalog.data.repository.ItemRepositoryPrueba
 import com.tecsup.smartcatalog.domain.model.Item
@@ -8,6 +9,7 @@ import com.tecsup.smartcatalog.domain.model.Rol
 import com.tecsup.smartcatalog.domain.model.Sesion
 import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -37,8 +39,12 @@ class PanelAdminViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun abrir(repo: ItemRepository = base, limpiar: () -> Unit = {}) {
-        panel = PanelAdminViewModel(repo, fecha, limpiar)
+    private fun abrir(
+        repo: ItemRepository = base,
+        notificar: NotificadorCatalogo = NotificadorCatalogo {},
+        limpiar: () -> Unit = {}
+    ) {
+        panel = PanelAdminViewModel(repo, fecha, notificar, limpiar)
     }
 
     @Test fun cuentaProductosYFavoritosYReflejaCambios() = runTest {
@@ -129,5 +135,69 @@ class PanelAdminViewModelTest {
         abrir { throw IllegalStateException() }
         panel.limpiarCache(admin)
         assertEquals(ResultadoCache.ERROR, panel.cache.value)
+    }
+
+    @Test fun publicaCantidadRealSoloDespuesDeGuardarYUnaVezPorOperacion() = runTest {
+        val guardar = CompletableDeferred<Unit>()
+        val avisos = mutableListOf<Int>()
+        var llamadas = 0
+        abrir(object : ItemRepository by base {
+            override suspend fun refrescar(): Result<Int> {
+                llamadas++
+                guardar.await()
+                return Result.success(if (llamadas == 1) 7 else 3)
+            }
+        }, notificar = NotificadorCatalogo { avisos.add(it) })
+        panel.sincronizar(admin)
+        runCurrent()
+        assertTrue(avisos.isEmpty())
+        panel.sincronizar(admin)
+        guardar.complete(Unit)
+        runCurrent()
+        assertEquals(listOf(7), avisos)
+        panel.sincronizar(admin)
+        runCurrent()
+        assertEquals(listOf(7, 3), avisos)
+        assertEquals(2, llamadas)
+    }
+
+    @Test fun erroresDeRedApiYPersistenciaNoPublicanNiBorranDatos() = runTest {
+        val errores = listOf(
+            IOException("red"),
+            IllegalArgumentException("respuesta de API no válida"),
+            IllegalStateException("falló escritura local")
+        ).iterator()
+        val avisos = mutableListOf<Int>()
+        abrir(object : ItemRepository by base {
+            override suspend fun refrescar(): Result<Int> = Result.failure(errores.next())
+        }, notificar = NotificadorCatalogo { avisos.add(it) })
+        repeat(3) {
+            panel.sincronizar(admin)
+            runCurrent()
+            assertTrue(panel.sincronizacion.value is SincronizacionAdmin.Fallida)
+        }
+        assertTrue(avisos.isEmpty())
+        assertEquals(AlmacenamientoCatalogo.Disponible(1, 1), panel.almacenamiento.value)
+    }
+
+    @Test fun loteVacioEsExitoSinAviso() = runTest {
+        val avisos = mutableListOf<Int>()
+        abrir(object : ItemRepository by base {
+            override suspend fun refrescar(): Result<Int> = Result.success(0)
+        }, notificar = NotificadorCatalogo { avisos.add(it) })
+        panel.sincronizar(admin)
+        runCurrent()
+        assertEquals(SincronizacionAdmin.Correcta(0), panel.sincronizacion.value)
+        assertTrue(avisos.isEmpty())
+    }
+
+    @Test fun cancelacionNoPublicaAviso() = runTest {
+        val avisos = mutableListOf<Int>()
+        abrir(object : ItemRepository by base {
+            override suspend fun refrescar(): Result<Int> = throw CancellationException()
+        }, notificar = NotificadorCatalogo { avisos.add(it) })
+        panel.sincronizar(admin)
+        runCurrent()
+        assertTrue(avisos.isEmpty())
     }
 }
