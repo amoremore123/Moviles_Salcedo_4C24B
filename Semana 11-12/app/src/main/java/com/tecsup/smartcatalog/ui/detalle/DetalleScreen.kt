@@ -1,6 +1,6 @@
 package com.tecsup.smartcatalog.ui.detalle
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,20 +24,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
-import coil.compose.SubcomposeAsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.domain.model.Item
 import com.tecsup.smartcatalog.domain.model.OrigenDetalle
@@ -48,7 +41,8 @@ import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
 import com.tecsup.smartcatalog.ui.components.BotonFavorito
 import com.tecsup.smartcatalog.ui.components.AvisoDatosGuardados
-import java.text.NumberFormat
+import com.tecsup.smartcatalog.ui.components.ImagenProducto
+import com.tecsup.smartcatalog.ui.components.precioFormateado
 import java.util.Locale
 
 @Composable
@@ -60,7 +54,7 @@ fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolve
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
                 Row(
                     modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -99,55 +93,30 @@ fun DetalleScreen(viewModel: DetalleViewModel, imageLoader: ImageLoader, onVolve
 
 @Composable
 private fun DetalleContenido(item: Item, imageLoader: ImageLoader) {
-    val context = LocalContext.current
-    val request = remember(item.imagen, context) {
-        ImageRequest.Builder(context).data(item.imagen.takeIf { it.isNotBlank() })
-            .diskCachePolicy(CachePolicy.DISABLED).crossfade(true).build()
-    }
-    val precio = remember(item.precio) {
-        NumberFormat.getNumberInstance(Locale.forLanguageTag("es-PE")).apply {
-            minimumFractionDigits = 2
-            maximumFractionDigits = 2
-        }.format(item.precio)
-    }
+    val precio = precioFormateado(item.precio)
     Column(Modifier.widthIn(max = 840.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+        ImagenProducto(
+            item, imageLoader,
+            Modifier.fillMaxWidth().height(216.dp).clip(MaterialTheme.shapes.extraLarge)
+        )
+        Spacer(Modifier.height(16.dp))
         Surface(
-            modifier = Modifier.fillMaxWidth().height(280.dp),
-            shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+            color = MaterialTheme.colorScheme.surface,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
         ) {
-            SubcomposeAsyncImage(
-                model = request,
-                imageLoader = imageLoader,
-                contentDescription = "Imagen de ${item.nombre}",
-                modifier = Modifier.fillMaxSize().padding(20.dp),
-                contentScale = ContentScale.Fit,
-                loading = { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(36.dp)) } },
-                error = {
-                    Image(painterResource(R.drawable.ic_smartcatalog), contentDescription = "Imagen no disponible", modifier = Modifier.fillMaxSize().padding(40.dp), contentScale = ContentScale.Fit)
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(item.categoria.uppercase(Locale.ROOT), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Text(item.nombre, style = MaterialTheme.typography.headlineMedium)
+                Column {
+                    Text("Precio de referencia", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(precio, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
                 }
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(50)) {
-                Text(item.categoria.uppercase(Locale.ROOT), modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                Text("Descripción", style = MaterialTheme.typography.titleMedium)
+                Text(item.descripcion.ifBlank { "Descripción no disponible." }, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Importe original de la API · Sin conversión de moneda", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("ID ${item.id}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.height(14.dp))
-        Text(item.nombre, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
-        Spacer(Modifier.height(18.dp))
-        Text("Precio de referencia", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(precio, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.height(24.dp))
-        Divider(color = MaterialTheme.colorScheme.outlineVariant)
-        Spacer(Modifier.height(24.dp))
-        Text("Descripción", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(10.dp))
-        Text(item.descripcion.ifBlank { "Descripción no disponible." }, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(24.dp))
-        Text("Importe original de la API · Sin conversión de moneda", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(12.dp))
     }
 }

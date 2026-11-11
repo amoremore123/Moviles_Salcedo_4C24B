@@ -15,8 +15,10 @@ import com.tecsup.smartcatalog.data.auth.TipoErrorAutenticacion
 import com.tecsup.smartcatalog.domain.model.Rol
 import com.tecsup.smartcatalog.domain.model.Sesion
 import com.tecsup.smartcatalog.testing.SmartCatalogTestApplication
+import com.tecsup.smartcatalog.testing.capturarMejora
 import com.tecsup.smartcatalog.ui.navigation.DestinoConPermiso
 import com.tecsup.smartcatalog.ui.navigation.DestinoProtegido
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -35,12 +37,14 @@ class SesionNavegacionTest {
     @Before fun preparar() {
         app = ApplicationProvider.getApplicationContext()
         app.auth.reiniciar()
+        app.api.errorLista = null
         app.api.consultasLista.set(0); app.api.consultasDetalle.set(0)
         app.container.database.clearAllTables()
     }
     @After fun limpiar() {
         app.auth.pendiente?.complete(Unit)
         escenario?.close()
+        app.api.errorLista = null
         app.auth.reiniciar()
         app.auth.actual = Sesion("uid-simulado", "vista@example.invalid", Rol.USUARIO)
         app.api.consultasLista.set(0); app.api.consultasDetalle.set(0)
@@ -50,8 +54,13 @@ class SesionNavegacionTest {
         compose.waitUntil(20_000) { runCatching { compose.onAllNodesWithText(texto).fetchSemanticsNodes().isNotEmpty() }.getOrDefault(false) }
         compose.onNodeWithText(texto).assertIsDisplayed()
     }
-    private fun login() {
+    private fun abrirLogin() {
         esperar("Iniciar sesión")
+        compose.onNodeWithText("Iniciar sesión").performScrollTo().performClick()
+        esperar("Bienvenido")
+    }
+    private fun login() {
+        abrirLogin()
         compose.onNodeWithTag("correo").performTextInput("vista@example.invalid")
         compose.onNodeWithTag("clave").performTextInput("valor-exclusivo-de-prueba")
         compose.onNodeWithText("Iniciar sesión").performScrollTo().performClick()
@@ -67,7 +76,9 @@ class SesionNavegacionTest {
     }
 
     @Test fun validaVaciosYCorreoYPermiteMostrarOcultarClave() {
-        abrir(); esperar("Iniciar sesión")
+        abrir()
+        abrirLogin()
+        compose.capturarMejora("m2", "login")
         compose.onNodeWithText("Iniciar sesión").performScrollTo().performClick()
         esperar("Ingresa tu correo electrónico.")
         compose.onNodeWithText("Ingresa tu contraseña.").assertExists()
@@ -92,12 +103,21 @@ class SesionNavegacionTest {
 
     @Test fun usuarioNavegaConFavoritosYLogoutEliminaBackstackSinBorrarRoom() {
         abrir(); login(); esperar("Nuestra colección")
+        compose.capturarMejora("m2", "catalogo")
         compose.onNodeWithText("Administración").assertDoesNotExist()
+        app.api.errorLista = IOException("Sin conexión")
+        compose.onNodeWithContentDescription("Actualizar catálogo").performClick()
+        esperar("No se pudo actualizar el catálogo. Mostrando productos guardados.")
+        compose.capturarMejora("m2", "offline")
         compose.onNodeWithContentDescription("Agregar a favoritos: Modelo de prueba").performClick()
         compose.onNodeWithText("Mis favoritos").performClick()
-        esperar("Guardados en este dispositivo · compartidos entre cuentas")
+        esperar("Guardados en este dispositivo")
+        esperar("Modelo de prueba")
+        compose.capturarMejora("m2", "favoritos")
         compose.onNodeWithText("Modelo de prueba").performClick()
         esperar("Detalle del smartphone")
+        esperar("Detalle de prueba")
+        compose.capturarMejora("m2", "detalle")
         compose.onNodeWithText("Cerrar sesión").performClick()
         esperar("Iniciar sesión")
         assertNull(app.auth.actual)
@@ -113,6 +133,7 @@ class SesionNavegacionTest {
     @Test fun adminEntraABienvenidaYPuedeVolverDesdeCatalogo() {
         app.auth.rolLogin = Rol.ADMIN
         abrir(); login(); esperar("Bienvenido, administrador")
+        compose.capturarMejora("m2", "panel")
         compose.onNodeWithText("Explorar catálogo").performClick(); esperar("Nuestra colección")
         compose.onNodeWithText("Administración").performClick(); esperar("Bienvenido, administrador")
     }

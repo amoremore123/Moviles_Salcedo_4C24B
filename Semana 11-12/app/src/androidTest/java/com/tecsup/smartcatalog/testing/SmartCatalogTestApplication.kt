@@ -27,11 +27,20 @@ class SmartCatalogTestApplication : SmartCatalogApplication() {
             consultasLista.incrementAndGet()
             pendiente?.await()
             errorLista?.let { throw it }
-            return ProductosResponseDto(listOf(ProductoDto(id = 1, title = "Modelo de prueba", category = "smartphones")))
+            return ProductosResponseDto(listOf(producto(1, "Modelo de prueba")))
         }
         override suspend fun obtenerDetalle(id: Int): ProductoDto {
             consultasDetalle.incrementAndGet()
-            return ProductoDto(id = id, title = "Detalle de prueba", category = "smartphones")
+            return producto(id, "Detalle de prueba")
         }
+
+        private fun producto(id: Int, nombre: String) = ProductoDto(
+            id = id,
+            title = nombre,
+            description = "Smartphone de ejemplo con ilustración local.",
+            price = 449.99,
+            thumbnail = "android.resource://com.tecsup.smartcatalog/drawable/smartphone_aurora",
+            category = "smartphones"
+        )
     }
 }

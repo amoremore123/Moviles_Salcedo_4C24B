@@ -43,7 +43,7 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
                 Row(
                     Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -53,8 +53,8 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
                         Icon(painterResource(R.drawable.ic_volver), "Volver al catálogo", tint = MaterialTheme.colorScheme.primary)
                     }
                     Column(Modifier.weight(1f)) {
-                        Text("Mis favoritos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text("Guardados en este dispositivo · compartidos entre cuentas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Mis favoritos", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        Text("Guardados en este dispositivo", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -71,7 +71,7 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
                     UiState.Cargando -> Cargando(mensaje = "Cargando tus favoritos...")
                     is UiState.Error -> ErrorView(actual.mensaje, onReintentar = viewModel::reintentar)
                     is UiState.Exito -> if (actual.datos.isEmpty()) {
-                        EstadoVacio("Tu colección empieza con un corazón", "Toca el corazón de un smartphone para guardarlo aquí.")
+                        EstadoVacio("Todavía no tienes favoritos", "Toca el corazón de un smartphone para guardarlo aquí.")
                     } else {
                         LazyColumn(
                             modifier = Modifier.widthIn(max = 840.dp).fillMaxSize(),

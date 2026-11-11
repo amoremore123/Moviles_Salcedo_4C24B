@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -45,19 +46,26 @@ fun PanelAdminScreen(
     val ocupado = sincronizacion == SincronizacionAdmin.EnCurso
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding().testTag("panel-admin"),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().testTag("panel-admin"),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+            Card(
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) {
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("ADMINISTRADOR", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     Text("Panel de administrador", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("Bienvenido, administrador", style = MaterialTheme.typography.bodyLarge)
+                    Text("Bienvenido, administrador", style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = onCatalogo) { Text("Explorar catálogo") }
-                        TextButton(onClick = onCerrarSesion) { Text("Cerrar sesión") }
+                        FilledTonalButton(onClick = onCatalogo, modifier = Modifier.weight(1f)) { Text("Explorar catálogo") }
+                        TextButton(onClick = onCerrarSesion, colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)) {
+                            Text("Cerrar sesión")
+                        }
                     }
                 }
             }
@@ -80,7 +88,7 @@ fun PanelAdminScreen(
             }
         }
         item {
-            OutlinedCard {
+            OutlinedCard(shape = MaterialTheme.shapes.large) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Mantenimiento", style = MaterialTheme.typography.titleLarge)
                     val hora = ultima?.let { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)) }
@@ -185,7 +193,7 @@ private fun PreferenciaAvisos(notificaciones: NotificacionesCatalogo) {
 
 @Composable
 private fun Contador(total: Int, etiqueta: String, modifier: Modifier) {
-    ElevatedCard(modifier) {
+    Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
         Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.Start) {
             Text(total.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
             Text(etiqueta, style = MaterialTheme.typography.bodySmall)

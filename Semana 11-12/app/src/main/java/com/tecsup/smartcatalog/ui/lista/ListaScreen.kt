@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -115,7 +116,8 @@ private fun ListaContenido(
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                         Text("Nuestra colección", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                         Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(50)) {
-                                            Text("${estado.datos.size} modelos", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                            val cantidad = estado.datos.size
+                                            Text(if (cantidad == 1) "1 modelo" else "$cantidad modelos", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                                         }
                                     }
                                 }
@@ -137,9 +139,9 @@ private fun ListaContenido(
 @Composable
 private fun EncabezadoCatalogo(actualizando: Boolean, onActualizar: () -> Unit, onFavoritos: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface) {
-        Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 24.dp, vertical = 20.dp)) {
+        Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(44.dp)) {
+                Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.size(44.dp)) {
                     Image(painterResource(R.drawable.ic_smartcatalog), contentDescription = null, modifier = Modifier.padding(5.dp))
                 }
                 Text(stringResource(R.string.app_name), modifier = Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -148,14 +150,19 @@ private fun EncabezadoCatalogo(actualizando: Boolean, onActualizar: () -> Unit, 
                     else Icon(painterResource(R.drawable.ic_actualizar), contentDescription = "Actualizar catálogo", tint = MaterialTheme.colorScheme.primary)
                 }
             }
-            Spacer(Modifier.height(20.dp))
-            Text("Explora nuestros smartphones", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
-            Text("DummyJSON · Precios de referencia", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            TextButton(onClick = onFavoritos, modifier = Modifier.align(Alignment.End)) {
-                Icon(painterResource(R.drawable.ic_favorito), contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.size(8.dp))
-                Text("Mis favoritos")
+            Spacer(Modifier.height(12.dp))
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
+                    Text("Explora nuestros smartphones", style = MaterialTheme.typography.titleLarge)
+                    FilledTonalButton(onClick = onFavoritos, modifier = Modifier.align(Alignment.End)) {
+                        Icon(painterResource(R.drawable.ic_favorito), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.size(8.dp))
+                        Text("Mis favoritos")
+                    }
+                }
             }
         }
     }

@@ -21,6 +21,9 @@ import org.junit.runner.RunWith
 class RotacionSinRecargaTest {
     @Test fun recrearActividadConConsultaPendienteConservaViewModelYNoDuplicaHttp() = runBlocking {
         val app = ApplicationProvider.getApplicationContext<SmartCatalogTestApplication>()
+        app.container.database.clearAllTables()
+        app.api.consultasLista.set(0)
+        app.api.consultasDetalle.set(0)
         val pendiente = CompletableDeferred<Unit>()
         app.api.pendiente = pendiente
         val escenario = ActivityScenario.launch<MainActivity>(Intent(app, MainActivity::class.java))

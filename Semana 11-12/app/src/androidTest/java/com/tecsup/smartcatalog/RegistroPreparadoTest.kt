@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.tecsup.smartcatalog.testing.SmartCatalogTestApplication
+import com.tecsup.smartcatalog.testing.capturarMejora
 import com.tecsup.smartcatalog.data.auth.AlmacenRegistroPendiente
 import java.io.File
 import org.junit.Assert.*
@@ -29,16 +30,18 @@ class RegistroPreparadoTest {
             ActivityScenario.launch<MainActivity>(Intent(app, MainActivity::class.java)).use {
                 compose.waitUntil(20_000) {
                     runCatching {
-                        compose.onAllNodesWithText("Ver formulario de registro").fetchSemanticsNodes().isNotEmpty()
+                        compose.onAllNodesWithText("Crear cuenta").fetchSemanticsNodes().isNotEmpty()
                     }.getOrDefault(false)
                 }
-                compose.onNodeWithText("Ver formulario de registro").performScrollTo().performClick()
+                compose.capturarMejora("m2", "bienvenida")
+                compose.onNodeWithText("Crear cuenta").performScrollTo().performClick()
                 compose.onNodeWithText("Crear cuenta").assertIsDisplayed()
                 compose.onNodeWithText("Registro aún no disponible.", substring = true).assertIsDisplayed()
                 compose.onNodeWithText("Nombre completo").assertExists()
                 compose.onNodeWithText("Correo electrónico").assertExists()
                 compose.onNodeWithText("Confirmar contraseña").assertExists()
                 compose.onNodeWithText("Validar formulario").assertIsNotEnabled()
+                compose.capturarMejora("m2", "registro")
                 val registro = InstrumentationRegistry.getInstrumentation()
                 if (InstrumentationRegistry.getArguments().getString("capturarM1") == "true") {
                     val captura = requireNotNull(registro.uiAutomation.takeScreenshot())

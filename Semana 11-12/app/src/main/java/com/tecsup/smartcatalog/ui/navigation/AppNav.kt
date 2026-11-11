@@ -1,5 +1,6 @@
 package com.tecsup.smartcatalog.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,11 +44,13 @@ fun AppNav(
 ) {
     val estadoRegistro by registroViewModel.estado.collectAsStateWithLifecycle()
     var registro by rememberSaveable { mutableStateOf(false) }
+    var mostrarLogin by rememberSaveable { mutableStateOf(false) }
     var confirmacionVista by rememberSaveable { mutableStateOf(false) }
     // Resolver el registro primero: la recuperación normal exige que el perfil ya exista.
     if (registro || estadoRegistro.pendiente || (estadoRegistro.completo && !confirmacionVista)) {
         RegistroScreen(registroViewModel, onVolver = {
             registro = false
+            mostrarLogin = true
             if (estadoRegistro.completo) confirmacionVista = true
         })
         return
@@ -57,9 +60,23 @@ fun AppNav(
     when (val actual = estado) {
         EstadoSesion.Verificando -> VerificandoSesion(modifier)
         is EstadoSesion.Autenticado -> key(actual.sesion.uid, actual.sesion.rol) {
-            NavegacionAutenticada(container, actual.sesion, { (sesionViewModel.estado.value as? EstadoSesion.Autenticado)?.sesion }, listaViewModel, sesionViewModel::cerrarSesion, modifier)
+            NavegacionAutenticada(
+                container, actual.sesion,
+                { (sesionViewModel.estado.value as? EstadoSesion.Autenticado)?.sesion },
+                listaViewModel,
+                onCerrarSesion = {
+                    mostrarLogin = false
+                    sesionViewModel.cerrarSesion()
+                },
+                modifier = modifier
+            )
         }
-        else -> LoginScreen(actual, sesionViewModel::iniciarSesion, modifier, onRegistro = { registro = true })
+        else -> if (mostrarLogin || actual is EstadoSesion.Error || actual == EstadoSesion.Iniciando) {
+            BackHandler(actual != EstadoSesion.Iniciando && actual !is EstadoSesion.Error) { mostrarLogin = false }
+            LoginScreen(actual, sesionViewModel::iniciarSesion, modifier, onRegistro = { registro = true })
+        } else {
+            BienvenidaScreen(onLogin = { mostrarLogin = true }, onRegistro = { registro = true })
+        }
     }
 }
 
