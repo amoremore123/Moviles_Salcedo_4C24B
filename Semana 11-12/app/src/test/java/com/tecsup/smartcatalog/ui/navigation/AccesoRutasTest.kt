@@ -14,6 +14,7 @@ class AccesoRutasTest {
         assertTrue(AccesoRutas.permite(usuario, DestinoProtegido.CATALOGO))
         assertTrue(AccesoRutas.permite(usuario, DestinoProtegido.DETALLE))
         assertTrue(AccesoRutas.permite(usuario, DestinoProtegido.FAVORITOS))
+        assertTrue(AccesoRutas.permite(usuario, DestinoProtegido.PERFIL))
         assertFalse(AccesoRutas.permite(usuario, DestinoProtegido.ADMIN))
     }
     @Test fun adminPuedeAccederATodasLasRutas() {

@@ -81,7 +81,7 @@ class AuthRepositoryFirebase(
             "usuario" -> Rol.USUARIO
             else -> throw ErrorAutenticacion(TipoErrorAutenticacion.PERFIL_INVALIDO)
         }
-        return Sesion(usuario.uid, usuario.correo, rol)
+        return Sesion(usuario.uid, usuario.correo, rol, perfil.nombre?.trim()?.takeIf(String::isNotEmpty))
     }
 
     private fun salirSeguro() { runCatching { autenticacion.cerrarSesion() } }

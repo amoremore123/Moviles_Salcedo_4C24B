@@ -38,7 +38,11 @@ internal class ProveedorPerfilesSdk(private val firestore: FirebaseFirestore) : 
     override suspend fun obtener(uid: String): PerfilFirebase? = seguro {
         val documento = firestore.collection("usuarios").document(uid).get(Source.SERVER).await()
         if (!documento.exists()) null
-        else PerfilFirebase(documento.get("correo") as? String, documento.get("rol") as? String)
+        else PerfilFirebase(
+            correo = documento.get("correo") as? String,
+            rol = documento.get("rol") as? String,
+            nombre = documento.get("nombre") as? String
+        )
     }
 }
 

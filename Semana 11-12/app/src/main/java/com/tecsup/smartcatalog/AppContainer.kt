@@ -18,6 +18,7 @@ import com.tecsup.smartcatalog.ui.favoritos.FavoritosViewModel
 import com.tecsup.smartcatalog.ui.auth.SesionViewModel
 import com.tecsup.smartcatalog.ui.auth.RegistroViewModel
 import com.tecsup.smartcatalog.ui.admin.PanelAdminViewModel
+import com.tecsup.smartcatalog.ui.theme.PreferenciasTema
 
 /** Inyección manual; construir el contenedor no ejecuta una consulta de productos. */
 class AppContainer(
@@ -28,6 +29,7 @@ class AppContainer(
     servicioRegistro: ServicioRegistro? = null
 ) {
     private val applicationContext = context.applicationContext
+    val preferenciasTema by lazy { PreferenciasTema(applicationContext) }
     // La base se abre cuando el catálogo necesita el repositorio; siempre usa el contexto de aplicación.
     val database: AppDatabase by lazy { crearDatabase(applicationContext) }
     val itemDao: ItemDao by lazy { database.itemDao() }

@@ -88,3 +88,12 @@ Las capturas originales están en las carpetas de cada hito. La selección para 
 1. Room permite consultar el catálogo guardado aunque falle la API.
 2. Firebase identifica la cuenta y Firestore determina qué pantallas puede abrir.
 3. Las pruebas ayudan a comprobar que sincronización, favoritos y avisos funcionan juntos.
+
+## Mejoras adicionales
+
+- **M1**. Formulario de registro y recuperación local preparados. El alta real queda pendiente de la integración y activación del servidor.
+- **M2**. Bienvenida y rediseño de acceso, catálogo, detalle, favoritos y panel con Material 3.
+- **M3**. Búsqueda, filtros combinados y orden sobre productos de Room, incluso si falla la conexión a la API.
+- **M4**. Perfil de la sesión validada y temas claro, oscuro y del sistema. La edición de nombre permanece deshabilitada.
+
+[Cambios, evidencias y verificación de las mejoras](docs/MEJORAS_ADICIONALES.md)

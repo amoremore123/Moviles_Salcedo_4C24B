@@ -3,7 +3,7 @@ package com.tecsup.smartcatalog.ui.navigation
 import com.tecsup.smartcatalog.domain.model.Rol
 import com.tecsup.smartcatalog.domain.model.Sesion
 
-enum class DestinoProtegido { CATALOGO, DETALLE, FAVORITOS, ADMIN }
+enum class DestinoProtegido { CATALOGO, DETALLE, FAVORITOS, ADMIN, PERFIL }
 
 /** La autorización se aplica al navegar y al componer el destino, no solo al mostrar botones. */
 object AccesoRutas {

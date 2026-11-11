@@ -2,7 +2,7 @@ package com.tecsup.smartcatalog.data.auth
 
 /** Contratos pequeños para probar la política de autenticación sin Android, Internet ni cuentas reales. */
 data class IdentidadFirebase(val uid: String, val correo: String)
-data class PerfilFirebase(val correo: String?, val rol: String?)
+data class PerfilFirebase(val correo: String?, val rol: String?, val nombre: String? = null)
 
 interface ProveedorAutenticacion {
     val uidActual: String?

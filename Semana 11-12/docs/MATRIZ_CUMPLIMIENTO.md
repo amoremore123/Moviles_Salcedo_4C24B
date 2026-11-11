@@ -36,3 +36,12 @@ Fuente local consultada: **GLAB-S11-JLEONS-2026.pdf**, guía de Juan José León
 | PA-14 Permiso denegado | NotificacionesCatalogoTest y evidencia de permiso | Verificado |
 
 Los entregables de la guía incluyen trabajo en pareja, nombre de repositorio específico, colaboración en GitHub, fase de mejora, Pull Request y versión con APK. Este proyecto usa el repositorio de laboratorios y la modalidad individual indicada por el usuario. Antes de H16 se encontraron 15 commits de SmartCatalog en main bajo un solo autor. La rama local mejora-ia existe en el repositorio, pero no contiene historial ni PROMPTS.md de Semana 11-12. La modalidad sin IA, la cuota por integrante, la visibilidad, el acceso del docente y la entrega en el aula no se acreditan mediante las pruebas de la app. La publicación, el PR y la versión remota quedan fuera de la autorización de H16.
+
+## Mejoras adicionales para nota extra
+
+| Mejora | Criterio | Verificación |
+| --- | --- | --- |
+| M1 | Validar formulario y recuperar un registro pendiente | Preparación local verificada. Activación del servidor y alta real pendientes |
+| M2 | Rediseñar el acceso y las pantallas de ambos roles | Verificado en el emulador, incluido el flujo de acceso en pantalla estrecha |
+| M3 | Buscar, filtrar y ordenar sobre Room con la API offline | Verificado con una combinación de criterios y conservación de favoritos |
+| M4 | Consultar perfil y conservar la preferencia de tema | Verificado con datos controlados de ambos roles. Edición de nombre deshabilitada |

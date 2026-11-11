@@ -28,11 +28,13 @@ import com.tecsup.smartcatalog.ui.favoritos.FavoritosScreen
 import com.tecsup.smartcatalog.ui.favoritos.FavoritosViewModel
 import com.tecsup.smartcatalog.ui.lista.ListaScreen
 import com.tecsup.smartcatalog.ui.lista.ListaViewModel
+import com.tecsup.smartcatalog.ui.perfil.PerfilScreen
 
 private const val LISTA = "lista"
 private const val DETALLE = "detalle/{id}"
 private const val FAVORITOS = "favoritos"
 private const val ADMIN = "admin"
+private const val PERFIL = "perfil"
 
 @Composable
 fun AppNav(
@@ -108,6 +110,7 @@ private fun NavegacionAutenticada(
                         notificaciones = container.notificacionesCatalogo,
                         sesionActual = sesionActual,
                         onCatalogo = { navegar(DestinoProtegido.CATALOGO, LISTA) },
+                        onPerfil = { navegar(DestinoProtegido.PERFIL, PERFIL) },
                         onCerrarSesion = onCerrarSesion
                     )
                 }
@@ -149,11 +152,26 @@ private fun NavegacionAutenticada(
                     )
                 }
             }
+            composable(PERFIL) {
+                DestinoConPermiso(sesionActual(), DestinoProtegido.PERFIL) {
+                    PerfilScreen(
+                        sesion, container.preferenciasTema,
+                        onVolver = {
+                            val actual = navController.currentBackStackEntry
+                            if (actual?.destination?.route == PERFIL && actual.lifecycle.currentState == Lifecycle.State.RESUMED) {
+                                navController.popBackStack()
+                            }
+                        },
+                        onCerrarSesion = onCerrarSesion
+                    )
+                }
+            }
         }
-        if (entradaActual?.destination?.route != ADMIN) Surface(tonalElevation = 3.dp) {
+        if (entradaActual?.destination?.route !in setOf(ADMIN, PERFIL)) Surface(tonalElevation = 3.dp) {
             Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 4.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(if (sesion.rol == Rol.ADMIN) "Administrador" else "Usuario", Modifier.weight(1f).padding(top = 14.dp), style = MaterialTheme.typography.labelLarge)
+                    TextButton(onClick = { navegar(DestinoProtegido.PERFIL, PERFIL) }) { Text("Perfil") }
                     if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN)) {
                         TextButton(onClick = {
                             if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN) &&

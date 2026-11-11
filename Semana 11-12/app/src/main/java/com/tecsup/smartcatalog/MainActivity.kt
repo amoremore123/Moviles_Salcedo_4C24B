@@ -5,6 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.smartcatalog.ui.navigation.AppNav
 import com.tecsup.smartcatalog.ui.lista.ListaViewModel
 import com.tecsup.smartcatalog.ui.auth.SesionViewModel
@@ -21,8 +30,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SmartCatalogTheme {
-                AppNav(container, { sesionViewModel }, registroViewModel, { listaViewModel })
+            val tema by container.preferenciasTema.tema.collectAsStateWithLifecycle()
+            val oscuro = tema.esOscuro(isSystemInDarkTheme())
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !oscuro
+                    isAppearanceLightNavigationBars = !oscuro
+                }
+            }
+            SmartCatalogTheme(darkTheme = oscuro) {
+                Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    AppNav(container, { sesionViewModel }, registroViewModel, { listaViewModel })
+                }
             }
         }
     }

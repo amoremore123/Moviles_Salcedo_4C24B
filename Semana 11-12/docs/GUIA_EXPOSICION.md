@@ -33,3 +33,20 @@
 1. Una lista respaldada por Room sigue siendo útil sin red.
 2. Verificar el rol desde Firestore separa las operaciones del usuario y del administrador.
 3. Las pruebas y las capturas permiten reproducir el comportamiento de la app.
+
+## Demostración de las mejoras adicionales
+
+1. Abre SmartCatalog con la sesión cerrada y muestra la bienvenida.
+2. Entra a «Crear cuenta» y muestra la validación local. Explica que el alta real queda pendiente de activar la función.
+3. Inicia sesión con una cuenta de usuario existente. Busca un smartphone, combina un rango de precio con favoritos y cambia el orden.
+4. Quita y vuelve a guardar un favorito. Tras cargar el catálogo, puedes repetir la búsqueda sin conexión.
+5. Abre «Perfil», elige «Oscuro» y reabre la aplicación con conexión para comprobar que el tema se conserva. Cierra sesión.
+6. Inicia sesión con una cuenta de administrador, abre el panel y sincroniza. Si Android tiene el permiso de avisos, muestra la notificación de guardado.
+
+| Pregunta | Respuesta |
+| --- | --- |
+| ¿Por qué el formulario está deshabilitado para altas? | La función con App Check sigue pendiente de integración y despliegue. El formulario solo valida sus campos. |
+| ¿Quién asignaría el rol a una cuenta nueva? | La callable local está preparada para asignar siempre `usuario` tras verificar Auth y el App ID. |
+| ¿Qué consulta la app al cambiar un filtro? | Aplica los criterios a los productos observados desde Room. |
+| ¿El tema está vinculado a Firebase? | La preferencia pertenece a la instalación y se guarda en el dispositivo. |
+| ¿Por qué el nombre puede estar vacío? | Algunos documentos existentes solo tienen correo y rol. La edición requiere permisos de escritura. |

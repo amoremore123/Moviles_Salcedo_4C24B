@@ -35,6 +35,16 @@ class AuthRepositoryFirebaseTest {
         assertEquals(Rol.ADMIN, e.repo.iniciarSesion(correo, claveSimulada).getOrThrow().rol)
     }
 
+    @Test fun nombreOpcionalProvieneDelDocumentoDelUsuarioValidado() = runTest {
+        val e = entorno()
+        e.perfiles.perfil = PerfilFirebase(correo, "usuario", "  Nombre del perfil  ")
+        assertEquals("Nombre del perfil", e.repo.iniciarSesion(correo, claveSimulada).getOrThrow().nombre)
+        e.perfiles.perfil = PerfilFirebase(correo, "usuario", "  ")
+        assertNull(e.repo.sesionActual()?.nombre)
+        e.perfiles.perfil = PerfilFirebase(correo, "usuario")
+        assertNull(e.repo.sesionActual()?.nombre)
+    }
+
     @Test fun credencialesIncorrectasNoConsultanPerfilNiDejanSesion() = runTest {
         val e = entorno(); e.auth.fallo = ErrorAutenticacion(TipoErrorAutenticacion.CREDENCIALES)
         assertEquals(TipoErrorAutenticacion.CREDENCIALES, tipo(e.repo.iniciarSesion(correo, claveSimulada)))
