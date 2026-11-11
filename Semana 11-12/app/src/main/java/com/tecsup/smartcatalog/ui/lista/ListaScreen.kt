@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,16 +51,17 @@ import com.tecsup.smartcatalog.ui.components.AvisoDatosGuardados
 
 @Composable
 fun ListaScreen(viewModel: ListaViewModel, imageLoader: ImageLoader, onItemClick: (Int) -> Unit, onFavoritos: () -> Unit, modifier: Modifier = Modifier) {
-    val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val vista by viewModel.vistaCatalogo.collectAsStateWithLifecycle()
     val actualizando by viewModel.actualizando.collectAsStateWithLifecycle()
     val mensaje by viewModel.mensajeActualizacion.collectAsStateWithLifecycle()
     val sincronizacion by viewModel.sincronizacion.collectAsStateWithLifecycle()
-    ListaContenido(estado, actualizando, mensaje, sincronizacion, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, viewModel::alternarFavorito, onFavoritos, modifier)
+    ListaContenido(vista, viewModel::actualizarCriterios, actualizando, mensaje, sincronizacion, viewModel::actualizar, viewModel::reintentar, imageLoader, onItemClick, viewModel::alternarFavorito, onFavoritos, modifier)
 }
 
 @Composable
 private fun ListaContenido(
-    estado: UiState<List<Item>>,
+    vista: VistaCatalogo,
+    cambiarCriterios: ((CriteriosCatalogo) -> CriteriosCatalogo) -> Unit,
     actualizando: Boolean,
     mensaje: String?,
     sincronizacion: EstadoSincronizacion,
@@ -71,6 +73,7 @@ private fun ListaContenido(
     onFavoritos: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val estado = vista.estado
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
@@ -108,24 +111,38 @@ private fun ListaContenido(
                             EstadoVacio("Sin smartphones por ahora", "El servicio no devolvió productos en esta categoría.")
                         } else {
                             LazyColumn(
-                                modifier = Modifier.widthIn(max = 840.dp).fillMaxSize(),
+                                modifier = Modifier.widthIn(max = 840.dp).fillMaxSize().testTag("lista-catalogo"),
                                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
+                                item(key = "filtros") { ControlesCatalogo(vista.criterios, cambiarCriterios) }
                                 item(key = "encabezado") {
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                         Text("Nuestra colección", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                         Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(50)) {
-                                            val cantidad = estado.datos.size
-                                            Text(if (cantidad == 1) "1 modelo" else "$cantidad modelos", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                            val cantidad = vista.coincidencias.size
+                                            Text(if (cantidad == 1) "1 coincidencia" else "$cantidad coincidencias", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                                         }
                                     }
                                 }
-                                items(estado.datos, key = { it.id }) { item ->
+                                if (vista.coincidencias.isEmpty() && vista.criterios.errorPrecio == null) {
+                                    item(key = "sin-resultados") {
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = MaterialTheme.shapes.large,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("No hay productos que coincidan con tus filtros.", Modifier.padding(20.dp))
+                                        }
+                                    }
+                                }
+                                items(vista.coincidencias, key = { it.id }) { item ->
                                     ItemCard(item, imageLoader, onClick = { onItemClick(item.id) }, onAlternarFavorito = { onAlternarFavorito(item.id) })
                                 }
-                                item(key = "nota") {
-                                    Text("Importes de la API · Sin conversión de moneda", modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                                if (vista.coincidencias.isNotEmpty()) {
+                                    item(key = "nota") {
+                                        Text("Importes de la API · Sin conversión de moneda", modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                                    }
                                 }
                             }
                         }

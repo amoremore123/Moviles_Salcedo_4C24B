@@ -9,14 +9,23 @@ import com.tecsup.smartcatalog.ui.UiState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
     private val estadoMutable = MutableStateFlow<UiState<List<Item>>>(UiState.Cargando)
     val estado: StateFlow<UiState<List<Item>>> = estadoMutable.asStateFlow()
+    private val criterios = MutableStateFlow(CriteriosCatalogo())
+    internal val vistaCatalogo = combine(estado, criterios) { estado, criterios ->
+        val productos = (estado as? UiState.Exito)?.datos.orEmpty()
+        VistaCatalogo(estado, criterios, criterios.aplicar(productos))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VistaCatalogo(UiState.Cargando, criterios.value, emptyList()))
     private val actualizandoMutable = MutableStateFlow(false)
     val actualizando: StateFlow<Boolean> = actualizandoMutable.asStateFlow()
     private val mensajeMutable = MutableStateFlow<String?>(null)
@@ -51,6 +60,8 @@ class ListaViewModel(private val repository: ItemRepository) : ViewModel() {
 
     fun reintentar() = consultar()
     fun actualizar() = consultar()
+
+    internal fun actualizarCriterios(cambio: (CriteriosCatalogo) -> CriteriosCatalogo) = criterios.update(cambio)
 
     fun alternarFavorito(id: Int) {
         viewModelScope.launch {

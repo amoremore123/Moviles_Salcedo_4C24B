@@ -109,6 +109,8 @@ class SesionNavegacionTest {
         compose.onNodeWithContentDescription("Actualizar catálogo").performClick()
         esperar("No se pudo actualizar el catálogo. Mostrando productos guardados.")
         compose.capturarMejora("m2", "offline")
+        compose.onNodeWithTag("lista-catalogo")
+            .performScrollToNode(hasContentDescription("Agregar a favoritos: Modelo de prueba"))
         compose.onNodeWithContentDescription("Agregar a favoritos: Modelo de prueba").performClick()
         compose.onNodeWithText("Mis favoritos").performClick()
         esperar("Guardados en este dispositivo")
