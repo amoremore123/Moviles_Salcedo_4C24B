@@ -3,6 +3,7 @@ package com.tecsup.smartcatalog.ui.navigation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -33,14 +34,32 @@ private const val FAVORITOS = "favoritos"
 private const val ADMIN = "admin"
 
 @Composable
-fun AppNav(container: AppContainer, sesionViewModel: SesionViewModel, listaViewModel: () -> ListaViewModel, modifier: Modifier = Modifier) {
+fun AppNav(
+    container: AppContainer,
+    obtenerSesionViewModel: () -> SesionViewModel,
+    registroViewModel: RegistroViewModel,
+    listaViewModel: () -> ListaViewModel,
+    modifier: Modifier = Modifier
+) {
+    val estadoRegistro by registroViewModel.estado.collectAsStateWithLifecycle()
+    var registro by rememberSaveable { mutableStateOf(false) }
+    var confirmacionVista by rememberSaveable { mutableStateOf(false) }
+    // Resolver el registro primero: la recuperación normal exige que el perfil ya exista.
+    if (registro || estadoRegistro.pendiente || (estadoRegistro.completo && !confirmacionVista)) {
+        RegistroScreen(registroViewModel, onVolver = {
+            registro = false
+            if (estadoRegistro.completo) confirmacionVista = true
+        })
+        return
+    }
+    val sesionViewModel = obtenerSesionViewModel()
     val estado by sesionViewModel.estado.collectAsStateWithLifecycle()
     when (val actual = estado) {
         EstadoSesion.Verificando -> VerificandoSesion(modifier)
         is EstadoSesion.Autenticado -> key(actual.sesion.uid, actual.sesion.rol) {
             NavegacionAutenticada(container, actual.sesion, { (sesionViewModel.estado.value as? EstadoSesion.Autenticado)?.sesion }, listaViewModel, sesionViewModel::cerrarSesion, modifier)
         }
-        else -> LoginScreen(actual, sesionViewModel::iniciarSesion, modifier)
+        else -> LoginScreen(actual, sesionViewModel::iniciarSesion, modifier, onRegistro = { registro = true })
     }
 }
 

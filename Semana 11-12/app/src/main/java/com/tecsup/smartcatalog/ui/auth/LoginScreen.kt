@@ -23,7 +23,12 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.smartcatalog.R
 
 @Composable
-fun LoginScreen(estado: EstadoSesion, onIniciar: (String, String) -> Unit, modifier: Modifier = Modifier) {
+fun LoginScreen(
+    estado: EstadoSesion,
+    onIniciar: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
+    onRegistro: (() -> Unit)? = null
+) {
     var correo by remember { mutableStateOf("") }
     // No rememberSaveable: nunca guardar la contraseña en el Bundle de la actividad.
     var clave by remember { mutableStateOf("") }
@@ -81,6 +86,9 @@ fun LoginScreen(estado: EstadoSesion, onIniciar: (String, String) -> Unit, modif
                     }
                 }
                 Text("Usa la cuenta asignada para el laboratorio. Si necesitas acceso, consulta al responsable.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                onRegistro?.let {
+                    TextButton(onClick = it, enabled = !cargando) { Text("Ver formulario de registro") }
+                }
             }
         }
     }
