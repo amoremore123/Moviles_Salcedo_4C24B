@@ -102,6 +102,7 @@ Son 4 mejoras de la lista de la guía más una propia (la suma de primos) y el d
 | 4 | Comparación de tiempos | ViewModel + View | Tabla con veces, último tiempo y promedio de cada modo, más el ahorro de *A la vez* (≈ 2000 ms, 39 %) |
 | 5 | Suma de primos | Repository + ViewModel + View | `contarYSumarPrimos` cuenta **y suma** los primos hasta N en una sola pasada (hasta 10 → 4 primos, suma 17; hasta 1000 → 168, suma 76 127) |
 | 6 | Diseño morado | View | Cabecera con ícono y gatito, tarjetas con ícono, anillo y barra de progreso, botones con íconos y pie «¡Tú puedes!». Mantiene la pantalla única de la guía con las tres tarjetas en orden y el botón Tócame |
+| 7 | Toques durante la tarea | View | Relaciona Tócame con la tarea: cuenta solo los toques hechos mientras trabaja y muestra «Tocaste 3 veces mientras trabajaba: nunca se congeló ✅». Se reinicia al pulsar Iniciar |
 
 > 🗺️ **[MAPA_DEL_LAB.html](MAPA_DEL_LAB.html)**: página con el archivo y la línea donde está implementado cada requisito (dependencias, hilos, corrutinas, pasos y mejoras). Ábrela en el navegador.
 
