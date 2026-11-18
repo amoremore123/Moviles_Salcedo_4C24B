@@ -1,7 +1,10 @@
 package com.tecsup.campusgps.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -97,7 +100,18 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Text("Obtener mi ubicación")
             }
 
-            EstadoUbicacion(estado)
+            EstadoUbicacion(
+                estado = estado,
+                onAbrirAjustes = {
+                    // Abre la pantalla de permisos de ESTA app en Ajustes
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", contexto.packageName, null)
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    contexto.startActivity(intent)
+                },
+                onReintentar = { alPulsar() }
+            )
 
             // El mapa ocupa todo el espacio libre
             MapaUbicacion(
@@ -140,7 +154,11 @@ fun PantallaMapa(vm: MapaViewModel) {
 }
 
 @Composable
-private fun EstadoUbicacion(estado: UbicacionUi) {
+private fun EstadoUbicacion(
+    estado: UbicacionUi,
+    onAbrirAjustes: () -> Unit,
+    onReintentar: () -> Unit
+) {
     when (estado) {
         UbicacionUi.Inicial -> Text("Pulsa el botón para conocer tu ubicación")
         UbicacionUi.Buscando -> Row(
@@ -153,10 +171,10 @@ private fun EstadoUbicacion(estado: UbicacionUi) {
         is UbicacionUi.Lista -> Text(
             "Lat: %.5f   Lon: %.5f".format(estado.posicion.latitud, estado.posicion.longitud)
         )
-        // TODO Paso 8: reemplazar por MensajeError(estado, ...)
-        is UbicacionUi.Error -> Text(
-            text = estado.mensaje,
-            color = MaterialTheme.colorScheme.error
+        is UbicacionUi.Error -> MensajeError(
+            error = estado,
+            onAbrirAjustes = onAbrirAjustes,
+            onReintentar = onReintentar
         )
     }
 }

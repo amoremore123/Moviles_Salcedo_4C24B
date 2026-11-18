@@ -17,7 +17,8 @@ sealed interface UbicacionUi {
     data object Inicial : UbicacionUi
     data object Buscando : UbicacionUi
     data class Lista(val posicion: Posicion) : UbicacionUi
-    data class Error(val mensaje: String) : UbicacionUi
+    data class Error(val mensaje: String, val tipo: TipoError) : UbicacionUi
 }
 
-// TODO Paso 8: enum class TipoError { SIN_PERMISO, GPS_APAGADO, SIN_PLAY_SERVICES, OTRO }
+// Cada tipo de error tiene su propia acción en la pantalla (ver ui/MensajeError.kt)
+enum class TipoError { SIN_PERMISO, GPS_APAGADO, SIN_PLAY_SERVICES, OTRO }
