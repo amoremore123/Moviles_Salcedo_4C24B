@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,12 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.ui.UiState
+import com.tecsup.smartcatalog.ui.components.CabeceraMarca
 import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
 import com.tecsup.smartcatalog.ui.components.EstadoVacio
@@ -43,28 +43,37 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
-                Row(
-                    Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(onClick = onVolver) {
-                        Icon(painterResource(R.drawable.ic_volver), "Volver al catálogo", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Text("Mis favoritos", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                        Text("Guardados en este dispositivo", style = MaterialTheme.typography.bodyMedium)
-                        Text("Compartidos entre cuentas", style = MaterialTheme.typography.bodySmall)
-                    }
+            CabeceraMarca("Mis favoritos", navegacion = {
+                IconButton(onClick = onVolver) {
+                    Icon(painterResource(R.drawable.ic_volver), "Volver al catálogo")
                 }
-            }
+            })
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp)
+            ) {
+                Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painterResource(R.drawable.ic_favorito), contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp)
+                    )
+                    Column(Modifier.padding(start = 10.dp)) {
+                        Text("Guardados en este dispositivo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("Compartidos entre cuentas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
+            }
             mensaje?.let { texto ->
-                Surface(color = MaterialTheme.colorScheme.errorContainer, modifier = Modifier.fillMaxWidth()) {
-                    Text(texto, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 12.dp)
+                ) {
+                    Text(texto, Modifier.padding(14.dp), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -78,7 +87,7 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
                             modifier = Modifier.widthIn(max = 840.dp).fillMaxSize(),
                             state = desplazamiento,
                             contentPadding = PaddingValues(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(actual.datos, key = { it.id }) { item ->
                                 ItemCard(item, imageLoader, onClick = { onItemClick(item.id) }, onAlternarFavorito = { viewModel.quitarFavorito(item.id) })

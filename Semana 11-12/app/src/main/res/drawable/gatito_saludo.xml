@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gatito con laptop (login y bienvenida). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="160dp"
+    android:viewportWidth="120" android:viewportHeight="120">
+    <!-- Cuerpo -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M34,98 a26,18 0 1,0 52,0 a26,18 0 1,0 -52,0 Z" />
+    <!-- Orejas -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M30,46 L35,14 L58,32 Z M90,46 L85,14 L62,32 Z" />
+    <path android:fillColor="#FFB3CF" android:pathData="M35,40 L38,22 L50,32 Z M85,40 L82,22 L70,32 Z" />
+    <!-- Cabeza -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M26,58 a34,28 0 1,0 68,0 a34,28 0 1,0 -68,0 Z" />
+    <!-- Ojos abiertos -->
+    <path android:fillColor="#4A2C40"
+        android:pathData="M42.5,58 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z M68.5,58 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M47,56.5 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 Z M73,56.5 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 Z" />
+    <!-- Mejillas, nariz y boca -->
+    <path android:fillColor="#FFB3CF"
+        android:pathData="M36,67 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z M76,67 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" />
+    <path android:fillColor="#FF6FA5" android:pathData="M57.5,63 h5 l-2.5,2.5 Z" />
+    <path android:strokeColor="#4A2C40" android:strokeWidth="1.6" android:strokeLineCap="round"
+        android:pathData="M55,67 q2.5,3 5,0 q2.5,3 5,0" />
+    <!-- Laptop -->
+    <path android:fillColor="#9C27B0" android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M36,80 h48 v22 h-48 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M60,96 c-6,-4 -5,-9 0,-6 c5,-3 6,2 0,6 Z" />
+    <path android:fillColor="#F3D6F7" android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M28,102 h64 l-5,6 h-54 Z" />
+    <!-- Patitas -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M35,103 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z M75,103 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 Z" />
+</vector>

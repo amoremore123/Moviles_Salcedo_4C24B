@@ -10,11 +10,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -27,6 +38,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.data.notificaciones.NotificacionesCatalogo
 import com.tecsup.smartcatalog.domain.model.Sesion
+import com.tecsup.smartcatalog.ui.components.BotonPrincipal
+import com.tecsup.smartcatalog.ui.components.CabeceraMarca
 import java.text.DateFormat
 import java.util.Date
 
@@ -45,52 +58,52 @@ fun PanelAdminScreen(
     var confirmar by rememberSaveable { mutableStateOf(false) }
     val ocupado = sincronizacion == SincronizacionAdmin.EnCurso
 
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    CabeceraMarca(
+        "Panel de administrador",
+        navegacion = {
+            Box(Modifier.padding(start = 8.dp)) {
+                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD54F))
+            }
+        }
+    )
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().testTag("panel-admin"),
+        modifier = Modifier.fillMaxWidth().weight(1f).testTag("panel-admin"),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Card(
-                shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            ) {
-                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Panel de administrador", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    Text("Bienvenido, administrador", style = MaterialTheme.typography.bodyMedium)
-                    FilledTonalButton(onClick = onCatalogo, modifier = Modifier.fillMaxWidth()) { Text("Explorar catálogo") }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = onCerrarSesion, colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)) {
-                            Text("Cerrar sesión")
-                        }
+            TarjetaPanel {
+                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Bienvenido, administrador", style = MaterialTheme.typography.titleLarge)
+                    BotonPrincipal(onCatalogo, Modifier.fillMaxWidth()) { Text("Explorar catálogo") }
+                    TextButton(onClick = onCerrarSesion, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Text("Cerrar sesión")
                     }
                 }
             }
         }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Almacenamiento local", style = MaterialTheme.typography.titleLarge)
+                Text("Almacenamiento local", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 when (val datos = almacenamiento) {
                     AlmacenamientoCatalogo.Cargando -> LinearProgressIndicator(Modifier.fillMaxWidth())
                     AlmacenamientoCatalogo.Error -> Text("No se pudo consultar el almacenamiento.", color = MaterialTheme.colorScheme.error)
                     is AlmacenamientoCatalogo.Disponible -> {
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Contador(datos.productos, "Productos almacenados", Modifier.weight(1f))
-                            Contador(datos.favoritos, "Favoritos locales", Modifier.weight(1f))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Contador(datos.productos, "Productos almacenados", Icons.Default.ShoppingCart, MaterialTheme.colorScheme.secondary, Modifier.weight(1f))
+                            Contador(datos.favoritos, "Favoritos locales", Icons.Default.Favorite, MaterialTheme.colorScheme.tertiary, Modifier.weight(1f))
                         }
-                        Text(if (datos.productos == 0) "Catálogo vacío" else "Productos disponibles en la base local")
-                        Text("Los favoritos se comparten entre las cuentas de este dispositivo.", style = MaterialTheme.typography.bodySmall)
+                        Text(if (datos.productos == 0) "Catálogo vacío" else "Productos disponibles en la base local", style = MaterialTheme.typography.bodyMedium)
+                        Text("Los favoritos se comparten entre las cuentas de este dispositivo.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
         item {
-            OutlinedCard(shape = MaterialTheme.shapes.large) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Mantenimiento", style = MaterialTheme.typography.titleLarge)
+            TarjetaPanel {
+                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Acciones rápidas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     val hora = ultima?.let { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)) }
                     Text(hora?.let { "Última sincronización correcta: $it" } ?: "Sin sincronizaciones registradas desde que se abrió la app.")
                     when (val estado = sincronizacion) {
@@ -109,12 +122,8 @@ fun PanelAdminScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
-                    Button(onClick = { panel.sincronizar(sesionActual()) }, enabled = !ocupado, modifier = Modifier.fillMaxWidth()) {
-                        Icon(painterResource(R.drawable.ic_actualizar), null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Sincronizar catálogo")
-                    }
-                    OutlinedButton(onClick = { confirmar = true }, modifier = Modifier.fillMaxWidth()) { Text("Limpiar caché") }
+                    AccionRapida("Sincronizar catálogo", painterResource(R.drawable.ic_actualizar), enabled = !ocupado) { panel.sincronizar(sesionActual()) }
+                    AccionRapida("Limpiar caché", rememberVectorPainter(Icons.Default.Delete)) { confirmar = true }
                     when (cache) {
                         ResultadoCache.INICIAL -> Unit
                         ResultadoCache.LIMPIADA -> Text("Caché de imágenes limpiada.")
@@ -124,6 +133,7 @@ fun PanelAdminScreen(
             }
         }
         item { PreferenciaAvisos(notificaciones) }
+    }
     }
 
     if (confirmar) AlertDialog(
@@ -159,7 +169,7 @@ private fun PreferenciaAvisos(notificaciones: NotificacionesCatalogo) {
         onDispose { lifecycle.removeObserver(observador) }
     }
 
-    OutlinedCard {
+    TarjetaPanel {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("Avisos de sincronización", style = MaterialTheme.typography.titleMedium)
             Text(
@@ -192,11 +202,44 @@ private fun PreferenciaAvisos(notificaciones: NotificacionesCatalogo) {
 }
 
 @Composable
-private fun Contador(total: Int, etiqueta: String, modifier: Modifier) {
-    Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-        Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.Start) {
-            Text(total.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
-            Text(etiqueta, style = MaterialTheme.typography.bodySmall)
+private fun TarjetaPanel(contenido: @Composable () -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth(),
+        content = contenido
+    )
+}
+
+@Composable
+private fun AccionRapida(texto: String, icono: Painter, enabled: Boolean = true, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        enabled = enabled,
+        shape = CircleShape,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.secondary
+        )
+    ) {
+        Icon(icono, null, Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(texto, color = MaterialTheme.colorScheme.onSecondaryContainer)
+    }
+}
+
+@Composable
+private fun Contador(total: Int, etiqueta: String, icono: ImageVector, color: Color, modifier: Modifier) {
+    Surface(modifier, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
+                Icon(icono, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(total.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            Text(etiqueta, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -14,7 +14,7 @@ fun BotonFavorito(favorito: Boolean, nombre: String, onAlternar: () -> Unit, hab
         Icon(
             painter = painterResource(if (favorito) R.drawable.ic_favorito else R.drawable.ic_favorito_vacio),
             contentDescription = if (favorito) "Quitar de favoritos: $nombre" else "Agregar a favoritos: $nombre",
-            tint = if (favorito) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            tint = if (favorito) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
         )
     }
 }

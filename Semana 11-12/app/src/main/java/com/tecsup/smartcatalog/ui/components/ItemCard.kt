@@ -1,11 +1,9 @@
 package com.tecsup.smartcatalog.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,27 +38,62 @@ import java.util.Locale
 
 @Composable
 fun ItemCard(item: Item, imageLoader: ImageLoader, onClick: () -> Unit, onAlternarFavorito: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
+    Surface(
         modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).clickable(role = Role.Button, onClick = onClick),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
     ) {
-        BoxWithConstraints {
-            val anchoImagen = if (maxWidth < 360.dp) 112.dp else 136.dp
-            if (maxWidth < 300.dp) {
-                Column {
-                    ImagenProducto(item, imageLoader, Modifier.fillMaxWidth().height(136.dp))
-                    InformacionProducto(item, onAlternarFavorito, Modifier.fillMaxWidth())
-                }
-            } else {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ImagenProducto(item, imageLoader, Modifier.width(anchoImagen).height(148.dp))
-                    InformacionProducto(item, onAlternarFavorito, Modifier.weight(1f))
-                }
+        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            ImagenProducto(item, imageLoader, Modifier.width(84.dp).height(84.dp).clip(MaterialTheme.shapes.medium))
+            Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                Text(item.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    precioFormateado(item.precio),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
+            BotonFavorito(item.favorito, item.nombre, onAlternarFavorito)
         }
     }
+}
+
+/** Tarjeta vertical para la cuadrícula del catálogo: imagen arriba, corazón en la esquina, nombre y precio. */
+@Composable
+fun TarjetaCatalogo(item: Item, imageLoader: ImageLoader, onClick: () -> Unit, onAlternarFavorito: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).clickable(role = Role.Button, onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) { Column {
+        Box {
+            ImagenProducto(
+                item, imageLoader,
+                Modifier.fillMaxWidth().height(140.dp).padding(8.dp).clip(MaterialTheme.shapes.medium)
+            )
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)
+            ) {
+                BotonFavorito(item.favorito, item.nombre, onAlternarFavorito)
+            }
+        }
+        Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 14.dp)) {
+            Text(item.nombre, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                precioFormateado(item.precio),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    } }
 }
 
 @Composable
@@ -103,35 +135,3 @@ internal fun precioFormateado(precio: Double): String = remember(precio) {
     "S/ $importe"
 }
 
-@Composable
-private fun InformacionProducto(item: Item, onAlternarFavorito: () -> Unit, modifier: Modifier) {
-    val precio = precioFormateado(item.precio)
-    Column(modifier = modifier.padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = item.categoria.uppercase(Locale.ROOT),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-            BotonFavorito(item.favorito, item.nombre, onAlternarFavorito)
-        }
-        Text(item.nombre, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(3.dp))
-        Text(
-            text = item.descripcion,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = precio,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}

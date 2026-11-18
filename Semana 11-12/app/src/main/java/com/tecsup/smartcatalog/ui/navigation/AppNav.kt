@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -113,17 +114,26 @@ private fun NavegacionAutenticada(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            NavigationBar {
+            val colores = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Surface(shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp), shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
                 NavigationBarItem(seleccion == LISTA, { navegar(DestinoProtegido.CATALOGO, LISTA) },
-                    icon = { Icon(Icons.Default.Home, null) }, label = { Text("Catálogo") })
+                    icon = { Icon(Icons.Default.Home, null) }, label = { Text("Catálogo") }, colors = colores)
                 NavigationBarItem(seleccion == FAVORITOS, { navegar(DestinoProtegido.FAVORITOS, FAVORITOS) },
-                    icon = { Icon(Icons.Default.Favorite, null) }, label = { Text("Favoritos") })
+                    icon = { Icon(Icons.Default.Favorite, null) }, label = { Text("Favoritos") }, colors = colores)
                 NavigationBarItem(seleccion == PERFIL, { navegar(DestinoProtegido.PERFIL, PERFIL) },
-                    icon = { Icon(Icons.Default.Person, null) }, label = { Text("Perfil") })
+                    icon = { Icon(Icons.Default.Person, null) }, label = { Text("Perfil") }, colors = colores)
                 if (AccesoRutas.permite(sesion, DestinoProtegido.ADMIN)) {
                     NavigationBarItem(seleccion == ADMIN, { navegar(DestinoProtegido.ADMIN, ADMIN) },
-                        icon = { Icon(Icons.Default.Settings, null) }, label = { Text("Administración") })
+                        icon = { Icon(Icons.Default.Settings, null) }, label = { Text("Administración", maxLines = 1) }, colors = colores)
                 }
+            }
             }
         }
     ) { padding ->

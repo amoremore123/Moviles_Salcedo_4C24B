@@ -2,7 +2,12 @@ package com.tecsup.smartcatalog.ui.auth
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -11,6 +16,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tecsup.smartcatalog.ui.components.BotonPrincipal
+import com.tecsup.smartcatalog.ui.components.coloresCampo
 
 @Composable
 fun RegistroScreen(modelo: RegistroViewModel, onVolver: () -> Unit) {
@@ -30,10 +37,10 @@ fun RegistroScreen(modelo: RegistroViewModel, onVolver: () -> Unit) {
 
     PaginaAcceso {
         MarcaSmartCatalog()
-        Text("Crear cuenta", style = MaterialTheme.typography.headlineLarge)
+        Text("Crear cuenta", style = MaterialTheme.typography.headlineMedium)
         if (!modelo.disponible) {
             Surface(
-                shape = MaterialTheme.shapes.medium,
+                shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Text(
@@ -44,30 +51,36 @@ fun RegistroScreen(modelo: RegistroViewModel, onVolver: () -> Unit) {
             }
         }
         if (!estado.pendiente && !estado.completo) {
-            OutlinedTextField(nombre, { nombre = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = MaterialTheme.shapes.medium,
-                label = { Text("Nombre completo") }, singleLine = true)
-            OutlinedTextField(correo, { correo = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = MaterialTheme.shapes.medium,
-                label = { Text("Correo electrónico") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
-            val transformacion = if (visible) VisualTransformation.None else PasswordVisualTransformation()
-            OutlinedTextField(clave, { clave = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = MaterialTheme.shapes.medium,
-                label = { Text("Contraseña") }, singleLine = true, visualTransformation = transformacion,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
-            OutlinedTextField(confirmacion, { confirmacion = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = MaterialTheme.shapes.medium,
-                label = { Text("Confirmar contraseña") }, singleLine = true, visualTransformation = transformacion,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
-            TextButton(onClick = { visible = !visible }, enabled = !estado.cargando) {
-                Text(if (visible) "Ocultar contraseñas" else "Mostrar contraseñas")
+            TarjetaAcceso {
+                val transformacion = if (visible) VisualTransformation.None else PasswordVisualTransformation()
+                OutlinedTextField(nombre, { nombre = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = CircleShape,
+                    colors = coloresCampo(), leadingIcon = { Icon(Icons.Default.Person, null) },
+                    label = { Text("Nombre completo") }, singleLine = true)
+                OutlinedTextField(correo, { correo = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = CircleShape,
+                    colors = coloresCampo(), leadingIcon = { Icon(Icons.Default.Email, null) },
+                    label = { Text("Correo electrónico") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
+                OutlinedTextField(clave, { clave = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = CircleShape,
+                    colors = coloresCampo(), leadingIcon = { Icon(Icons.Default.Lock, null) },
+                    label = { Text("Contraseña") }, singleLine = true, visualTransformation = transformacion,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
+                OutlinedTextField(confirmacion, { confirmacion = it }, Modifier.fillMaxWidth(), enabled = !estado.cargando, shape = CircleShape,
+                    colors = coloresCampo(), leadingIcon = { Icon(Icons.Default.Lock, null) },
+                    label = { Text("Confirmar contraseña") }, singleLine = true, visualTransformation = transformacion,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
+                TextButton(onClick = { visible = !visible }, enabled = !estado.cargando) {
+                    Text(if (visible) "Ocultar contraseñas" else "Mostrar contraseñas")
+                }
+                BotonPrincipal(
+                    onClick = { modelo.iniciar(nombre, correo, clave, confirmacion) },
+                    enabled = !estado.cargando && nombre.isNotBlank() && correo.isNotBlank() &&
+                        clave.isNotBlank() && confirmacion.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text(if (modelo.disponible) "Crear cuenta" else "Validar formulario") }
             }
-            Button(
-                onClick = { modelo.iniciar(nombre, correo, clave, confirmacion) },
-                enabled = !estado.cargando && nombre.isNotBlank() && correo.isNotBlank() &&
-                    clave.isNotBlank() && confirmacion.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)
-            ) { Text(if (modelo.disponible) "Crear cuenta" else "Validar formulario") }
         }
         if (estado.pendiente) {
-            Button(modelo::comprobarCorreo, enabled = !estado.cargando) { Text("Ya verifiqué mi correo") }
+            BotonPrincipal(modelo::comprobarCorreo, Modifier.fillMaxWidth(), enabled = !estado.cargando) { Text("Ya verifiqué mi correo") }
             TextButton(modelo::reenviar, enabled = !estado.cargando) { Text("Reenviar enlace") }
         }
         if (estado.cargando) LinearProgressIndicator(Modifier.fillMaxWidth())

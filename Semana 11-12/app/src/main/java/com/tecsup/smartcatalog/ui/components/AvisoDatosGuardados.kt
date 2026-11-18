@@ -22,11 +22,11 @@ import com.tecsup.smartcatalog.R
 fun AvisoDatosGuardados(mensaje: String, onReintentar: () -> Unit, habilitado: Boolean = true) {
     Surface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.primaryContainer
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(painterResource(R.drawable.ic_datos_guardados), contentDescription = null, modifier = Modifier.size(24.dp))
+            Icon(painterResource(R.drawable.ic_datos_guardados), contentDescription = null, modifier = Modifier.size(24.dp), tint = MaterialTheme.colorScheme.primary)
             Text(mensaje, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = onReintentar, enabled = habilitado) { Text("Reintentar") }
         }

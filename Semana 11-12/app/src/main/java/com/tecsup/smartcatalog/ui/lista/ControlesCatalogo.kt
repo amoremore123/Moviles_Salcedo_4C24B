@@ -1,7 +1,10 @@
 package com.tecsup.smartcatalog.ui.lista
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -9,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tecsup.smartcatalog.ui.components.coloresCampo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,15 +26,18 @@ internal fun ControlesCatalogo(criterios: CriteriosCatalogo, cambiar: ((Criterio
             label = { Text("Buscar por nombre") },
             modifier = Modifier.fillMaxWidth().testTag("buscar-catalogo"),
             singleLine = true,
-            shape = MaterialTheme.shapes.medium,
+            shape = CircleShape,
+            colors = coloresCampo(),
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = if (criterios.busqueda.isNotEmpty()) {
                 { TextButton(onClick = { cambiar { it.copy(busqueda = "") } }) { Text("Borrar") } }
             } else null
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = verFiltros, onClick = { verFiltros = !verFiltros }, label = { Text("Filtros") })
+            FilterChip(selected = verFiltros, onClick = { verFiltros = !verFiltros }, label = { Text("Filtros") }, shape = CircleShape,
+                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
             Box {
-                OutlinedButton(onClick = { verOrden = true }) { Text(criterios.orden.etiqueta) }
+                OutlinedButton(onClick = { verOrden = true }, shape = CircleShape) { Text(criterios.orden.etiqueta) }
                 DropdownMenu(expanded = verOrden, onDismissRequest = { verOrden = false }) {
                     OrdenCatalogo.entries.forEach { orden ->
                         DropdownMenuItem(
@@ -45,7 +52,7 @@ internal fun ControlesCatalogo(criterios: CriteriosCatalogo, cambiar: ((Criterio
             }
         }
         if (verFiltros) {
-            OutlinedCard {
+            Card(shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CampoPrecio(
@@ -60,7 +67,8 @@ internal fun ControlesCatalogo(criterios: CriteriosCatalogo, cambiar: ((Criterio
                     FilterChip(
                         selected = criterios.soloFavoritos,
                         onClick = { cambiar { it.copy(soloFavoritos = !it.soloFavoritos) } },
-                        label = { Text("Solo favoritos") }
+                        label = { Text("Solo favoritos") },
+                        shape = CircleShape
                     )
                 }
             }
@@ -79,6 +87,8 @@ private fun CampoPrecio(valor: String, etiqueta: String, error: Boolean, modifie
         onValueChange = cambiar,
         label = { Text(etiqueta) },
         prefix = { Text("S/") },
+        shape = CircleShape,
+        colors = coloresCampo(),
         modifier = modifier,
         singleLine = true,
         isError = error,

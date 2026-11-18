@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gatito guiñando con un corazón (acción realizada). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp" android:height="160dp"
+    android:viewportWidth="120" android:viewportHeight="120">
+    <!-- Corazones de fondo -->
+    <path android:fillColor="#FF4F9A" android:pathData="M100,34 c-5,-3 -5,-8 0,-5 c5,-3 5,2 0,5 Z" />
+    <path android:fillColor="#CE93D8" android:pathData="M20,42 c-5,-3 -5,-8 0,-5 c5,-3 5,2 0,5 Z" />
+    <!-- Cuerpo -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M34,98 a26,18 0 1,0 52,0 a26,18 0 1,0 -52,0 Z" />
+    <!-- Orejas -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M30,46 L35,14 L58,32 Z M90,46 L85,14 L62,32 Z" />
+    <path android:fillColor="#FFB3CF" android:pathData="M35,40 L38,22 L50,32 Z M85,40 L82,22 L70,32 Z" />
+    <!-- Cabeza -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M26,58 a34,28 0 1,0 68,0 a34,28 0 1,0 -68,0 Z" />
+    <!-- Ojo abierto y guiño -->
+    <path android:fillColor="#4A2C40" android:pathData="M42.5,58 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M47,56.5 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 Z" />
+    <path android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M68,60 l5,-4 l5,4" />
+    <!-- Mejillas, nariz y boca -->
+    <path android:fillColor="#FFB3CF"
+        android:pathData="M36,67 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z M76,67 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" />
+    <path android:fillColor="#FF6FA5" android:pathData="M57.5,63 h5 l-2.5,2.5 Z" />
+    <path android:strokeColor="#4A2C40" android:strokeWidth="1.6" android:strokeLineCap="round"
+        android:pathData="M55,67 q2.5,3 5,0 q2.5,3 5,0" />
+    <!-- Corazón -->
+    <path android:fillColor="#FF4F9A" android:strokeColor="#4A2C40" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M60,112 C38,98 44,82 60,91 C76,82 82,98 60,112 Z" />
+    <!-- Patitas -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#4A2C40" android:strokeWidth="2"
+        android:pathData="M40,94 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z M68,94 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z" />
+</vector>

@@ -117,7 +117,7 @@ class PanelAdminTest {
         esperar("Nuestra colección")
         compose.onNodeWithText("Administración").assertDoesNotExist()
         compose.onNodeWithText("Panel de administrador").assertDoesNotExist()
-        compose.onNodeWithText("Mis favoritos").performClick()
+        compose.onNodeWithText("Favoritos").performClick()
         esperar("Modelo de prueba")
         compose.onNodeWithContentDescription("Quitar de favoritos: Modelo de prueba").assertExists()
     }
