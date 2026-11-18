@@ -40,6 +40,9 @@ import com.tecsup.smartcatalog.data.notificaciones.NotificacionesCatalogo
 import com.tecsup.smartcatalog.domain.model.Sesion
 import com.tecsup.smartcatalog.ui.components.BotonPrincipal
 import com.tecsup.smartcatalog.ui.components.CabeceraMarca
+import com.tecsup.smartcatalog.ui.components.coloresCampo
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import java.text.DateFormat
 import java.util.Date
 
@@ -132,6 +135,7 @@ fun PanelAdminScreen(
                 }
             }
         }
+        item { AgregarCelular(panel, sesionActual) }
         item { PreferenciaAvisos(notificaciones) }
     }
     }
@@ -240,6 +244,33 @@ private fun Contador(total: Int, etiqueta: String, icono: ImageVector, color: Co
             Spacer(Modifier.height(6.dp))
             Text(total.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
             Text(etiqueta, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun AgregarCelular(panel: PanelAdminViewModel, sesionActual: () -> Sesion?) {
+    val resultado by panel.resultadoAgregar.collectAsStateWithLifecycle()
+    var nombre by rememberSaveable { mutableStateOf("") }
+    var precio by rememberSaveable { mutableStateOf("") }
+    var descripcion by rememberSaveable { mutableStateOf("") }
+    TarjetaPanel {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("Agregar celular", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            OutlinedTextField(nombre, { nombre = it }, Modifier.fillMaxWidth(), label = { Text("Nombre del celular") },
+                singleLine = true, shape = CircleShape, colors = coloresCampo())
+            OutlinedTextField(precio, { precio = it }, Modifier.fillMaxWidth(), label = { Text("Precio") },
+                prefix = { Text("S/ ") }, singleLine = true, shape = CircleShape, colors = coloresCampo(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+            OutlinedTextField(descripcion, { descripcion = it }, Modifier.fillMaxWidth(), label = { Text("Descripción (opcional)") },
+                shape = MaterialTheme.shapes.large, colors = coloresCampo())
+            BotonPrincipal({
+                panel.agregar(sesionActual(), nombre, descripcion, precio)
+                if (nombre.isNotBlank() && precio.trim().replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true) {
+                    nombre = ""; precio = ""; descripcion = ""
+                }
+            }, Modifier.fillMaxWidth()) { Text("Agregar al catálogo") }
+            resultado?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
         }
     }
 }

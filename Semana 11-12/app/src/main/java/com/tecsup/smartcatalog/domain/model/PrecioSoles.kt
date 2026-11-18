@@ -9,3 +9,6 @@ internal const val NOTA_PRECIOS = "Precios referenciales en soles · US\$ 1 = S/
 
 internal fun precioEnSoles(precio: Double): Double =
     precio.toBigDecimal().multiply(solesPorDolar).setScale(2, RoundingMode.HALF_UP).toDouble()
+
+internal fun solesADolares(soles: Double): Double =
+    soles.toBigDecimal().divide(solesPorDolar, 2, RoundingMode.HALF_UP).toDouble()

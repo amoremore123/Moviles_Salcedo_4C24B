@@ -36,7 +36,8 @@ class PanelAdminViewModel(
     private val repositorio: ItemRepository,
     val ultimaSincronizacion: StateFlow<Long?>,
     private val notificador: NotificadorCatalogo = NotificadorCatalogo {},
-    private val limpiarImagenes: () -> Unit
+    private val limpiarImagenes: () -> Unit,
+    private val agregarProducto: suspend (nombre: String, descripcion: String, precioSoles: Double) -> Unit = { _, _, _ -> }
 ) : ViewModel() {
     private val almacenamientoMutable = MutableStateFlow<AlmacenamientoCatalogo>(AlmacenamientoCatalogo.Cargando)
     val almacenamiento = almacenamientoMutable.asStateFlow()
@@ -80,6 +81,29 @@ class PanelAdminViewModel(
         }
     }
 
+    private val resultadoAgregarMutable = MutableStateFlow<String?>(null)
+    val resultadoAgregar = resultadoAgregarMutable.asStateFlow()
+
+    /** Agrega un celular al catálogo local. Solo el administrador puede hacerlo. */
+    fun agregar(sesion: Sesion?, nombre: String, descripcion: String, precioTexto: String) {
+        if (!AccesoRutas.permite(sesion, DestinoProtegido.ADMIN)) return
+        val precio = precioTexto.trim().replace(",", ".").toDoubleOrNull()
+        if (nombre.isBlank() || precio == null || precio <= 0) {
+            resultadoAgregarMutable.value = "Ingresa un nombre y un precio válido."
+            return
+        }
+        viewModelScope.launch {
+            resultadoAgregarMutable.value = try {
+                agregarProducto(nombre.trim(), descripcion.trim(), precio)
+                "Celular agregado: ${nombre.trim()}."
+            } catch (cancelacion: CancellationException) {
+                throw cancelacion
+            } catch (_: Exception) {
+                "No se pudo agregar el celular."
+            }
+        }
+    }
+
     fun limpiarCache(sesion: Sesion?) {
         if (!AccesoRutas.permite(sesion, DestinoProtegido.ADMIN)) return
         cacheMutable.value = try {
@@ -96,12 +120,13 @@ class PanelAdminViewModel(
         private val repositorio: ItemRepository,
         private val ultimaSincronizacion: StateFlow<Long?>,
         private val notificador: NotificadorCatalogo,
-        private val limpiarImagenes: () -> Unit
+        private val limpiarImagenes: () -> Unit,
+        private val agregarProducto: suspend (String, String, Double) -> Unit = { _, _, _ -> }
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(PanelAdminViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
-            return PanelAdminViewModel(repositorio, ultimaSincronizacion, notificador, limpiarImagenes) as T
+            return PanelAdminViewModel(repositorio, ultimaSincronizacion, notificador, limpiarImagenes, agregarProducto) as T
         }
     }
 }

@@ -5,6 +5,9 @@ import coil.ImageLoader
 import com.tecsup.smartcatalog.data.notificaciones.NotificacionesCatalogo
 import com.tecsup.smartcatalog.data.local.AppDatabase
 import com.tecsup.smartcatalog.data.local.ItemDao
+import com.tecsup.smartcatalog.data.local.ItemEntity
+import kotlinx.coroutines.flow.first
+import com.tecsup.smartcatalog.domain.model.solesADolares
 import com.tecsup.smartcatalog.data.auth.AuthRepository
 import com.tecsup.smartcatalog.data.auth.FabricaAuthFirebase
 import com.tecsup.smartcatalog.data.auth.ServicioRegistro
@@ -42,9 +45,15 @@ class AppContainer(
     val favoritosViewModelFactory: FavoritosViewModel.Factory by lazy { FavoritosViewModel.Factory(itemRepository) }
     val notificacionesCatalogo by lazy { NotificacionesCatalogo(applicationContext) }
     val panelAdminFactory by lazy {
-        PanelAdminViewModel.Factory(itemRepository, repositorioLocal.ultimaSincronizacion, notificacionesCatalogo) {
-            requireNotNull(imageLoader.memoryCache).clear()
-        }
+        PanelAdminViewModel.Factory(
+            itemRepository, repositorioLocal.ultimaSincronizacion, notificacionesCatalogo,
+            limpiarImagenes = { requireNotNull(imageLoader.memoryCache).clear() },
+            agregarProducto = { nombre, descripcion, precioSoles ->
+                // IDs desde 100000 para no chocar con los productos de la API.
+                val id = maxOf((itemDao.observarTodos().first().maxOfOrNull { it.id } ?: 0) + 1, 100_000)
+                itemDao.insertarNuevos(listOf(ItemEntity(id, nombre, descripcion.ifBlank { "Agregado por el administrador." }, solesADolares(precioSoles), "smartphone_aurora", "smartphones")))
+            }
+        )
     }
     fun detalleViewModelFactory(id: Int): DetalleViewModel.Factory = DetalleViewModel.Factory(itemRepository, id)
     val imageLoader: ImageLoader by lazy {
