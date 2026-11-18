@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.util.formatearDistancia
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +39,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsStateWithLifecycle()
     val lugares by vm.lugares.collectAsStateWithLifecycle()
     val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
+    val masCercano by vm.masCercano.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
 
@@ -101,6 +104,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                idMasCercano = masCercano?.id,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -115,7 +119,22 @@ fun PantallaMapa(vm: MapaViewModel) {
                     .fillMaxWidth()
                     .height(220.dp)
             )
-            // TODO Paso 7: botón "Ir al más cercano" y texto "Más cercano: ..."
+            // Botón secundario: lleva la cámara al lugar más cercano
+            OutlinedButton(
+                onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                enabled = masCercano != null
+            ) {
+                Text("Ir al más cercano")
+            }
+
+            // La distancia ya viene calculada por el ViewModel; aquí solo se formatea
+            masCercano?.let { cercano ->
+                val metros = lugares.firstOrNull { it.lugar.id == cercano.id }?.metros
+                Text(
+                    "Más cercano: ${cercano.nombre} (${metros?.let { formatearDistancia(it) } ?: "Sin calcular"})",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
