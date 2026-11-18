@@ -122,6 +122,25 @@
   .galeria figcaption { font-size: 12px; color: var(--suave); text-align: center; margin-top: 6px; }
   .nota { background: var(--azul-suave); color: var(--azul-oscuro); border-radius: 14px; padding: 12px 16px; font-size: 14px; }
   footer { text-align: center; color: var(--suave); font-size: 13px; padding: 30px 16px 50px; }
+  .concepto { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); margin-bottom: 14px; }
+  .concepto h3 { margin: 0 0 6px; font-size: 17px; color: var(--azul); }
+  .concepto p { margin: 0 0 8px; font-size: 15px; }
+  .concepto ul { margin: 0; padding-left: 20px; font-size: 14px; color: var(--suave); }
+  .concepto li { margin: 4px 0; }
+  .analogia { background: var(--morado-suave); border-left: 4px solid var(--morado); border-radius: 14px; padding: 14px 16px; font-size: 15px; margin-bottom: 18px; }
+  h3.subtitulo { font-size: 17px; margin: 22px 0 10px; }
+  .linea-tiempo { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 16px; overflow-x: auto; }
+  .carril { display: grid; grid-template-columns: 190px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; min-width: 640px; }
+  .carril-nombre { font-family: Consolas, monospace; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 10px; text-align: center; }
+  .carril-nombre.main { background: var(--azul-suave); color: var(--azul-oscuro); }
+  .carril-nombre.worker { background: var(--verde-suave); color: var(--verde); }
+  .eventos { display: grid; grid-template-columns: 1fr 2fr 1.4fr 1fr; gap: 6px; }
+  .ev { font-size: 12.5px; padding: 8px 10px; border-radius: 10px; background: var(--azul-suave); color: var(--azul-oscuro); }
+  .carril:nth-child(2) .ev { background: var(--verde-suave); color: var(--verde); }
+  .ev.libre { background: transparent; border: 2px dashed var(--azul); }
+  .ev.vacio { background: transparent !important; }
+  .pie-linea { margin: 6px 0 0; font-size: 13.5px; color: var(--suave); }
+  .comparacion { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   @media (max-width: 600px) { header { padding-top: 28px; } section { margin: 26px 0; } }
 </style>
 </head>
@@ -132,7 +151,7 @@
     <h1>📋 CentroTareas · Mapa del laboratorio</h1>
     <p>Semana 14, Hilos en Android: dónde está implementado cada cosa que pide la guía</p>
     <div class="chips">
-      <span class="chip">✔ Corrutinas</span>
+      <span class="chip">✔ Hilos y corrutinas explicados</span>
       <span class="chip">✔ MVVM + Repository</span>
       <span class="chip">✔ Jetpack Compose + Material 3</span>
       <span class="chip">✔ 9 commits Fase 1</span>
@@ -232,8 +251,77 @@
   </section>
 
   <section id="hilos">
-    <h2><span class="num">3</span>Hilos y corrutinas: cada concepto y dónde está</h2>
+    <h2><span class="num">3</span>Hilos y corrutinas: qué hacen y dónde están</h2>
     <p class="sub">El hilo principal (<code>main</code>) dibuja y atiende toques. Todo lo que tarda va en segundo plano.</p>
+    <div class="concepto">
+      <div class="tarjeta">
+        <h3>🧵 ¿Qué es un hilo?</h3>
+        <p>Un <b>hilo</b> (<i>thread</i>) es una fila de instrucciones que el procesador ejecuta una tras otra. Una app puede tener varios hilos trabajando a la vez.</p>
+        <ul>
+          <li><b>Hilo principal (<code>main</code>)</b>: Android le da uno a cada app. Dibuja la pantalla unas 60 veces por segundo y atiende los toques. Si lo ocupas con algo lento, la pantalla se congela, y a los ~5 s aparece «La app no responde» (ANR).</li>
+          <li><b>Hilos de trabajo</b>: hacen lo pesado sin molestar a <code>main</code>. <code>Dispatchers.Default</code> tiene tantos como núcleos tenga el celular (para cálculos) y <code>Dispatchers.IO</code> hasta 64 (para red y archivos).</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h3>🌀 ¿Qué es una corrutina?</h3>
+        <p>Una <b>corrutina</b> es un trabajo que se puede <b>pausar y continuar</b>. Corre encima de un hilo, pero cuando llega a <code>delay</code>, <code>await</code> o <code>collect</code> se <b>suspende</b>: suelta el hilo para que otro trabajo lo use y luego sigue donde se quedó.</p>
+        <ul>
+          <li><b>Son livianas</b>: un hilo reserva cerca de 1 MB de memoria; se pueden tener miles de corrutinas sobre unos pocos hilos.</li>
+          <li><b>Se cancelan en grupo</b>: las lanzadas en <code>viewModelScope</code> mueren juntas cuando el ViewModel se destruye; nada queda trabajando «suelto».</li>
+          <li><b>Se leen de arriba abajo</b>: el código asíncrono se escribe como si fuera normal, sin callbacks.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="analogia">
+      <b>🍳 Analogía de la cocina.</b> Los <b>hilos</b> son los cocineros y las <b>corrutinas</b> son los pedidos.
+      <code>Thread.sleep(4000)</code> es un cocinero parado 4 s mirando el horno sin hacer nada: nadie más atiende.
+      <code>delay(4000)</code> es meter la torta al horno, poner un temporizador y mientras tanto atender otros pedidos.
+      Y el cocinero <code>main</code> es el único que puede servir en el mostrador (tocar la pantalla), por eso nunca debe quedarse esperando.
+    </div>
+
+    <h3 class="subtitulo">⏯️ Qué pasa al pulsar «Iniciar»</h3>
+    <div class="linea-tiempo">
+      <div class="carril">
+        <span class="carril-nombre main">main</span>
+        <div class="eventos">
+          <span class="ev">Toque en Iniciar → <code>launch</code></span>
+          <span class="ev libre">Libre: dibuja la barra y atiende «Tócame»</span>
+          <span class="ev">Recibe cada avance (<code>collect</code>) → mueve la barra</span>
+          <span class="ev">«Terminó» y <code>finally</code></span>
+        </div>
+      </div>
+      <div class="carril">
+        <span class="carril-nombre worker">DefaultDispatcher-worker</span>
+        <div class="eventos">
+          <span class="ev vacio"></span>
+          <span class="ev">100 vueltas: <code>delay(40)</code> + <code>emit(i/100f)</code> ≈ 4 s</span>
+          <span class="ev vacio"></span>
+          <span class="ev vacio"></span>
+        </div>
+      </div>
+      <p class="pie-linea">Por eso «Tócame» sigue sumando mientras la barra avanza: <code>main</code> nunca se queda esperando. En Logcat (filtro <code>HILO</code>) se ve <code>Antes: main</code> → <code>Dentro: DefaultDispatcher-worker-1</code> → <code>Despues: main</code>.</p>
+    </div>
+
+    <h3 class="subtitulo">🗂️ Qué hilo y qué herramienta usa cada parte de la app</h3>
+    <div class="tabla-envoltura" style="margin-bottom:18px">
+      <table>
+        <tr><th>Parte de la app</th><th>¿En qué hilo corre lo lento?</th><th>¿Qué hace la corrutina?</th><th>Resultado</th></tr>
+        <tr><td>Tarea con progreso</td><td><code>Dispatchers.Default</code> (<code>flowOn</code>)</td><td>Emite 100 avances con <code>delay</code>; el ViewModel los recoge en <code>main</code>. Se puede cancelar con su <code>Job</code>.</td><td>Barra fluida y botón Tócame vivo</td></tr>
+        <tr><td>Contar primos</td><td><code>Dispatchers.Default</code> (<code>withContext</code>)</td><td>Cálculo de CPU puro; <code>ensureActive()</code> en cada número para poder cancelarlo.</td><td>Millones de números sin congelar</td></tr>
+        <tr><td>Una por una</td><td>Ninguno: <code>delay</code> solo suspende</td><td>Espera el perfil (2 s) y <b>luego</b> los pedidos (3 s).</td><td>≈ 5 s</td></tr>
+        <tr><td>A la vez</td><td>Ninguno: <code>delay</code> solo suspende</td><td>Dos <code>async</code> esperan al mismo tiempo dentro de <code>coroutineScope</code>; <code>await</code> junta ambos.</td><td>≈ 3 s (el más lento)</td></tr>
+        <tr><td>Error y reintentos</td><td>—</td><td><code>try/catch</code> convierte el fallo en estado de error; la cancelación se relanza.</td><td>Mensaje rojo + Reintentar</td></tr>
+      </table>
+    </div>
+
+    <div class="comparacion">
+      <div class="regla no"><span class="ok">✗</span><div><b>Bloquear</b> (<code>Thread.sleep</code>, cálculos en <code>main</code>): el hilo queda ocupado y no puede hacer nada más.</div></div>
+      <div class="regla"><span class="ok">✓</span><div><b>Suspender</b> (<code>delay</code>, <code>await</code>): la corrutina se pausa y el hilo queda libre para otros trabajos.</div></div>
+      <div class="regla"><span class="ok">✓</span><div><b>Cambiar de hilo</b> (<code>withContext</code>, <code>flowOn</code>): el trabajo de CPU se va a un hilo de trabajo y el resultado vuelve a <code>main</code>.</div></div>
+    </div>
+
+    <h3 class="subtitulo">📍 Dónde está cada concepto en el código</h3>
     <div class="rejilla">
       <div class="tarjeta">
         <h3>🚫 El problema: Thread.sleep</h3>
