@@ -110,7 +110,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             } catch (e: CancellationException) {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error("No se pudo cargar tras $MAX_INTENTOS intentos: ${e.message}")
+                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }
     }
@@ -135,7 +135,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
                 // Si una carga falla, coroutineScope cancela la otra y lanza el error aquí
-                _carga.value = CargaUi.Error("No se pudo cargar tras $MAX_INTENTOS intentos: ${e.message}")
+                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }
     }
