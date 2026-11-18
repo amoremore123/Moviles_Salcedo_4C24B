@@ -20,6 +20,13 @@
 | "Ahora haz la interfaz como esta imagen" (maqueta con pestañas, saludo y anillo de progreso) | Rediseñó la app con 3 pestañas (Inicio, Resultados, Acerca de), un saludo, un anillo de progreso y un trofeo | Al releer la guía **se descartaron las pestañas, el saludo, el anillo y el trofeo**. Se volvió a la pantalla única de la sección 7 y solo se conservó el estilo visual (tarjetas redondeadas con ícono y paleta azul). | La sección 7 pide "los mismos elementos, el mismo orden y los mismos estados". Con las pestañas, Tócame quedaba separado de la tarea y la app perdía sentido. |
 | "Vuelve a analizar la guía, hay cosas que no están bien" | Comparó cada imagen de la guía con la app | Se corrigieron el campo **"Hasta el número"**, el resultado **"Primos hasta N: X"**, **Reintentar debajo** del recuadro de error y el mensaje **"No se pudo cargar: " + mensaje**, que es el contrato del Paso 7 (antes decía "tras 3 intentos"). | Ajustarse exactamente a los contratos y al diseño de la guía. |
 
+## Suma de primos y diseño morado
+
+| Prompt que escribí | Qué respondió la IA | Qué cambié o descarté | Por qué |
+|---|---|---|---|
+| "Mejora su interfaz (imagen morada) y quiero poner el número de primos que quiero sumar" | Preguntó qué significaba «sumar»: sumar los primeros K primos, sumar los primos hasta N o solo elegir N. Elegí **sumar los primos hasta N** | Se agregó `contarYSumarPrimos` al Repository; `contarPrimos` del Paso 5 se mantiene y usa la misma pasada. La suma es `Long` | Con N = 3 000 000 la suma es 312 471 072 265 y no entra en un `Int`. Se reutiliza el mismo recorrido con `ensureActive()`, así que se puede cancelar igual que antes. |
+| (misma imagen) | Propuso aplicar la cabecera, las tarjetas con ícono y dibujo, el anillo de progreso, los botones con íconos y el pie con el gatito | **Se mantuvo el botón Tócame**, aunque la imagen no lo tiene. El gatito y los dibujos son emojis, no ilustraciones | La guía exige Tócame como prueba de vida (sección 7 y Paso 8). Con emojis no se agregan imágenes ni dependencias. |
+
 ## Revisión de reglas (después de cada mejora)
 
 - `git grep` no encuentra `GlobalScope`, `runBlocking` ni `Thread.sleep`.

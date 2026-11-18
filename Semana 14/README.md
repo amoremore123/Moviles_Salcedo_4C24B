@@ -100,7 +100,8 @@ Son 4 mejoras de la lista de la guía más una propia (la suma de primos) y el d
 | 2 | Primos con progreso | Repository + ViewModel + View | `contarPrimos` avisa su avance cada 1 % y la tarjeta muestra la barra con "Calculando... 41 %" |
 | 3 | Reintento automático | ViewModel + View | Los pedidos se reintentan hasta 3 veces con espera creciente (500 ms, 1000 ms) y la pantalla muestra cada intento |
 | 4 | Comparación de tiempos | ViewModel + View | Tabla con veces, último tiempo y promedio de cada modo, más el ahorro de *A la vez* (≈ 2000 ms, 39 %) |
-| 5 | Estilo visual | View | Tarjetas redondeadas con ícono junto al título y paleta azul. Se mantiene la pantalla única de la guía, con las tres tarjetas en orden |
+| 5 | Suma de primos | Repository + ViewModel + View | `contarYSumarPrimos` cuenta **y suma** los primos hasta N en una sola pasada (hasta 10 → 4 primos, suma 17; hasta 1000 → 168, suma 76 127) |
+| 6 | Diseño morado | View | Cabecera con ícono y gatito, tarjetas con ícono, anillo y barra de progreso, botones con íconos y pie «¡Tú puedes!». Mantiene la pantalla única de la guía con las tres tarjetas en orden y el botón Tócame |
 
 > 🗺️ **[MAPA_DEL_LAB.html](MAPA_DEL_LAB.html)**: página con el archivo y la línea donde está implementado cada requisito (dependencias, hilos, corrutinas, pasos y mejoras). Ábrela en el navegador.
 
