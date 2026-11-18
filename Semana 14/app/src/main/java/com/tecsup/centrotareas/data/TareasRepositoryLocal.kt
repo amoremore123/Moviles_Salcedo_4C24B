@@ -33,14 +33,19 @@ class TareasRepositoryLocal : TareasRepository {
     }.flowOn(Dispatchers.Default)
 
     // Paso 5: cálculo pesado de CPU, fuera del hilo principal
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
-        var cantidad = 0
-        for (n in 2..hasta) {
-            ensureActive() // permite cancelar a mitad del cálculo
-            if (esPrimo(n)) cantidad++
+    override suspend fun contarPrimos(hasta: Int, alAvanzar: (Float) -> Unit): Int =
+        withContext(Dispatchers.Default) {
+            var cantidad = 0
+            // Mejora 2: avisa el avance cada 1 % (no en cada número, para no saturar la UI)
+            val paso = maxOf(1, hasta / 100)
+            for (n in 2..hasta) {
+                ensureActive() // permite cancelar a mitad del cálculo
+                if (esPrimo(n)) cantidad++
+                if (n % paso == 0) alAvanzar(n.toFloat() / hasta)
+            }
+            alAvanzar(1f)
+            cantidad
         }
-        cantidad
-    }
 
     // Prueba divisores desde 2 hasta la raíz de n (d * d <= n, en Long para no desbordar)
     private fun esPrimo(n: Int): Boolean {

@@ -3,7 +3,8 @@ package com.tecsup.centrotareas.data
 import kotlinx.coroutines.flow.Flow
 
 interface TareasRepository {
-    suspend fun contarPrimos(hasta: Int): Int
+    // Mejora 2: alAvanzar recibe el avance del cálculo (0f a 1f)
+    suspend fun contarPrimos(hasta: Int, alAvanzar: (Float) -> Unit = {}): Int
     suspend fun cargarPerfil(): String
     suspend fun cargarPedidos(simularError: Boolean): List<String>
 

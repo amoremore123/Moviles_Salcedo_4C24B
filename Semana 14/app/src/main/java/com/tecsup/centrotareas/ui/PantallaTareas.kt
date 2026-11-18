@@ -113,6 +113,7 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
 @Composable
 private fun TarjetaPrimos(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
+    val progresoPrimos by vm.progresoPrimos.collectAsState()
     // Ajustado: con 500 000 este emulador tardaba ~0,5 s; con 3 000 000 tarda ~3 s
     var texto by rememberSaveable { mutableStateOf("3000000") }
     // Ignora textos no numéricos o menores que 2
@@ -150,12 +151,13 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
         }
         when (val estado = primos) {
             PrimosUi.Inicial -> Text("Escribe N y pulsa Contar")
-            PrimosUi.Calculando -> Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
-                Text("Calculando...")
+            // Mejora 2: barra y porcentaje del cálculo
+            PrimosUi.Calculando -> {
+                LinearProgressIndicator(
+                    progress = { progresoPrimos },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Calculando... ${(progresoPrimos * 100).toInt()} %")
             }
             is PrimosUi.Listo -> RecuadroExito(
                 "Primos encontrados: ${estado.cantidad}\nTiempo: ${estado.milisegundos} ms"
