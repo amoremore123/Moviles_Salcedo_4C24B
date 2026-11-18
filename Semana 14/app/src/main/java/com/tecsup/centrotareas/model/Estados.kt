@@ -18,3 +18,9 @@ sealed interface CargaUi {
     ) : CargaUi
     data class Error(val mensaje: String) : CargaUi
 }
+
+// Mejora 4: tiempos acumulados de cada modo de carga (en milisegundos)
+data class ComparacionTiempos(
+    val unaPorUna: List<Long> = emptyList(),
+    val aLaVez: List<Long> = emptyList()
+)

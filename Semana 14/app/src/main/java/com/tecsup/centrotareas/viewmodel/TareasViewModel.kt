@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.centrotareas.data.TareasRepository
 import com.tecsup.centrotareas.model.CargaUi
+import com.tecsup.centrotareas.model.ComparacionTiempos
 import com.tecsup.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -14,6 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
@@ -102,9 +104,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 val inicio = System.currentTimeMillis()
                 val perfil = repo.cargarPerfil()
                 val pedidos = conReintentos { repo.cargarPedidos(_simularError.value) }
-                _carga.value = CargaUi.Exito(
-                    "Una por una", perfil, pedidos.size, System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+                registrarTiempo(unaPorUna = true, ms = ms)
             } catch (e: CancellationException) {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
@@ -126,9 +128,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                     val b = async { conReintentos { repo.cargarPedidos(_simularError.value) } }
                     Pair(a.await(), b.await())
                 }
-                _carga.value = CargaUi.Exito(
-                    "A la vez", perfil, pedidos.size, System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+                registrarTiempo(unaPorUna = false, ms = ms)
             } catch (e: CancellationException) {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
@@ -144,6 +146,23 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
     fun cambiarSimularError(valor: Boolean) {
         _simularError.value = valor
+    }
+
+    // Mejora 4: acumula los tiempos de cada modo para compararlos en una tabla
+    private val _comparacion = MutableStateFlow(ComparacionTiempos())
+    val comparacion: StateFlow<ComparacionTiempos> = _comparacion.asStateFlow()
+
+    // Solo cuenta cargas sin reintentos: las esperas extra harían injusta la comparación
+    private fun registrarTiempo(unaPorUna: Boolean, ms: Long) {
+        if (_avisoCarga.value != null) return
+        _comparacion.update { actual ->
+            if (unaPorUna) actual.copy(unaPorUna = actual.unaPorUna + ms)
+            else actual.copy(aLaVez = actual.aLaVez + ms)
+        }
+    }
+
+    fun limpiarComparacion() {
+        _comparacion.value = ComparacionTiempos()
     }
 
     // Mejora 3: aviso de reintentos para la pantalla (solo se muestra mientras Cargando)

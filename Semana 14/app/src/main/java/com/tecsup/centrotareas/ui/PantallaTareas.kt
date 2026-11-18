@@ -17,6 +17,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.LinearProgressIndicator
@@ -39,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tecsup.centrotareas.model.CargaUi
+import com.tecsup.centrotareas.model.ComparacionTiempos
 import com.tecsup.centrotareas.model.PrimosUi
 import com.tecsup.centrotareas.ui.theme.Verde
 import com.tecsup.centrotareas.ui.theme.VerdeFondo
@@ -168,6 +171,59 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
 }
 
 @Composable
+private fun TablaComparacion(datos: ComparacionTiempos, onLimpiar: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        HorizontalDivider()
+        Text(
+            "Comparación de tiempos",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
+        FilaTabla("Modo", "Veces", "Último", "Promedio", encabezado = true)
+        FilaModo("Una por una", datos.unaPorUna)
+        FilaModo("A la vez", datos.aLaVez)
+        if (datos.unaPorUna.isNotEmpty() && datos.aLaVez.isNotEmpty()) {
+            val ahorro = datos.unaPorUna.average() - datos.aLaVez.average()
+            val porcentaje = ahorro / datos.unaPorUna.average() * 100
+            Text(
+                "A la vez ahorra ${ahorro.toLong()} ms (${porcentaje.toInt()} %) en promedio",
+                color = Verde,
+                fontWeight = FontWeight.Medium
+            )
+        }
+        Text(
+            "Solo cuenta cargas sin reintentos",
+            style = MaterialTheme.typography.bodySmall
+        )
+        TextButton(onClick = onLimpiar) { Text("Limpiar tabla") }
+    }
+}
+
+@Composable
+private fun FilaModo(modo: String, tiempos: List<Long>) {
+    FilaTabla(
+        modo,
+        tiempos.size.toString(),
+        tiempos.lastOrNull()?.let { "$it ms" } ?: "—",
+        if (tiempos.isEmpty()) "—" else "${tiempos.average().toLong()} ms"
+    )
+}
+
+@Composable
+private fun FilaTabla(
+    c1: String, c2: String, c3: String, c4: String,
+    encabezado: Boolean = false
+) {
+    val peso = if (encabezado) FontWeight.Bold else FontWeight.Normal
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(c1, fontWeight = peso, modifier = Modifier.weight(1.4f))
+        Text(c2, fontWeight = peso, modifier = Modifier.weight(0.8f))
+        Text(c3, fontWeight = peso, modifier = Modifier.weight(1f))
+        Text(c4, fontWeight = peso, modifier = Modifier.weight(1.1f))
+    }
+}
+
+@Composable
 private fun RecuadroError(mensaje: String, onReintentar: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
@@ -214,6 +270,7 @@ private fun TarjetaCargas(vm: TareasViewModel) {
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
     val avisoCarga by vm.avisoCarga.collectAsState()
+    val comparacion by vm.comparacion.collectAsState()
     val cargando = carga is CargaUi.Cargando
 
     Tarjeta("Dos cargas") {
@@ -260,6 +317,10 @@ private fun TarjetaCargas(vm: TareasViewModel) {
                 mensaje = estado.mensaje,
                 onReintentar = { vm.cargarALaVez() }
             )
+        }
+        // Mejora 4: tabla que acumula los tiempos de cada modo
+        if (comparacion.unaPorUna.isNotEmpty() || comparacion.aLaVez.isNotEmpty()) {
+            TablaComparacion(comparacion, onLimpiar = { vm.limpiarComparacion() })
         }
     }
 }
