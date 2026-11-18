@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,6 +60,7 @@ fun PantallaTareas(vm: TareasViewModel) {
 @Composable
 private fun TarjetaProgreso(vm: TareasViewModel) {
     val mensaje by vm.mensaje.collectAsState()
+    val progreso by vm.progreso.collectAsState()
     // Prueba de vida: si deja de sumar, la pantalla está congelada
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
@@ -67,8 +69,13 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
             Text("Tócame: $toques")
         }
         Button(onClick = { vm.tareaLarga() }, modifier = Modifier.fillMaxWidth()) {
-            Text("Tarea larga")
+            Text("Iniciar")
         }
+        LinearProgressIndicator(
+            progress = { progreso },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text("${(progreso * 100).toInt()} %")
         Text(text = mensaje, style = MaterialTheme.typography.bodyLarge)
     }
 }
