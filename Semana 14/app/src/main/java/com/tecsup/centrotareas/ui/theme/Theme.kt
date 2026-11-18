@@ -5,19 +5,20 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// El rediseño es claro (fondo lavanda y tarjetas blancas), así que usa un solo esquema
+// Diseño claro: fondo lavanda, tarjetas blancas y color principal índigo
 private val Esquema = lightColorScheme(
-    primary = AzulPrimario,
+    primary = Indigo,
     onPrimary = Color.White,
-    primaryContainer = AzulSuave,
-    onPrimaryContainer = AzulOscuro,
-    secondary = Morado,
+    primaryContainer = LavandaSuave,
+    onPrimaryContainer = IndigoOscuro,
+    secondary = Violeta,
     background = FondoApp,
     onBackground = TextoFuerte,
     surface = Color.White,
     onSurface = TextoFuerte,
-    surfaceVariant = GrisPista,
+    surfaceVariant = PistaBarra,
     onSurfaceVariant = GrisTexto,
+    outline = LavandaBorde,
     error = RojoError,
     errorContainer = RojoFondo,
     onErrorContainer = RojoTexto
