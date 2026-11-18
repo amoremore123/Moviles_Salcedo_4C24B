@@ -6,10 +6,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +34,8 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsStateWithLifecycle()
+    val lugares by vm.lugares.collectAsStateWithLifecycle()
+    val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
 
@@ -90,11 +93,20 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Text("Obtener mi ubicación")
             }
 
-            // TODO Paso 3: MapaUbicacion(..., modifier = Modifier.weight(1f))
+            EstadoUbicacion(estado)
+
+            // El mapa ocupa todo el espacio libre
+            MapaUbicacion(
+                estado = estado,
+                lugares = lugares,
+                seleccionado = seleccionado,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
             // TODO Paso 6: ListaLugares(...) con altura fija
             // TODO Paso 7: botón "Ir al más cercano" y texto "Más cercano: ..."
-
-            EstadoUbicacion(estado)
         }
     }
 }
@@ -103,19 +115,20 @@ fun PantallaMapa(vm: MapaViewModel) {
 private fun EstadoUbicacion(estado: UbicacionUi) {
     when (estado) {
         UbicacionUi.Inicial -> Text("Pulsa el botón para conocer tu ubicación")
-        UbicacionUi.Buscando -> {
-            CircularProgressIndicator()
+        UbicacionUi.Buscando -> Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             Text("Buscando tu ubicación…")
         }
-        is UbicacionUi.Lista -> {
-            Text("Latitud: ${estado.posicion.latitud}")
-            Text("Longitud: ${estado.posicion.longitud}")
-        }
+        is UbicacionUi.Lista -> Text(
+            "Lat: %.5f   Lon: %.5f".format(estado.posicion.latitud, estado.posicion.longitud)
+        )
         // TODO Paso 8: reemplazar por MensajeError(estado, ...)
         is UbicacionUi.Error -> Text(
             text = estado.mensaje,
             color = MaterialTheme.colorScheme.error
         )
     }
-    Spacer(Modifier.height(4.dp))
 }
