@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
 import com.tecsup.centrotareas.ui.theme.Verde
 import com.tecsup.centrotareas.ui.theme.VerdeFondo
@@ -180,9 +181,44 @@ private fun RecuadroExito(texto: String) {
 
 @Composable
 private fun TarjetaCargas(vm: TareasViewModel) {
+    val carga by vm.carga.collectAsState()
+    val cargando = carga is CargaUi.Cargando
+
     Tarjeta("Dos cargas") {
-        // TODO Pasos 6 y 7: Una por una / A la vez, Simular error y resultado
-        Text("Pendiente: pasos 6 y 7")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { vm.cargarUnaPorUna() },
+                enabled = !cargando,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Una por una")
+            }
+            Button(
+                onClick = { vm.cargarALaVez() },
+                enabled = !cargando,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("A la vez")
+            }
+        }
+        when (val estado = carga) {
+            CargaUi.Inicial -> Text("Elige cómo cargar el perfil y los pedidos")
+            CargaUi.Cargando -> Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                Text("Cargando...")
+            }
+            is CargaUi.Exito -> RecuadroExito(
+                "Modo: ${estado.modo}\n" +
+                    "Perfil: ${estado.perfil}\n" +
+                    "Pedidos: ${estado.pedidos}\n" +
+                    "Tiempo: ${estado.milisegundos} ms"
+            )
+            // TODO Paso 7: recuadro de error con Reintentar
+            is CargaUi.Error -> Text(estado.mensaje, color = MaterialTheme.colorScheme.error)
+        }
     }
 }
 
