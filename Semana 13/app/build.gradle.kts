@@ -25,7 +25,12 @@ android {
         versionName = "1.0"
 
         // Inyecta la clave en ${MAPS_API_KEY} del Manifest ("" si aún no la configuraste)
-        manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
+        val claveMaps = localProps.getProperty("MAPS_API_KEY", "")
+        manifestPlaceholders["MAPS_API_KEY"] = claveMaps
+
+        // Mejora 4: sin clave de Google Maps se usa el mapa de OpenStreetMap.
+        // Solo se publica si HAY clave (true/false), nunca la clave en sí.
+        buildConfigField("boolean", "TIENE_CLAVE_MAPS", claveMaps.isNotBlank().toString())
     }
 
     buildTypes {
@@ -45,6 +50,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -74,4 +80,7 @@ dependencies {
 
     // Mejora 3: guardar el último lugar visitado
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Mejora 4: mapa alternativo de OpenStreetMap (gratis, sin clave)
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
 }

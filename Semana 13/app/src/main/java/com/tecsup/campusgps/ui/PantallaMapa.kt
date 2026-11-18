@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tecsup.campusgps.BuildConfig
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.formatearDistancia
 import com.tecsup.campusgps.viewmodel.MapaViewModel
@@ -118,17 +119,30 @@ fun PantallaMapa(vm: MapaViewModel) {
                 onReintentar = { alPulsar() }
             )
 
-            // El mapa ocupa todo el espacio libre
-            MapaUbicacion(
-                estado = estado,
-                lugares = lugaresVisibles,
-                seleccionado = seleccionado,
-                idMasCercano = masCercano?.id,
-                radio = radio,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
+            // El mapa ocupa todo el espacio libre.
+            // Mejora 4: con clave se usa Google Maps; sin clave, OpenStreetMap.
+            val modificadorMapa = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+            if (BuildConfig.TIENE_CLAVE_MAPS) {
+                MapaUbicacion(
+                    estado = estado,
+                    lugares = lugaresVisibles,
+                    seleccionado = seleccionado,
+                    idMasCercano = masCercano?.id,
+                    radio = radio,
+                    modifier = modificadorMapa
+                )
+            } else {
+                MapaOsm(
+                    estado = estado,
+                    lugares = lugaresVisibles,
+                    seleccionado = seleccionado,
+                    idMasCercano = masCercano?.id,
+                    radio = radio,
+                    modifier = modificadorMapa
+                )
+            }
 
             // Mejora 2: selector del radio de cercanía
             SelectorRadio(
