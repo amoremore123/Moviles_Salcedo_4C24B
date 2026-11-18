@@ -1,0 +1,18 @@
+.gradle/
+.kotlin/
+build/
+**/build/
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+*.log
+*.tmp
+.DS_Store
+
+# Nunca subir: aqui vive la clave de Maps (MAPS_API_KEY)
+local.properties
+secrets.properties
+*.jks
+*.keystore
