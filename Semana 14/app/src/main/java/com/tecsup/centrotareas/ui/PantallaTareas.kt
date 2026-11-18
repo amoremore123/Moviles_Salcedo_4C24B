@@ -3,6 +3,8 @@ package com.tecsup.centrotareas.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,11 +28,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tecsup.centrotareas.model.PrimosUi
+import com.tecsup.centrotareas.ui.theme.Verde
+import com.tecsup.centrotareas.ui.theme.VerdeFondo
 import com.tecsup.centrotareas.viewmodel.TareasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,9 +109,72 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
 
 @Composable
 private fun TarjetaPrimos(vm: TareasViewModel) {
+    val primos by vm.primos.collectAsState()
+    // Ajustado: con 500 000 este emulador tardaba ~0,5 s; con 3 000 000 tarda ~3 s
+    var texto by rememberSaveable { mutableStateOf("3000000") }
+    // Ignora textos no numéricos o menores que 2
+    val numero = texto.toIntOrNull()?.takeIf { it >= 2 }
+    val calculando = primos is PrimosUi.Calculando
+
     Tarjeta("Contar números primos") {
-        // TODO Paso 5: campo numérico, Contar / Cancelar y resultado
-        Text("Pendiente: paso 5")
+        OutlinedTextField(
+            value = texto,
+            onValueChange = { texto = it.filter(Char::isDigit).take(9) },
+            label = { Text("Contar primos hasta N") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = numero == null,
+            supportingText = if (numero == null) {
+                { Text("Ingresa un número mayor o igual a 2") }
+            } else null,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { numero?.let { vm.contar(it) } },
+                enabled = numero != null && !calculando,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Contar")
+            }
+            OutlinedButton(
+                onClick = { vm.cancelarPrimos() },
+                enabled = calculando,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cancelar")
+            }
+        }
+        when (val estado = primos) {
+            PrimosUi.Inicial -> Text("Escribe N y pulsa Contar")
+            PrimosUi.Calculando -> Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                Text("Calculando...")
+            }
+            is PrimosUi.Listo -> RecuadroExito(
+                "Primos encontrados: ${estado.cantidad}\nTiempo: ${estado.milisegundos} ms"
+            )
+            PrimosUi.Cancelado -> Text("Cancelado", color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+@Composable
+private fun RecuadroExito(texto: String) {
+    Surface(
+        color = VerdeFondo,
+        contentColor = Verde,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = texto,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(12.dp)
+        )
     }
 }
 
