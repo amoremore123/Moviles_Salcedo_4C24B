@@ -10,6 +10,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,19 +95,20 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // Paso 6: primero el perfil y después los pedidos (2 s + 3 s ≈ 5 s)
     fun cargarUnaPorUna() {
         if (_carga.value is CargaUi.Cargando) return
+        _avisoCarga.value = null
         _carga.value = CargaUi.Cargando
         viewModelScope.launch {
             try {
                 val inicio = System.currentTimeMillis()
                 val perfil = repo.cargarPerfil()
-                val pedidos = repo.cargarPedidos(_simularError.value)
+                val pedidos = conReintentos { repo.cargarPedidos(_simularError.value) }
                 _carga.value = CargaUi.Exito(
                     "Una por una", perfil, pedidos.size, System.currentTimeMillis() - inicio
                 )
             } catch (e: CancellationException) {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
+                _carga.value = CargaUi.Error("No se pudo cargar tras $MAX_INTENTOS intentos: ${e.message}")
             }
         }
     }
@@ -114,13 +116,14 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // Paso 6: las dos cargas al mismo tiempo (máximo(2 s, 3 s) ≈ 3 s)
     fun cargarALaVez() {
         if (_carga.value is CargaUi.Cargando) return
+        _avisoCarga.value = null
         _carga.value = CargaUi.Cargando
         viewModelScope.launch {
             try {
                 val inicio = System.currentTimeMillis()
                 val (perfil, pedidos) = coroutineScope {
                     val a = async { repo.cargarPerfil() }
-                    val b = async { repo.cargarPedidos(_simularError.value) }
+                    val b = async { conReintentos { repo.cargarPedidos(_simularError.value) } }
                     Pair(a.await(), b.await())
                 }
                 _carga.value = CargaUi.Exito(
@@ -130,7 +133,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
                 // Si una carga falla, coroutineScope cancela la otra y lanza el error aquí
-                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
+                _carga.value = CargaUi.Error("No se pudo cargar tras $MAX_INTENTOS intentos: ${e.message}")
             }
         }
     }
@@ -141,5 +144,34 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
     fun cambiarSimularError(valor: Boolean) {
         _simularError.value = valor
+    }
+
+    // Mejora 3: aviso de reintentos para la pantalla (solo se muestra mientras Cargando)
+    private val _avisoCarga = MutableStateFlow<String?>(null)
+    val avisoCarga: StateFlow<String?> = _avisoCarga.asStateFlow()
+
+    // Mejora 3: ejecuta el bloque hasta MAX_INTENTOS veces con espera creciente
+    // (500 ms, 1000 ms...). La cancelación nunca se reintenta: se relanza.
+    private suspend fun <T> conReintentos(bloque: suspend () -> T): T {
+        var espera = ESPERA_INICIAL_MS
+        for (intento in 1 until MAX_INTENTOS) {
+            try {
+                return bloque()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _avisoCarga.value = "Intento $intento de $MAX_INTENTOS falló " +
+                    "(${e.message}). Reintentando en $espera ms..."
+                delay(espera)
+                espera *= 2
+            }
+        }
+        _avisoCarga.value = "Último intento ($MAX_INTENTOS de $MAX_INTENTOS)..."
+        return bloque() // si vuelve a fallar, el error llega al catch de la carga
+    }
+
+    private companion object {
+        const val MAX_INTENTOS = 3
+        const val ESPERA_INICIAL_MS = 500L
     }
 }

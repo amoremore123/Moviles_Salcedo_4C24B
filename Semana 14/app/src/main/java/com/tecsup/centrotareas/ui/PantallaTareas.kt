@@ -213,6 +213,7 @@ private fun RecuadroExito(texto: String) {
 private fun TarjetaCargas(vm: TareasViewModel) {
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val avisoCarga by vm.avisoCarga.collectAsState()
     val cargando = carga is CargaUi.Cargando
 
     Tarjeta("Dos cargas") {
@@ -246,7 +247,8 @@ private fun TarjetaCargas(vm: TareasViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
-                Text("Cargando...")
+                // Mejora 3: si hay reintentos en curso, se avisa aquí
+                Text(avisoCarga ?: "Cargando...")
             }
             is CargaUi.Exito -> RecuadroExito(
                 "Modo: ${estado.modo}\n" +
