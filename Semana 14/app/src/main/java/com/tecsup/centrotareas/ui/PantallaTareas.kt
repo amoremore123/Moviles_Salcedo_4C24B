@@ -66,8 +66,8 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
         Button(onClick = { toques++ }, modifier = Modifier.fillMaxWidth()) {
             Text("Tócame: $toques")
         }
-        Button(onClick = { vm.tareaLargaMala() }, modifier = Modifier.fillMaxWidth()) {
-            Text("Tarea larga (MAL)")
+        Button(onClick = { vm.tareaLarga() }, modifier = Modifier.fillMaxWidth()) {
+            Text("Tarea larga")
         }
         Text(text = mensaje, style = MaterialTheme.typography.bodyLarge)
     }
