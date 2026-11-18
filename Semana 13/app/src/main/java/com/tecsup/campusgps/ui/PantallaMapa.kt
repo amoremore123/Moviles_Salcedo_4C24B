@@ -47,6 +47,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val categoria by vm.categoria.collectAsStateWithLifecycle()
     val radio by vm.radio.collectAsStateWithLifecycle()
     val idsDentroDelRadio by vm.idsDentroDelRadio.collectAsStateWithLifecycle()
+    val ultimoVisitado by vm.ultimoVisitado.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
 
@@ -170,6 +171,15 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Text(
                     "Más cercano: ${cercano.nombre} (${metros?.let { formatearDistancia(it) } ?: "Sin calcular"})",
                     style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // Mejora 3: último lugar visitado, recuperado de DataStore
+            ultimoVisitado?.let {
+                Text(
+                    "Último visitado: ${it.nombre}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

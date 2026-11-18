@@ -71,4 +71,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
     implementation("com.google.maps.android:maps-compose:8.4.0")
+
+    // Mejora 3: guardar el último lugar visitado
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

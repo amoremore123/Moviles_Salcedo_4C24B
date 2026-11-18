@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.LugaresRepository
+import com.tecsup.campusgps.data.PreferenciasRepository
 import com.tecsup.campusgps.data.UbicacionNoDisponibleException
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.model.Lugar
@@ -18,13 +19,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
-    private val lugaresRepo: LugaresRepository
+    private val lugaresRepo: LugaresRepository,
+    private val preferenciasRepo: PreferenciasRepository
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
@@ -76,6 +79,23 @@ class MapaViewModel(
         if (metros in radios) _radio.value = metros
     }
 
+    // ---- Mejora 3: último lugar visitado (DataStore) ----
+
+    // El lugar guardado, para mostrar "Último visitado: ..." en la pantalla
+    val ultimoVisitado: StateFlow<Lugar?> = preferenciasRepo.ultimoLugar
+        .map { id -> lugaresRepo.obtenerLugares().firstOrNull { it.id == id } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    init {
+        // Al abrir la app, recupera la última selección (solo si aún no hay otra)
+        viewModelScope.launch {
+            val guardado = preferenciasRepo.ultimoLugar.first()
+            if (guardado != null && _seleccionado.value == null) {
+                _seleccionado.value = guardado
+            }
+        }
+    }
+
     fun buscar() {
         // Sin Play Services no hay FusedLocationProviderClient: no tiene sentido reintentar
         if (!ubicacionRepo.playServicesDisponible()) {
@@ -119,6 +139,10 @@ class MapaViewModel(
     // La pantalla avisa qué lugar tocó el usuario; null = ninguno
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+        // Mejora 3: cada selección se guarda como último lugar visitado
+        if (id != null) {
+            viewModelScope.launch { preferenciasRepo.guardarUltimoLugar(id) }
+        }
     }
     // Se deriva de lugares: el primero con distancia calculada (la lista ya está ordenada).
     // Es null mientras todavía no hay ubicación.
