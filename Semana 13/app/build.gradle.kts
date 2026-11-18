@@ -1,12 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// TODO Paso 1: lee local.properties (si existe) y úsalo en defaultConfig
-// val localProps = java.util.Properties().apply {
-//     // TODO: cargar rootProject.file("local.properties")
-// }
+// Lee local.properties (si existe). Ese archivo está en .gitignore: la clave nunca se sube.
+val localProps = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) {
+        archivo.inputStream().use { load(it) }
+    }
+}
 
 android {
     namespace = "com.tecsup.campusgps"
@@ -19,7 +24,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // TODO Paso 1: manifestPlaceholders["MAPS_API_KEY"] = ...
+        // Inyecta la clave en ${MAPS_API_KEY} del Manifest ("" si aún no la configuraste)
+        manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- TODO Paso 1: declarar ACCESS_COARSE_LOCATION y ACCESS_FINE_LOCATION aquí -->
+    <!-- Ubicación aproximada (COARSE) y precisa (FINE); se piden en tiempo de ejecución -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CampusGPS">
 
-        <!-- TODO Paso 1: meta-data com.google.android.geo.API_KEY con ${MAPS_API_KEY} -->
+        <!-- La clave real vive en local.properties y llega por manifestPlaceholders -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
 
         <activity
             android:name=".MainActivity"
