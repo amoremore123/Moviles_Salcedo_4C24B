@@ -1,8 +1,12 @@
 package com.tecsup.centrotareas.data
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -18,6 +22,15 @@ class TareasRepositoryLocal : TareasRepository {
         if (simularError) throw IOException("Sin conexión")
         return listOf("Pedido 101", "Pedido 102", "Pedido 103")
     }
+
+    // Mejora 1: 100 pasos de 40 ms (≈ 4 s); flowOn mueve el trabajo a Dispatchers.Default
+    override fun progresoTarea(): Flow<Float> = flow {
+        Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
+        for (i in 1..100) {
+            delay(40) // delay revisa la cancelación
+            emit(i / 100f)
+        }
+    }.flowOn(Dispatchers.Default)
 
     // Paso 5: cálculo pesado de CPU, fuera del hilo principal
     override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {

@@ -7,16 +7,13 @@ import com.tecsup.centrotareas.data.TareasRepository
 import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
@@ -33,7 +30,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _corriendo = MutableStateFlow(false)
     val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
 
-    // Paso 2: la espera corre en segundo plano; el hilo principal queda libre
+    // Mejora 1: el trabajo vive en el Repository (Flow con flowOn); aquí solo se recoge
     fun tareaLarga() {
         if (_corriendo.value) return // evita lanzar dos tareas a la vez
         _corriendo.value = true
@@ -42,14 +39,8 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 _progreso.value = 0f
                 _mensaje.value = "Trabajando..."
                 Log.d("HILO", "Antes: ${Thread.currentThread().name}")
-                withContext(Dispatchers.Default) {
-                    Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-                    // 100 vueltas x 40 ms = unos 4 segundos
-                    for (i in 1..100) {
-                        delay(40) // delay revisa la cancelación
-                        _progreso.value = i / 100f
-                    }
-                }
+                // collect corre en main; el flow emite desde Dispatchers.Default
+                repo.progresoTarea().collect { valor -> _progreso.value = valor }
                 Log.d("HILO", "Despues: ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
             } finally {
