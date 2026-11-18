@@ -16,6 +16,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.tecsup.campusgps.model.Campus
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.UbicacionUi
 import org.osmdroid.config.Configuration
@@ -48,7 +49,8 @@ fun MapaOsm(
         MapView(contexto).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            mover(this, GeoPoint(-12.0464, -77.0428), 15.0) // Lima, igual que el mapa de Google
+            // Mejora 5: el mapa arranca sobre Tecsup Lima, igual que el de Google
+            mover(this, GeoPoint(Campus.CENTRO.latitud, Campus.CENTRO.longitud), 17.0)
         }
     }
 

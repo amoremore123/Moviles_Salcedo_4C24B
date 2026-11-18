@@ -14,6 +14,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import com.tecsup.campusgps.model.Campus
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.UbicacionUi
 
@@ -27,7 +28,10 @@ fun MapaUbicacion(
     radio: Int? = null // Mejora 2: círculo de cercanía alrededor de tu posición
 ) {
     val camara = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(-12.0464, -77.0428), 12f)
+        // Mejora 5: el mapa arranca sobre Tecsup Lima
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(Campus.CENTRO.latitud, Campus.CENTRO.longitud), 16f
+        )
     }
 
     // Cada vez que cambia el estado: si ya hay ubicación, la cámara viaja hasta ella
