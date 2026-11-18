@@ -58,6 +58,24 @@ class MapaViewModel(
         _categoria.value = if (cat == _categoria.value) null else cat
     }
 
+    // ---- Mejora 2: radio de cercanía ----
+
+    val radios: List<Int> = listOf(100, 200, 500)
+
+    private val _radio = MutableStateFlow(200)
+    val radio: StateFlow<Int> = _radio.asStateFlow()
+
+    // Ids de los lugares cuya distancia ya calculada cae dentro del radio.
+    // La comparación se hace aquí, no en el Composable.
+    val idsDentroDelRadio: StateFlow<Set<Int>> =
+        combine(_lugares, _radio) { lista, r ->
+            lista.filter { it.metros != null && it.metros <= r }.map { it.lugar.id }.toSet()
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    fun cambiarRadio(metros: Int) {
+        if (metros in radios) _radio.value = metros
+    }
+
     fun buscar() {
         // Sin Play Services no hay FusedLocationProviderClient: no tiene sentido reintentar
         if (!ubicacionRepo.playServicesDisponible()) {

@@ -33,7 +33,10 @@ fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     onClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // Mejora 2: ids dentro del radio (ya calculados por el ViewModel) y el radio actual
+    dentroDelRadio: Set<Int> = emptySet(),
+    radio: Int? = null
 ) {
     LazyColumn(
         modifier = modifier,
@@ -43,6 +46,7 @@ fun ListaLugares(
             TarjetaLugar(
                 item = item,
                 esSeleccionado = item.lugar.id == seleccionado,
+                dentro = if (item.lugar.id in dentroDelRadio) radio else null,
                 onClick = { onClick(item.lugar.id) }
             )
         }
@@ -53,6 +57,7 @@ fun ListaLugares(
 private fun TarjetaLugar(
     item: LugarConDistancia,
     esSeleccionado: Boolean,
+    dentro: Int?, // radio en metros si el lugar está dentro; null si no
     onClick: () -> Unit
 ) {
     val colores = MaterialTheme.colorScheme
@@ -72,7 +77,8 @@ private fun TarjetaLugar(
             Box(
                 Modifier
                     .size(12.dp)
-                    .background(colores.primary, CircleShape)
+                    // Verde si está dentro del radio
+                    .background(if (dentro != null) colores.secondary else colores.primary, CircleShape)
             )
             Column(Modifier.weight(1f)) {
                 Text(item.lugar.nombre, fontWeight = FontWeight.Bold)
@@ -82,10 +88,20 @@ private fun TarjetaLugar(
                     color = colores.onSurfaceVariant
                 )
             }
-            Text(
-                text = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (dentro != null) {
+                    Text(
+                        "Dentro de $dentro m",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colores.secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
