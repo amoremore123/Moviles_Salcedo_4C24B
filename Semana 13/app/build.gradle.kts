@@ -71,6 +71,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    // Mejora 6 (rediseño): íconos de libro, taza, matraz, máscaras, auto, etc.
+    implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // Ubicación y mapas (sección 4 de la guía)
