@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa CentroTareas</title>
+<style>
+  :root {
+    --fondo: #f1f3fc;
+    --tarjeta: #ffffff;
+    --texto: #1b2140;
+    --suave: #5d6478;
+    --azul: #1f4fd6;
+    --azul-suave: #e7edfe;
+    --azul-oscuro: #16399e;
+    --verde: #2e9b5a;
+    --verde-suave: #e4f5ea;
+    --rojo: #d64545;
+    --rojo-suave: #fce6e6;
+    --morado: #7b5cf5;
+    --morado-suave: #efeafe;
+    --borde: #e3e6f0;
+    --codigo: #f6f7fb;
+    --sombra: 0 2px 10px rgba(31, 79, 214, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #10142a; --tarjeta: #1a1f3a; --texto: #e8ebf7; --suave: #a3a9c2;
+      --azul: #7d9bff; --azul-suave: #24305e; --azul-oscuro: #c3d0ff;
+      --verde: #5fd08f; --verde-suave: #1d3a2b; --rojo: #ff7d7d; --rojo-suave: #3e2226;
+      --morado: #a993ff; --morado-suave: #2c2552; --borde: #2c3354; --codigo: #141831;
+      --sombra: 0 2px 10px rgba(0, 0, 0, .3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #10142a; --tarjeta: #1a1f3a; --texto: #e8ebf7; --suave: #a3a9c2;
+    --azul: #7d9bff; --azul-suave: #24305e; --azul-oscuro: #c3d0ff;
+    --verde: #5fd08f; --verde-suave: #1d3a2b; --rojo: #ff7d7d; --rojo-suave: #3e2226;
+    --morado: #a993ff; --morado-suave: #2c2552; --borde: #2c3354; --codigo: #141831;
+    --sombra: 0 2px 10px rgba(0, 0, 0, .3);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    background: linear-gradient(135deg, #1f4fd6, #4b3fd6 60%, #7b5cf5);
+    color: #fff; padding: 40px 16px 56px;
+  }
+  .ancho { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header h1 { margin: 0; font-size: clamp(28px, 5vw, 42px); letter-spacing: -.5px; }
+  header p { margin: 6px 0 0; opacity: .9; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,.18); color: #fff;
+  }
+  nav.indice {
+    background: var(--tarjeta); border-radius: 18px; box-shadow: var(--sombra);
+    margin-top: -32px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  nav.indice a {
+    color: var(--azul); text-decoration: none; font-size: 14px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; background: var(--azul-suave);
+  }
+  section { margin: 34px 0; }
+  h2 { font-size: 22px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  h2 .num {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--azul); color: #fff;
+    display: inline-grid; place-items: center; font-size: 15px; flex: none;
+  }
+  .sub { color: var(--suave); margin: 0 0 16px; }
+  .tarjeta {
+    background: var(--tarjeta); border-radius: 20px; box-shadow: var(--sombra);
+    padding: 18px 20px; border: 1px solid var(--borde);
+  }
+  .rejilla { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+  .rejilla .tarjeta h3 { margin: 0 0 4px; font-size: 16px; color: var(--azul); }
+  .rejilla .tarjeta p { margin: 0 0 10px; color: var(--suave); font-size: 14px; }
+  code, .ruta {
+    font-family: "JetBrains Mono", Consolas, "Cascadia Code", monospace; font-size: 13px;
+  }
+  .ruta {
+    display: inline-block; background: var(--azul-suave); color: var(--azul-oscuro);
+    padding: 2px 8px; border-radius: 8px; margin: 2px 4px 2px 0; overflow-wrap: anywhere;
+  }
+  .ruta b { color: var(--azul); }
+  pre {
+    background: var(--codigo); border: 1px solid var(--borde); border-radius: 12px;
+    padding: 12px 14px; overflow-x: auto; margin: 8px 0 0; font-size: 13px; line-height: 1.5;
+  }
+  .tabla-envoltura { overflow-x: auto; border-radius: 16px; border: 1px solid var(--borde); background: var(--tarjeta); box-shadow: var(--sombra); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+  th { text-align: left; background: var(--azul-suave); color: var(--azul-oscuro); padding: 10px 12px; font-size: 13px; }
+  td { padding: 10px 12px; border-top: 1px solid var(--borde); vertical-align: top; }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+  .commit { font-family: Consolas, monospace; font-size: 12px; color: var(--morado); background: var(--morado-suave); padding: 2px 7px; border-radius: 6px; white-space: nowrap; }
+  .etq { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .etq.main { background: var(--verde-suave); color: var(--verde); }
+  .etq.rama { background: var(--morado-suave); color: var(--morado); }
+  .flujo { display: grid; gap: 10px; }
+  .capa {
+    border-radius: 16px; padding: 14px 16px; border: 2px solid var(--azul);
+    background: var(--tarjeta); box-shadow: var(--sombra);
+  }
+  .capa h3 { margin: 0; font-size: 16px; }
+  .capa p { margin: 4px 0 0; font-size: 14px; color: var(--suave); }
+  .capa.v { border-color: var(--azul); }
+  .capa.vm { border-color: var(--morado); }
+  .capa.r { border-color: var(--verde); }
+  .flecha { text-align: center; color: var(--suave); font-size: 13px; font-weight: 600; }
+  .reglas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .regla { display: flex; gap: 10px; align-items: flex-start; padding: 14px; border-radius: 14px; background: var(--verde-suave); }
+  .regla .ok { color: var(--verde); font-weight: 800; font-size: 18px; line-height: 1; }
+  .regla.no { background: var(--rojo-suave); }
+  .regla.no .ok { color: var(--rojo); }
+  .galeria { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .galeria figure { margin: 0; background: var(--tarjeta); border-radius: 16px; padding: 8px; box-shadow: var(--sombra); }
+  .galeria img { width: 100%; border-radius: 10px; display: block; }
+  .galeria figcaption { font-size: 12px; color: var(--suave); text-align: center; margin-top: 6px; }
+  .nota { background: var(--azul-suave); color: var(--azul-oscuro); border-radius: 14px; padding: 12px 16px; font-size: 14px; }
+  footer { text-align: center; color: var(--suave); font-size: 13px; padding: 30px 16px 50px; }
+  @media (max-width: 600px) { header { padding-top: 28px; } section { margin: 26px 0; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ancho">
+    <h1>📋 CentroTareas · Mapa del laboratorio</h1>
+    <p>Semana 14, Hilos en Android: dónde está implementado cada cosa que pide la guía</p>
+    <div class="chips">
+      <span class="chip">✔ Corrutinas</span>
+      <span class="chip">✔ MVVM + Repository</span>
+      <span class="chip">✔ Jetpack Compose + Material 3</span>
+      <span class="chip">✔ 9 commits Fase 1</span>
+      <span class="chip">✔ 4 mejoras Fase 2</span>
+    </div>
+  </div>
+</header>
+
+<main class="ancho">
+  <nav class="indice" aria-label="Índice">
+    <a href="#como-leer">Cómo leer</a>
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#dependencias">Dependencias</a>
+    <a href="#hilos">Hilos y corrutinas</a>
+    <a href="#pasos">Pasos 0 a 8</a>
+    <a href="#mejoras">Fase 2</a>
+    <a href="#interfaz">Interfaz</a>
+    <a href="#reglas">Reglas de oro</a>
+    <a href="#capturas">Capturas</a>
+  </nav>
+
+  <section id="como-leer">
+    <h2><span class="num">0</span>Cómo leer este mapa</h2>
+    <p class="sub">Cada ubicación se ve así: <span class="ruta">viewmodel/TareasViewModel.kt : <b>37</b></span> (archivo y número de línea).</p>
+    <div class="nota">
+      Todas las rutas parten de <code>Semana 14/app/src/main/java/com/tecsup/centrotareas/</code>, salvo las de Gradle, que parten de <code>Semana 14/</code>.
+      Los números de línea son de la rama <span class="etq rama">mejora-ia-s14</span> (la versión final). Cuando la versión de la rama <span class="etq main">main</span> (Fase 1) es distinta, se indica aparte.
+    </div>
+  </section>
+
+  <section id="arquitectura">
+    <h2><span class="num">1</span>Arquitectura MVVM + Repository</h2>
+    <p class="sub">Cada capa conoce solo a la de abajo. Los datos suben por <code>StateFlow</code> y los eventos bajan como llamadas.</p>
+    <div class="flujo">
+      <div class="capa v">
+        <h3>🖼️ View: Jetpack Compose</h3>
+        <p>Solo muestra el estado y avisa los eventos (botones). No lanza corrutinas ni usa <code>Thread</code>.</p>
+        <div style="margin-top:8px">
+          <span class="ruta">ui/PantallaTareas.kt : <b>63</b></span>
+          <span class="ruta">ui/Tarjetas.kt</span>
+          <span class="ruta">ui/Componentes.kt</span>
+        </div>
+      </div>
+      <div class="flecha">↓ eventos: <code>vm.tareaLarga()</code>, <code>vm.contar(n)</code>… &nbsp;&nbsp; ↑ estado: <code>collectAsState()</code></div>
+      <div class="capa vm">
+        <h3>🧠 ViewModel: TareasViewModel</h3>
+        <p>Lanza las corrutinas con <code>viewModelScope</code> y expone <code>StateFlow</code> de solo lectura. Conoce solo la interface del Repository.</p>
+        <div style="margin-top:8px">
+          <span class="ruta">viewmodel/TareasViewModel.kt : <b>21</b></span>
+          <span class="ruta">viewmodel/TareasViewModelFactory.kt : <b>7</b></span>
+        </div>
+      </div>
+      <div class="flecha">↓ <code>suspend fun</code> y <code>Flow</code></div>
+      <div class="capa r">
+        <h3>💾 Repository: interface + implementación local</h3>
+        <p>Hace el trabajo pesado (cargas simuladas con <code>delay</code>, conteo de primos). No sabe nada de la UI.</p>
+        <div style="margin-top:8px">
+          <span class="ruta">data/TareasRepository.kt : <b>5</b></span>
+          <span class="ruta">data/TareasRepositoryLocal.kt : <b>13</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="rejilla" style="margin-top:14px">
+      <div class="tarjeta">
+        <h3>Estados de pantalla</h3>
+        <p><code>sealed interface</code> PrimosUi y CargaUi; data class ComparacionTiempos (mejora 4).</p>
+        <span class="ruta">model/Estados.kt : <b>3</b></span>
+        <span class="ruta">model/Estados.kt : <b>10</b></span>
+        <span class="ruta">model/Estados.kt : <b>23</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Inyección del Repository</h3>
+        <p>MainActivity crea el ViewModel con su Factory y le pasa <code>TareasRepositoryLocal()</code>.</p>
+        <span class="ruta">MainActivity.kt : <b>20</b></span>
+        <span class="ruta">viewmodel/TareasViewModelFactory.kt : <b>13</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="dependencias">
+    <h2><span class="num">2</span>Dependencias</h2>
+    <p class="sub">Todas en <span class="ruta">app/build.gradle.kts</span>. No hace falta ningún permiso: las cargas son simuladas.</p>
+    <div class="tabla-envoltura">
+      <table>
+        <thead><tr><th>Línea</th><th>Dependencia</th><th>Para qué sirve en el lab</th></tr></thead>
+        <tbody>
+          <tr><td>48</td><td><code>lifecycle-viewmodel-compose:2.8.7</code></td><td><b>La que pide la guía.</b> Trae <code>ViewModel</code>, <code>viewModelScope</code> y <code>viewModel()</code> para Compose. Las corrutinas (<code>launch</code>, <code>async</code>, <code>withContext</code>) llegan con ella.</td></tr>
+          <tr><td>47</td><td><code>lifecycle-runtime-ktx:2.8.7</code></td><td>Ciclo de vida de la Activity.</td></tr>
+          <tr><td>49</td><td><code>lifecycle-runtime-compose:2.8.7</code></td><td>Utilidades de ciclo de vida para Compose.</td></tr>
+          <tr><td>45 · 46</td><td><code>core-ktx</code> · <code>activity-compose</code></td><td>Base de Android y <code>setContent { }</code> en MainActivity.</td></tr>
+          <tr><td>51</td><td><code>compose-bom:2024.12.01</code></td><td>Fija versiones compatibles de todas las librerías de Compose.</td></tr>
+          <tr><td>52 · 54</td><td><code>compose.ui</code> · <code>material3</code></td><td>Interfaz sin XML: Card, Button, LinearProgressIndicator, Switch…</td></tr>
+          <tr><td>56</td><td><code>material-icons-extended</code></td><td>Rediseño: íconos de cohete, calculadora, nube, trofeo y reloj.</td></tr>
+          <tr><td>34</td><td><code>buildFeatures { compose = true }</code></td><td>Activa Compose en el módulo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="hilos">
+    <h2><span class="num">3</span>Hilos y corrutinas: cada concepto y dónde está</h2>
+    <p class="sub">El hilo principal (<code>main</code>) dibuja y atiende toques. Todo lo que tarda va en segundo plano.</p>
+    <div class="rejilla">
+      <div class="tarjeta">
+        <h3>🚫 El problema: Thread.sleep</h3>
+        <p>Paso 1: bloqueaba el hilo principal 4 s y la pantalla se congelaba. Ya no existe en el código final; queda en el historial.</p>
+        <span class="ruta">commit <b>e507862</b> · TareasViewModel.kt : <b>18–21</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🚀 viewModelScope.launch</h3>
+        <p>Lanza corrutinas atadas al ViewModel: se cancelan solas si el ViewModel se destruye y sobreviven a la rotación.</p>
+        <span class="ruta">TareasViewModel.kt : <b>40</b></span>
+        <span class="ruta">: <b>76</b></span><span class="ruta">: <b>102</b></span><span class="ruta">: <b>123</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🔀 withContext(Dispatchers.Default)</h3>
+        <p>Cambia de hilo para el trabajo pesado y vuelve a <code>main</code> al terminar.</p>
+        <span class="ruta">TareasRepositoryLocal.kt : <b>37</b></span> (primos)
+        <span class="ruta"><span class="etq main">main</span> TareasViewModel.kt : <b>45</b></span> (tarea larga, Pasos 2 y 3)
+      </div>
+      <div class="tarjeta">
+        <h3>🌊 Flow + flowOn (mejora 1)</h3>
+        <p>La tarea emite su progreso con <code>emit()</code> desde <code>Dispatchers.Default</code>; el ViewModel hace <code>collect</code> en <code>main</code>.</p>
+        <span class="ruta">TareasRepositoryLocal.kt : <b>27–33</b></span>
+        <span class="ruta">TareasViewModel.kt : <b>46</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🧵 Log.d("HILO")</h3>
+        <p>Muestra en qué hilo corre cada parte: <code>main</code> → <code>DefaultDispatcher-worker</code> → <code>main</code>.</p>
+        <span class="ruta">TareasViewModel.kt : <b>44</b> · <b>47</b></span>
+        <span class="ruta">TareasRepositoryLocal.kt : <b>28</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>⏱️ delay (no bloquea)</h3>
+        <p>Suspende solo la corrutina, libera el hilo y revisa la cancelación.</p>
+        <span class="ruta">TareasRepositoryLocal.kt : <b>16</b> · <b>21</b> · <b>30</b></span>
+        <span class="ruta">TareasViewModel.kt : <b>184</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🛑 Job y cancel()</h3>
+        <p>Se guarda el resultado de <code>launch</code> para poder cancelarlo.</p>
+        <span class="ruta">TareasViewModel.kt : <b>32</b> · <b>58</b></span>
+        <span class="ruta">: <b>65</b> · <b>90</b></span> (primos)
+      </div>
+      <div class="tarjeta">
+        <h3>🧹 finally</h3>
+        <p><code>corriendo = false</code> se ejecuta siempre, tanto si la tarea termina bien como si la cancelan.</p>
+        <span class="ruta">TareasViewModel.kt : <b>49</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🔁 Evitar doble inicio</h3>
+        <p>Si ya corre, no se lanza otra (y además el botón se deshabilita).</p>
+        <span class="ruta">TareasViewModel.kt : <b>38</b> · <b>73</b> · <b>99</b> · <b>120</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>✋ ensureActive()</h3>
+        <p>Dentro del ciclo de primos: permite cancelar un cálculo de CPU a mitad de camino.</p>
+        <span class="ruta">TareasRepositoryLocal.kt : <b>42</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>⚡ async + coroutineScope + await</h3>
+        <p>Perfil y pedidos al mismo tiempo: ≈ 3 s en lugar de 5 s. Si uno falla, se cancela el otro.</p>
+        <span class="ruta">TareasViewModel.kt : <b>126–130</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>🧯 try/catch + relanzar CancellationException</h3>
+        <p>Un error de carga pasa a <code>CargaUi.Error</code>, pero la cancelación siempre se vuelve a lanzar.</p>
+        <span class="ruta">TareasViewModel.kt : <b>82</b> · <b>110</b> · <b>134</b> · <b>179</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>📡 StateFlow de solo lectura</h3>
+        <p><code>MutableStateFlow</code> privado + <code>asStateFlow()</code> público. La UI los lee con <code>collectAsState()</code>.</p>
+        <span class="ruta">TareasViewModel.kt : <b>24</b> · <b>28</b> · <b>33</b> · <b>63</b> · <b>94</b></span>
+        <span class="ruta">ui/Tarjetas.kt : <b>97–99</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>⏲️ Medir el tiempo</h3>
+        <p><code>System.currentTimeMillis()</code> antes y después de cada trabajo.</p>
+        <span class="ruta">TareasViewModel.kt : <b>77</b> · <b>104</b> · <b>125</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="pasos">
+    <h2><span class="num">4</span>Pasos de la guía (Fase 1, rama main)</h2>
+    <p class="sub">Un commit por paso, con el mensaje exacto de la guía.</p>
+    <div class="tabla-envoltura">
+      <table>
+        <thead><tr><th>Paso</th><th>Qué pide</th><th>Dónde está</th><th>Commit</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>Proyecto base que compila</td><td><span class="ruta">MainActivity.kt</span><span class="ruta">model/Estados.kt</span><span class="ruta">data/</span></td><td><span class="commit">d655701</span></td></tr>
+          <tr><td>1</td><td><code>tareaLargaMala()</code> con <code>Thread.sleep(4000)</code>; Observación en README</td><td>Historial: <span class="ruta">TareasViewModel.kt : <b>18</b></span> · <span class="ruta">README.md</span></td><td><span class="commit">e507862</span></td></tr>
+          <tr><td>2</td><td><code>tareaLarga()</code> con <code>launch</code> + <code>withContext</code> y Logcat HILO</td><td><span class="ruta"><span class="etq main">main</span> TareasViewModel.kt : <b>37–53</b></span></td><td><span class="commit">e1a2f34</span></td></tr>
+          <tr><td>3</td><td><code>progreso: StateFlow&lt;Float&gt;</code>, 100 × 40 ms, barra y %</td><td><span class="ruta">TareasViewModel.kt : <b>28</b></span><span class="ruta">ui/Tarjetas.kt : <b>122</b></span></td><td><span class="commit">a9a709a</span></td></tr>
+          <tr><td>4</td><td><code>Job</code>, <code>corriendo</code> con <code>finally</code>, <code>cancelar()</code>, botones habilitados</td><td><span class="ruta">TareasViewModel.kt : <b>32–60</b></span><span class="ruta">ui/Tarjetas.kt : <b>149–156</b></span></td><td><span class="commit">f4dfbcf</span></td></tr>
+          <tr><td>5</td><td><code>contarPrimos</code> con <code>Default</code> + <code>ensureActive</code>; <code>esPrimo</code>; <code>contar</code>/<code>cancelarPrimos</code></td><td><span class="ruta">TareasRepositoryLocal.kt : <b>36–58</b></span><span class="ruta">TareasViewModel.kt : <b>72–91</b></span><span class="ruta">ui/Tarjetas.kt : <b>166</b></span></td><td><span class="commit">4d1b4f9</span></td></tr>
+          <tr><td>6</td><td><code>cargarUnaPorUna()</code> ≈ 5 s y <code>cargarALaVez()</code> con <code>async</code> ≈ 3 s</td><td><span class="ruta">TareasViewModel.kt : <b>98–140</b></span><span class="ruta">ui/Tarjetas.kt : <b>269</b></span></td><td><span class="commit">d90e322</span></td></tr>
+          <tr><td>7</td><td><code>simularError</code>, <code>try/catch</code>, Reintentar y Switch</td><td><span class="ruta">TareasViewModel.kt : <b>144–149</b></span><span class="ruta">ui/Tarjetas.kt : <b>282</b> · <b>326</b></span></td><td><span class="commit">2ad5b04</span></td></tr>
+          <tr><td>8</td><td>Pruebas de aceptación, README, capturas y «Para pensar»</td><td><span class="ruta">README.md</span><span class="ruta">capturas/</span></td><td><span class="commit">2f31016</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="mejoras">
+    <h2><span class="num">5</span>Mejoras de la Fase 2 (rama mejora-ia-s14)</h2>
+    <p class="sub">Registro de prompts y decisiones en <span class="ruta">PROMPTS.md</span>.</p>
+    <div class="tabla-envoltura">
+      <table>
+        <thead><tr><th>Mejora</th><th>Qué hace</th><th>Dónde está</th><th>Commit</th></tr></thead>
+        <tbody>
+          <tr><td>1 · Progreso desde el Repository</td><td><code>flow { emit }.flowOn(Default)</code>; el ViewModel solo hace <code>collect</code></td><td><span class="ruta">TareasRepository.kt : <b>12</b></span><span class="ruta">TareasRepositoryLocal.kt : <b>27</b></span><span class="ruta">TareasViewModel.kt : <b>46</b></span></td><td><span class="commit">fcb7760</span></td></tr>
+          <tr><td>2 · Primos con progreso</td><td>Callback <code>alAvanzar</code> cada 1 % y barra «Calculando… 41 %»</td><td><span class="ruta">TareasRepository.kt : <b>7</b></span><span class="ruta">TareasViewModel.kt : <b>68</b></span><span class="ruta">ui/Tarjetas.kt : <b>220</b></span></td><td><span class="commit">db55379</span></td></tr>
+          <tr><td>3 · Reintento automático</td><td>Hasta 3 intentos con espera de 500 ms y luego 1000 ms; la cancelación nunca se reintenta</td><td><span class="ruta">TareasViewModel.kt : <b>174–195</b></span></td><td><span class="commit">0490715</span></td></tr>
+          <tr><td>4 · Comparación de tiempos</td><td>Tabla con veces, último, promedio y ahorro de «A la vez»</td><td><span class="ruta">TareasViewModel.kt : <b>152–166</b></span><span class="ruta">ui/Tarjetas.kt : <b>337</b></span></td><td><span class="commit">10b7aa7</span></td></tr>
+          <tr><td>Rediseño</td><td>Pestañas, tarjetas con íconos, anillo de progreso y trofeo</td><td><span class="ruta">ui/</span> (ver sección 6)</td><td><span class="commit">4675390</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="interfaz">
+    <h2><span class="num">6</span>Interfaz (Compose, sin XML)</h2>
+    <p class="sub">La interfaz se reparte en tres pestañas: Inicio, Resultados y Acerca de.</p>
+    <div class="rejilla">
+      <div class="tarjeta">
+        <h3>Pantalla y pestañas</h3>
+        <p>TopAppBar azul, NavigationBar y estado de cada pestaña con <code>rememberSaveableStateHolder</code>.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>63</b> · <b>73</b> · <b>88</b> · <b>106</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Prueba de vida «Tócame»</h3>
+        <p>Contador con <code>rememberSaveable</code>: si deja de sumar, la pantalla está congelada.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>67</b></span>
+        <span class="ruta">ui/Tarjetas.kt : <b>73</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Tarea con progreso</h3>
+        <p>Anillo, LinearProgressIndicator con %, chip de estado e Iniciar/Cancelar.</p>
+        <span class="ruta">ui/Tarjetas.kt : <b>96</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Contar primos</h3>
+        <p>Campo numérico que no acepta textos inválidos ni números &lt; 2; resultado con trofeo.</p>
+        <span class="ruta">ui/Tarjetas.kt : <b>166</b> · <b>173</b> · <b>241</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Dos cargas</h3>
+        <p>Switch «Simular error», recuadro verde de éxito y recuadro rojo con Reintentar.</p>
+        <span class="ruta">ui/Tarjetas.kt : <b>269</b></span>
+      </div>
+      <div class="tarjeta">
+        <h3>Componentes y tema</h3>
+        <p>TarjetaTarea, ChipEstado y RecuadroConIcono; paleta azul y lavanda.</p>
+        <span class="ruta">ui/Componentes.kt : <b>38</b> · <b>94</b> · <b>114</b></span>
+        <span class="ruta">ui/theme/Color.kt</span><span class="ruta">ui/theme/Theme.kt : <b>9</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="reglas">
+    <h2><span class="num">7</span>Reglas de oro</h2>
+    <p class="sub">Verificadas con <code>git grep</code> y en el emulador.</p>
+    <div class="reglas">
+      <div class="regla no"><span class="ok">✕</span><div><b>Sin GlobalScope</b><br><small>Solo se usa viewModelScope.</small></div></div>
+      <div class="regla no"><span class="ok">✕</span><div><b>Sin runBlocking</b><br><small>Nada bloquea el hilo principal.</small></div></div>
+      <div class="regla no"><span class="ok">✕</span><div><b>Sin Thread.sleep</b><br><small>Se usa delay, que no bloquea.</small></div></div>
+      <div class="regla"><span class="ok">✓</span><div><b>CancellationException relanzada</b><br><small>En los 4 catch del ViewModel.</small></div></div>
+      <div class="regla"><span class="ok">✓</span><div><b>La View no lanza corrutinas</b><br><small>Solo llama funciones del ViewModel.</small></div></div>
+      <div class="regla"><span class="ok">✓</span><div><b>Datos ficticios</b><br><small>Ana Torres y los pedidos 101, 102 y 103.</small></div></div>
+    </div>
+  </section>
+
+  <section id="capturas">
+    <h2><span class="num">8</span>Capturas de la app rediseñada</h2>
+    <p class="sub">Tomadas en el emulador <i>Medium_Phone</i>.</p>
+    <div class="galeria">
+      <figure><img src="capturas/rediseno_inicio.png" alt="Pantalla de inicio"><figcaption>Inicio</figcaption></figure>
+      <figure><img src="capturas/rediseno_progreso.png" alt="Tarea al 61 %"><figcaption>Trabajando 61 %</figcaption></figure>
+      <figure><img src="capturas/rediseno_cancelado.png" alt="Tarea cancelada"><figcaption>Cancelado 40 %</figcaption></figure>
+      <figure><img src="capturas/rediseno_primos.png" alt="Resultado de primos"><figcaption>Primos con trofeo</figcaption></figure>
+      <figure><img src="capturas/rediseno_error.png" alt="Error con Reintentar"><figcaption>Error y Reintentar</figcaption></figure>
+      <figure><img src="capturas/rediseno_acerca.png" alt="Acerca de"><figcaption>Acerca de</figcaption></figure>
+    </div>
+  </section>
+</main>
+
+<footer>CentroTareas · Programación en Móviles · Tecsup · Semana 14</footer>
+</body>
+</html>
