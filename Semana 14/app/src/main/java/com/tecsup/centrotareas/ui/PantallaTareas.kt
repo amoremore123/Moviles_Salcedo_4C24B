@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -164,6 +166,32 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
 }
 
 @Composable
+private fun RecuadroError(mensaje: String, onReintentar: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = mensaje, fontWeight = FontWeight.Medium)
+            Button(
+                onClick = onReintentar,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                Text("Reintentar")
+            }
+        }
+    }
+}
+
+@Composable
 private fun RecuadroExito(texto: String) {
     Surface(
         color = VerdeFondo,
@@ -182,9 +210,17 @@ private fun RecuadroExito(texto: String) {
 @Composable
 private fun TarjetaCargas(vm: TareasViewModel) {
     val carga by vm.carga.collectAsState()
+    val simularError by vm.simularError.collectAsState()
     val cargando = carga is CargaUi.Cargando
 
     Tarjeta("Dos cargas") {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Simular error", modifier = Modifier.weight(1f))
+            Switch(
+                checked = simularError,
+                onCheckedChange = { vm.cambiarSimularError(it) }
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = { vm.cargarUnaPorUna() },
@@ -216,8 +252,10 @@ private fun TarjetaCargas(vm: TareasViewModel) {
                     "Pedidos: ${estado.pedidos}\n" +
                     "Tiempo: ${estado.milisegundos} ms"
             )
-            // TODO Paso 7: recuadro de error con Reintentar
-            is CargaUi.Error -> Text(estado.mensaje, color = MaterialTheme.colorScheme.error)
+            is CargaUi.Error -> RecuadroError(
+                mensaje = estado.mensaje,
+                onReintentar = { vm.cargarALaVez() }
+            )
         }
     }
 }
