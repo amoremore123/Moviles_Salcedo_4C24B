@@ -92,7 +92,7 @@ Todas se hicieron en el emulador *Medium_Phone*.
 
 ## Fase 2 – Mejoras (rama `mejora-ia-s14`)
 
-Son 4 mejoras de la lista de la guía, cada una en su propio commit. El registro de prompts y decisiones está en [PROMPTS.md](PROMPTS.md).
+Son 4 mejoras de la lista de la guía más una propia (la suma de primos) y el diseño visual, cada una en su propio commit. El registro de prompts y decisiones está en [PROMPTS.md](PROMPTS.md).
 
 | # | Mejora | Capas que cambian | Qué hace |
 |---|---|---|---|
