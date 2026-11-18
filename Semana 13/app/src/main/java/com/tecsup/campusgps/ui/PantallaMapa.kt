@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -105,7 +106,15 @@ fun PantallaMapa(vm: MapaViewModel) {
                     .weight(1f)
             )
 
-            // TODO Paso 6: ListaLugares(...) con altura fija
+            // La lista va debajo con altura fija; el toque se lo pasa al ViewModel
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = { id -> vm.seleccionar(id) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            )
             // TODO Paso 7: botón "Ir al más cercano" y texto "Más cercano: ..."
         }
     }
