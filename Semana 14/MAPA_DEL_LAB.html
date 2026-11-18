@@ -171,9 +171,8 @@
         <h3>🖼️ View: Jetpack Compose</h3>
         <p>Solo muestra el estado y avisa los eventos (botones). No lanza corrutinas ni usa <code>Thread</code>.</p>
         <div style="margin-top:8px">
-          <span class="ruta">ui/PantallaTareas.kt : <b>63</b></span>
-          <span class="ruta">ui/Tarjetas.kt</span>
-          <span class="ruta">ui/Componentes.kt</span>
+          <span class="ruta">ui/PantallaTareas.kt : <b>77</b></span>
+          <span class="ruta">ui/theme/Theme.kt</span>
         </div>
       </div>
       <div class="flecha">↓ eventos: <code>vm.tareaLarga()</code>, <code>vm.contar(n)</code>… &nbsp;&nbsp; ↑ estado: <code>collectAsState()</code></div>
@@ -225,7 +224,7 @@
           <tr><td>45 · 46</td><td><code>core-ktx</code> · <code>activity-compose</code></td><td>Base de Android y <code>setContent { }</code> en MainActivity.</td></tr>
           <tr><td>51</td><td><code>compose-bom:2024.12.01</code></td><td>Fija versiones compatibles de todas las librerías de Compose.</td></tr>
           <tr><td>52 · 54</td><td><code>compose.ui</code> · <code>material3</code></td><td>Interfaz sin XML: Card, Button, LinearProgressIndicator, Switch…</td></tr>
-          <tr><td>56</td><td><code>material-icons-extended</code></td><td>Rediseño: íconos de cohete, calculadora, nube, trofeo y reloj.</td></tr>
+          <tr><td>56</td><td><code>material-icons-extended</code></td><td>Íconos de cohete, calculadora y nube junto al título de cada tarjeta.</td></tr>
           <tr><td>34</td><td><code>buildFeatures { compose = true }</code></td><td>Activa Compose en el módulo.</td></tr>
         </tbody>
       </table>
@@ -306,7 +305,7 @@
         <h3>📡 StateFlow de solo lectura</h3>
         <p><code>MutableStateFlow</code> privado + <code>asStateFlow()</code> público. La UI los lee con <code>collectAsState()</code>.</p>
         <span class="ruta">TareasViewModel.kt : <b>24</b> · <b>28</b> · <b>33</b> · <b>63</b> · <b>94</b></span>
-        <span class="ruta">ui/Tarjetas.kt : <b>97–99</b></span>
+        <span class="ruta">ui/PantallaTareas.kt : <b>108–110</b></span>
       </div>
       <div class="tarjeta">
         <h3>⏲️ Medir el tiempo</h3>
@@ -326,11 +325,11 @@
           <tr><td>0</td><td>Proyecto base que compila</td><td><span class="ruta">MainActivity.kt</span><span class="ruta">model/Estados.kt</span><span class="ruta">data/</span></td><td><span class="commit">d655701</span></td></tr>
           <tr><td>1</td><td><code>tareaLargaMala()</code> con <code>Thread.sleep(4000)</code>; Observación en README</td><td>Historial: <span class="ruta">TareasViewModel.kt : <b>18</b></span> · <span class="ruta">README.md</span></td><td><span class="commit">e507862</span></td></tr>
           <tr><td>2</td><td><code>tareaLarga()</code> con <code>launch</code> + <code>withContext</code> y Logcat HILO</td><td><span class="ruta"><span class="etq main">main</span> TareasViewModel.kt : <b>37–53</b></span></td><td><span class="commit">e1a2f34</span></td></tr>
-          <tr><td>3</td><td><code>progreso: StateFlow&lt;Float&gt;</code>, 100 × 40 ms, barra y %</td><td><span class="ruta">TareasViewModel.kt : <b>28</b></span><span class="ruta">ui/Tarjetas.kt : <b>122</b></span></td><td><span class="commit">a9a709a</span></td></tr>
-          <tr><td>4</td><td><code>Job</code>, <code>corriendo</code> con <code>finally</code>, <code>cancelar()</code>, botones habilitados</td><td><span class="ruta">TareasViewModel.kt : <b>32–60</b></span><span class="ruta">ui/Tarjetas.kt : <b>149–156</b></span></td><td><span class="commit">f4dfbcf</span></td></tr>
-          <tr><td>5</td><td><code>contarPrimos</code> con <code>Default</code> + <code>ensureActive</code>; <code>esPrimo</code>; <code>contar</code>/<code>cancelarPrimos</code></td><td><span class="ruta">TareasRepositoryLocal.kt : <b>36–58</b></span><span class="ruta">TareasViewModel.kt : <b>72–91</b></span><span class="ruta">ui/Tarjetas.kt : <b>166</b></span></td><td><span class="commit">4d1b4f9</span></td></tr>
-          <tr><td>6</td><td><code>cargarUnaPorUna()</code> ≈ 5 s y <code>cargarALaVez()</code> con <code>async</code> ≈ 3 s</td><td><span class="ruta">TareasViewModel.kt : <b>98–140</b></span><span class="ruta">ui/Tarjetas.kt : <b>269</b></span></td><td><span class="commit">d90e322</span></td></tr>
-          <tr><td>7</td><td><code>simularError</code>, <code>try/catch</code>, Reintentar y Switch</td><td><span class="ruta">TareasViewModel.kt : <b>144–149</b></span><span class="ruta">ui/Tarjetas.kt : <b>282</b> · <b>326</b></span></td><td><span class="commit">2ad5b04</span></td></tr>
+          <tr><td>3</td><td><code>progreso: StateFlow&lt;Float&gt;</code>, 100 × 40 ms, barra y %</td><td><span class="ruta">TareasViewModel.kt : <b>28</b></span><span class="ruta">ui/PantallaTareas.kt : <b>132</b></span></td><td><span class="commit">a9a709a</span></td></tr>
+          <tr><td>4</td><td><code>Job</code>, <code>corriendo</code> con <code>finally</code>, <code>cancelar()</code>, botones habilitados</td><td><span class="ruta">TareasViewModel.kt : <b>32–60</b></span><span class="ruta">ui/PantallaTareas.kt : <b>118–129</b></span></td><td><span class="commit">f4dfbcf</span></td></tr>
+          <tr><td>5</td><td><code>contarPrimos</code> con <code>Default</code> + <code>ensureActive</code>; <code>esPrimo</code>; <code>contar</code>/<code>cancelarPrimos</code></td><td><span class="ruta">TareasRepositoryLocal.kt : <b>36–58</b></span><span class="ruta">TareasViewModel.kt : <b>72–91</b></span><span class="ruta">ui/PantallaTareas.kt : <b>166</b></span></td><td><span class="commit">4d1b4f9</span></td></tr>
+          <tr><td>6</td><td><code>cargarUnaPorUna()</code> ≈ 5 s y <code>cargarALaVez()</code> con <code>async</code> ≈ 3 s</td><td><span class="ruta">TareasViewModel.kt : <b>98–140</b></span><span class="ruta">ui/PantallaTareas.kt : <b>237</b></span></td><td><span class="commit">d90e322</span></td></tr>
+          <tr><td>7</td><td><code>simularError</code>, <code>try/catch</code>, Reintentar y Switch</td><td><span class="ruta">TareasViewModel.kt : <b>144–149</b></span><span class="ruta">ui/PantallaTareas.kt : <b>246</b> · <b>293</b></span></td><td><span class="commit">2ad5b04</span></td></tr>
           <tr><td>8</td><td>Pruebas de aceptación, README, capturas y «Para pensar»</td><td><span class="ruta">README.md</span><span class="ruta">capturas/</span></td><td><span class="commit">2f31016</span></td></tr>
         </tbody>
       </table>
@@ -345,10 +344,10 @@
         <thead><tr><th>Mejora</th><th>Qué hace</th><th>Dónde está</th><th>Commit</th></tr></thead>
         <tbody>
           <tr><td>1 · Progreso desde el Repository</td><td><code>flow { emit }.flowOn(Default)</code>; el ViewModel solo hace <code>collect</code></td><td><span class="ruta">TareasRepository.kt : <b>12</b></span><span class="ruta">TareasRepositoryLocal.kt : <b>27</b></span><span class="ruta">TareasViewModel.kt : <b>46</b></span></td><td><span class="commit">fcb7760</span></td></tr>
-          <tr><td>2 · Primos con progreso</td><td>Callback <code>alAvanzar</code> cada 1 % y barra «Calculando… 41 %»</td><td><span class="ruta">TareasRepository.kt : <b>7</b></span><span class="ruta">TareasViewModel.kt : <b>68</b></span><span class="ruta">ui/Tarjetas.kt : <b>220</b></span></td><td><span class="commit">db55379</span></td></tr>
+          <tr><td>2 · Primos con progreso</td><td>Callback <code>alAvanzar</code> cada 1 % y barra «Calculando… 41 %»</td><td><span class="ruta">TareasRepository.kt : <b>7</b></span><span class="ruta">TareasViewModel.kt : <b>68</b></span><span class="ruta">ui/PantallaTareas.kt : <b>206</b></span></td><td><span class="commit">db55379</span></td></tr>
           <tr><td>3 · Reintento automático</td><td>Hasta 3 intentos con espera de 500 ms y luego 1000 ms; la cancelación nunca se reintenta</td><td><span class="ruta">TareasViewModel.kt : <b>174–195</b></span></td><td><span class="commit">0490715</span></td></tr>
-          <tr><td>4 · Comparación de tiempos</td><td>Tabla con veces, último, promedio y ahorro de «A la vez»</td><td><span class="ruta">TareasViewModel.kt : <b>152–166</b></span><span class="ruta">ui/Tarjetas.kt : <b>337</b></span></td><td><span class="commit">10b7aa7</span></td></tr>
-          <tr><td>Rediseño</td><td>Pestañas, tarjetas con íconos, anillo de progreso y trofeo</td><td><span class="ruta">ui/</span> (ver sección 6)</td><td><span class="commit">4675390</span></td></tr>
+          <tr><td>4 · Comparación de tiempos</td><td>Tabla con veces, último, promedio y ahorro de «A la vez»</td><td><span class="ruta">TareasViewModel.kt : <b>152–166</b></span><span class="ruta">ui/PantallaTareas.kt : <b>301–307</b></span></td><td><span class="commit">10b7aa7</span></td></tr>
+          <tr><td>Estilo visual</td><td>Tarjetas redondeadas con ícono junto al título y paleta azul. Se respeta la pantalla única y el orden de la guía</td><td><span class="ruta">ui/PantallaTareas.kt</span><span class="ruta">ui/theme/</span></td><td><span class="commit">5a3a6b9</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -356,38 +355,37 @@
 
   <section id="interfaz">
     <h2><span class="num">6</span>Interfaz (Compose, sin XML)</h2>
-    <p class="sub">La interfaz se reparte en tres pestañas: Inicio, Resultados y Acerca de.</p>
+    <p class="sub">Una sola pantalla, como en la sección 7 de la guía: barra superior y tres tarjetas en este orden. Todo está en <span class="ruta">ui/PantallaTareas.kt</span>.</p>
     <div class="rejilla">
       <div class="tarjeta">
-        <h3>Pantalla y pestañas</h3>
-        <p>TopAppBar azul, NavigationBar y estado de cada pestaña con <code>rememberSaveableStateHolder</code>.</p>
-        <span class="ruta">ui/PantallaTareas.kt : <b>63</b> · <b>73</b> · <b>88</b> · <b>106</b></span>
+        <h3>Barra superior y orden</h3>
+        <p>Título CentroTareas sobre el azul del tema y, debajo, las tres tarjetas con scroll.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>77</b></span>
       </div>
       <div class="tarjeta">
-        <h3>Prueba de vida «Tócame»</h3>
-        <p>Contador con <code>rememberSaveable</code>: si deja de sumar, la pantalla está congelada.</p>
-        <span class="ruta">ui/PantallaTareas.kt : <b>67</b></span>
-        <span class="ruta">ui/Tarjetas.kt : <b>73</b></span>
+        <h3>1 · Tarea con progreso</h3>
+        <p>Tócame (prueba de vida), Iniciar / Cancelar (OutlinedButton), LinearProgressIndicator, el % debajo y el mensaje.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>107</b> · <b>115</b> · <b>118–129</b> · <b>132</b></span>
       </div>
       <div class="tarjeta">
-        <h3>Tarea con progreso</h3>
-        <p>Anillo, LinearProgressIndicator con %, chip de estado e Iniciar/Cancelar.</p>
-        <span class="ruta">ui/Tarjetas.kt : <b>96</b></span>
+        <h3>2 · Contar números primos</h3>
+        <p>Campo «Hasta el número» que no acepta textos inválidos ni números &lt; 2, Contar / Cancelar y el recuadro verde «Primos hasta N».</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>166</b> · <b>174</b> · <b>178</b></span>
       </div>
       <div class="tarjeta">
-        <h3>Contar primos</h3>
-        <p>Campo numérico que no acepta textos inválidos ni números &lt; 2; resultado con trofeo.</p>
-        <span class="ruta">ui/Tarjetas.kt : <b>166</b> · <b>173</b> · <b>241</b></span>
+        <h3>3 · Dos cargas</h3>
+        <p>Switch «Simular error», Una por una (OutlinedButton) y A la vez, el recuadro verde o el de error con Reintentar debajo.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>237</b> · <b>246</b> · <b>293</b></span>
       </div>
       <div class="tarjeta">
-        <h3>Dos cargas</h3>
-        <p>Switch «Simular error», recuadro verde de éxito y recuadro rojo con Reintentar.</p>
-        <span class="ruta">ui/Tarjetas.kt : <b>269</b></span>
+        <h3>Tabla comparativa (mejora 4)</h3>
+        <p>Dentro de la tarjeta Dos cargas, aparece después de la primera carga exitosa.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>301</b> · <b>307</b></span>
       </div>
       <div class="tarjeta">
-        <h3>Componentes y tema</h3>
-        <p>TarjetaTarea, ChipEstado y RecuadroConIcono; paleta azul y lavanda.</p>
-        <span class="ruta">ui/Componentes.kt : <b>38</b> · <b>94</b> · <b>114</b></span>
+        <h3>Piezas comunes y tema</h3>
+        <p>Card con el título en azul, recuadro verde de resultado y paleta de colores.</p>
+        <span class="ruta">ui/PantallaTareas.kt : <b>361</b> · <b>393</b></span>
         <span class="ruta">ui/theme/Color.kt</span><span class="ruta">ui/theme/Theme.kt : <b>9</b></span>
       </div>
     </div>
@@ -407,15 +405,15 @@
   </section>
 
   <section id="capturas">
-    <h2><span class="num">8</span>Capturas de la app rediseñada</h2>
-    <p class="sub">Tomadas en el emulador <i>Medium_Phone</i>.</p>
+    <h2><span class="num">8</span>Capturas de la versión final</h2>
+    <p class="sub">Tomadas en el emulador <i>Medium_Phone</i>, rama mejora-ia-s14.</p>
     <div class="galeria">
-      <figure><img src="capturas/rediseno_inicio.png" alt="Pantalla de inicio"><figcaption>Inicio</figcaption></figure>
-      <figure><img src="capturas/rediseno_progreso.png" alt="Tarea al 61 %"><figcaption>Trabajando 61 %</figcaption></figure>
-      <figure><img src="capturas/rediseno_cancelado.png" alt="Tarea cancelada"><figcaption>Cancelado 40 %</figcaption></figure>
-      <figure><img src="capturas/rediseno_primos.png" alt="Resultado de primos"><figcaption>Primos con trofeo</figcaption></figure>
-      <figure><img src="capturas/rediseno_error.png" alt="Error con Reintentar"><figcaption>Error y Reintentar</figcaption></figure>
-      <figure><img src="capturas/rediseno_acerca.png" alt="Acerca de"><figcaption>Acerca de</figcaption></figure>
+      <figure><img src="capturas/app_inicio.png" alt="Pantalla al abrir"><figcaption>Al abrir</figcaption></figure>
+      <figure><img src="capturas/app_progreso.png" alt="Tarea al 51 %"><figcaption>Trabajando</figcaption></figure>
+      <figure><img src="capturas/app_cancelado.png" alt="Tarea cancelada"><figcaption>Cancelado</figcaption></figure>
+      <figure><img src="capturas/app_primos.png" alt="Resultado de primos"><figcaption>Primos</figcaption></figure>
+      <figure><img src="capturas/app_cargas.png" alt="Carga a la vez y tabla"><figcaption>A la vez + tabla</figcaption></figure>
+      <figure><img src="capturas/app_error.png" alt="Error con Reintentar"><figcaption>Error y Reintentar</figcaption></figure>
     </div>
   </section>
 </main>

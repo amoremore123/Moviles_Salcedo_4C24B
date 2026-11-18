@@ -13,6 +13,13 @@
 | Mejora 3: reintento automático | Una función `conReintentos` en el ViewModel: hasta 3 intentos con espera creciente (500 ms, 1000 ms) solo para los pedidos, que son los que fallan. | Dentro del helper se mantiene `catch (e: CancellationException) { throw e }` antes del `catch (e: Exception)`. Además, cada intento vuelve a leer el interruptor *Simular error*. | Una cancelación nunca debe reintentarse (regla de la guía). Leer el interruptor en cada intento permite ver la recuperación: si lo apagas durante los reintentos, el 2.º intento tiene éxito. |
 | Mejora 4: tabla comparativa | Acumular en el ViewModel los tiempos de *Una por una* y *A la vez* y mostrar veces, último tiempo, promedio y el ahorro de *A la vez*. | La tabla **no cuenta las cargas que necesitaron reintentos**. Se agregó un botón *Limpiar tabla*. | Las esperas de los reintentos inflarían los tiempos y la comparación dejaría de ser justa. |
 
+## Corrección después de revisar la guía
+
+| Prompt que escribí | Qué respondió la IA | Qué cambié o descarté | Por qué |
+|---|---|---|---|
+| "Ahora haz la interfaz como esta imagen" (maqueta con pestañas, saludo y anillo de progreso) | Rediseñó la app con 3 pestañas (Inicio, Resultados, Acerca de), un saludo, un anillo de progreso y un trofeo | Al releer la guía **se descartaron las pestañas, el saludo, el anillo y el trofeo**. Se volvió a la pantalla única de la sección 7 y solo se conservó el estilo visual (tarjetas redondeadas con ícono y paleta azul). | La sección 7 pide "los mismos elementos, el mismo orden y los mismos estados". Con las pestañas, Tócame quedaba separado de la tarea y la app perdía sentido. |
+| "Vuelve a analizar la guía, hay cosas que no están bien" | Comparó cada imagen de la guía con la app | Se corrigieron el campo **"Hasta el número"**, el resultado **"Primos hasta N: X"**, **Reintentar debajo** del recuadro de error y el mensaje **"No se pudo cargar: " + mensaje**, que es el contrato del Paso 7 (antes decía "tras 3 intentos"). | Ajustarse exactamente a los contratos y al diseño de la guía. |
+
 ## Revisión de reglas (después de cada mejora)
 
 - `git grep` no encuentra `GlobalScope`, `runBlocking` ni `Thread.sleep`.
