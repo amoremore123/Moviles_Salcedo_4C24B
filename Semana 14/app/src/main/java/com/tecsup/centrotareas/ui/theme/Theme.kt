@@ -1,28 +1,29 @@
 package com.tecsup.centrotareas.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
-private val EsquemaClaro = lightColorScheme(
-    primary = Azul,
-    secondary = Verde
-)
-
-private val EsquemaOscuro = darkColorScheme(
-    primary = AzulClaro,
-    secondary = VerdeClaro
+// El rediseño es claro (fondo lavanda y tarjetas blancas), así que usa un solo esquema
+private val Esquema = lightColorScheme(
+    primary = AzulPrimario,
+    onPrimary = Color.White,
+    primaryContainer = AzulSuave,
+    onPrimaryContainer = AzulOscuro,
+    secondary = Morado,
+    background = FondoApp,
+    onBackground = TextoFuerte,
+    surface = Color.White,
+    onSurface = TextoFuerte,
+    surfaceVariant = GrisPista,
+    onSurfaceVariant = GrisTexto,
+    error = RojoError,
+    errorContainer = RojoFondo,
+    onErrorContainer = RojoTexto
 )
 
 @Composable
-fun CentroTareasTheme(
-    oscuro: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    MaterialTheme(
-        colorScheme = if (oscuro) EsquemaOscuro else EsquemaClaro,
-        content = content
-    )
+fun CentroTareasTheme(content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = Esquema, content = content)
 }
