@@ -215,6 +215,10 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
     val porcentaje = (progreso * 100).toInt()
     // Prueba de vida: si deja de sumar, la pantalla está congelada
     var toques by rememberSaveable { mutableIntStateOf(0) }
+    // Toques hechos solo mientras la tarea corre (se reinicia al pulsar Iniciar).
+    // Es estado de la vista: rememberSaveable lo conserva al rotar.
+    var toquesDurante by rememberSaveable { mutableIntStateOf(0) }
+    var huboTarea by rememberSaveable { mutableStateOf(false) }
 
     Tarjeta(
         Icons.Rounded.RocketLaunch,
@@ -223,7 +227,10 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
         decoracion = { Decoracion("🚀") }
     ) {
         Button(
-            onClick = { toques++ },
+            onClick = {
+                toques++
+                if (corriendo) toquesDurante++
+            },
             shape = FormaPildora,
             colors = ButtonDefaults.buttonColors(containerColor = LavandaSuave, contentColor = Indigo),
             modifier = Modifier
@@ -276,14 +283,53 @@ private fun TarjetaProgreso(vm: TareasViewModel) {
                 }
             }
         }
+        // Relación entre Tócame y la tarea: cuántos toques respondió la pantalla mientras trabajaba
+        if (huboTarea) {
+            AvisoToques(toquesDurante, corriendo)
+        }
         // Iniciar se deshabilita mientras corre; Cancelar solo se habilita mientras corre
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             BotonPrincipal("Iniciar", Icons.Rounded.PlayArrow, enabled = !corriendo, modifier = Modifier.weight(1f)) {
+                toquesDurante = 0
+                huboTarea = true
                 vm.tareaLarga()
             }
             BotonContorno("Cancelar", Icons.Rounded.Close, enabled = corriendo, modifier = Modifier.weight(1f)) {
                 vm.cancelar()
             }
+        }
+    }
+}
+
+/** Muestra los toques que la pantalla atendió mientras la tarea trabajaba (prueba de vida). */
+@Composable
+private fun AvisoToques(toquesDurante: Int, corriendo: Boolean) {
+    val veces = if (toquesDurante == 1) "1 vez" else "$toquesDurante veces"
+    val texto = when {
+        corriendo && toquesDurante == 0 -> "Toca «Tócame» mientras trabaja 👆"
+        corriendo -> "Tocaste $veces mientras trabaja: ¡la pantalla responde!"
+        toquesDurante == 0 -> "No tocaste «Tócame» mientras trabajaba"
+        else -> "Tocaste $veces mientras trabajaba: nunca se congeló ✅"
+    }
+    Surface(
+        color = if (toquesDurante > 0) VerdeFondo else LavandaSuave,
+        contentColor = if (toquesDurante > 0) TextoVerde else IndigoOscuro,
+        shape = FormaPildora,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
+            Icon(Icons.Rounded.TouchApp, contentDescription = null, modifier = Modifier.size(20.dp))
+            Text(
+                texto,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 8.dp)
+            )
         }
     }
 }
