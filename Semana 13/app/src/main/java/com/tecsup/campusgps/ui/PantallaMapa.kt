@@ -43,6 +43,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     val lugares by vm.lugares.collectAsStateWithLifecycle()
     val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
     val masCercano by vm.masCercano.collectAsStateWithLifecycle()
+    val lugaresVisibles by vm.lugaresVisibles.collectAsStateWithLifecycle()
+    val categoria by vm.categoria.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
 
@@ -116,7 +118,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             // El mapa ocupa todo el espacio libre
             MapaUbicacion(
                 estado = estado,
-                lugares = lugares,
+                lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 idMasCercano = masCercano?.id,
                 modifier = Modifier
@@ -124,9 +126,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                     .weight(1f)
             )
 
+            // Mejora 1: chips de categoría (filtran mapa y lista)
+            FiltroCategorias(
+                categorias = vm.categorias,
+                activa = categoria,
+                onSeleccionar = { vm.filtrarCategoria(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // La lista va debajo con altura fija; el toque se lo pasa al ViewModel
             ListaLugares(
-                lugares = lugares,
+                lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 onClick = { id -> vm.seleccionar(id) },
                 modifier = Modifier

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,6 +37,26 @@ class MapaViewModel(
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
+    // ---- Mejora 1: filtrar por categoría ----
+
+    // Categorías disponibles, en el orden en que aparecen en el Repository
+    val categorias: List<String> = lugaresRepo.obtenerLugares().map { it.categoria }.distinct()
+
+    // null = sin filtro (se muestran todas)
+    private val _categoria = MutableStateFlow<String?>(null)
+    val categoria: StateFlow<String?> = _categoria.asStateFlow()
+
+    // Lo que dibujan el mapa y la lista: los lugares ordenados, filtrados por categoría
+    val lugaresVisibles: StateFlow<List<LugarConDistancia>> =
+        combine(_lugares, _categoria) { lista, cat ->
+            if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
+
+    // Tocar el chip activo lo desactiva (vuelve a "Todas")
+    fun filtrarCategoria(cat: String?) {
+        _categoria.value = if (cat == _categoria.value) null else cat
+    }
 
     fun buscar() {
         // Sin Play Services no hay FusedLocationProviderClient: no tiene sentido reintentar
