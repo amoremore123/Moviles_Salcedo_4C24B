@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.NOTA_PRECIOS
 import com.tecsup.smartcatalog.domain.model.OrigenDetalle
 import com.tecsup.smartcatalog.ui.UiState
 import com.tecsup.smartcatalog.ui.components.Cargando
@@ -115,7 +116,7 @@ private fun DetalleContenido(item: Item, imageLoader: ImageLoader) {
                 Divider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text("Descripción", style = MaterialTheme.typography.titleMedium)
                 Text(item.descripcion.ifBlank { "Descripción no disponible." }, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Importe original de la API · Sin conversión de moneda", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(NOTA_PRECIOS, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

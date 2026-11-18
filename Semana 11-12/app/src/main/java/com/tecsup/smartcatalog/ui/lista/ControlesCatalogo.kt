@@ -78,6 +78,7 @@ private fun CampoPrecio(valor: String, etiqueta: String, error: Boolean, modifie
         value = valor,
         onValueChange = cambiar,
         label = { Text(etiqueta) },
+        prefix = { Text("S/") },
         modifier = modifier,
         singleLine = true,
         isError = error,

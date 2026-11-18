@@ -19,7 +19,7 @@ class CriteriosCatalogoTest {
     }
 
     @Test fun combinaRangoInclusivoNombreFavoritosYOrden() {
-        val criterios = CriteriosCatalogo("Galaxy", "350,50", "350.5", true, OrdenCatalogo.NOMBRE_DESC)
+        val criterios = CriteriosCatalogo("Galaxy", "1199,06", "1199.06", true, OrdenCatalogo.NOMBRE_DESC)
         assertEquals(listOf(4, 1), ids(criterios))
         assertEquals(listOf(1, 2, 4), ids(CriteriosCatalogo(soloFavoritos = true)))
     }

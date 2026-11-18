@@ -2,6 +2,11 @@ package com.tecsup.smartcatalog.ui.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,7 +22,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.smartcatalog.AppContainer
-import com.tecsup.smartcatalog.domain.model.Rol
 import com.tecsup.smartcatalog.domain.model.Sesion
 import com.tecsup.smartcatalog.ui.admin.PanelAdminScreen
 import com.tecsup.smartcatalog.ui.admin.PanelAdminViewModel
@@ -94,14 +98,36 @@ private fun NavegacionAutenticada(
 ) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
+    val inicio = if (AccesoRutas.inicial(sesion) == DestinoProtegido.ADMIN) ADMIN else LISTA
     fun navegar(destino: DestinoProtegido, ruta: String) {
         val actual = navController.currentBackStackEntry
-        if (AccesoRutas.permite(sesionActual(), destino) && actual?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-            navController.navigate(ruta) { launchSingleTop = true }
-        }
+        if (!AccesoRutas.permite(sesionActual(), destino) || actual?.lifecycle?.currentState != Lifecycle.State.RESUMED) return
+        if (destino != DestinoProtegido.DETALLE && actual.destination.route == DETALLE) navController.popBackStack()
+        if (navController.currentDestination?.route == ruta) return
+        if (destino != DestinoProtegido.DETALLE && navController.popBackStack(ruta, inclusive = false)) return
+        navController.navigate(ruta) { launchSingleTop = true }
     }
-    Column(modifier.fillMaxSize()) {
-        NavHost(navController, startDestination = if (AccesoRutas.inicial(sesion) == DestinoProtegido.ADMIN) ADMIN else LISTA, modifier = Modifier.weight(1f)) {
+    val rutaActual = entradaActual?.destination?.route ?: inicio
+    val seleccion = if (rutaActual == DETALLE) navController.previousBackStackEntry?.destination?.route else rutaActual
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(seleccion == LISTA, { navegar(DestinoProtegido.CATALOGO, LISTA) },
+                    icon = { Icon(Icons.Default.Home, null) }, label = { Text("Catálogo") })
+                NavigationBarItem(seleccion == FAVORITOS, { navegar(DestinoProtegido.FAVORITOS, FAVORITOS) },
+                    icon = { Icon(Icons.Default.Favorite, null) }, label = { Text("Favoritos") })
+                NavigationBarItem(seleccion == PERFIL, { navegar(DestinoProtegido.PERFIL, PERFIL) },
+                    icon = { Icon(Icons.Default.Person, null) }, label = { Text("Perfil") })
+                if (AccesoRutas.permite(sesion, DestinoProtegido.ADMIN)) {
+                    NavigationBarItem(seleccion == ADMIN, { navegar(DestinoProtegido.ADMIN, ADMIN) },
+                        icon = { Icon(Icons.Default.Settings, null) }, label = { Text("Administración") })
+                }
+            }
+        }
+    ) { padding ->
+        NavHost(navController, startDestination = inicio, modifier = Modifier.padding(padding).consumeWindowInsets(padding).fillMaxSize()) {
             composable(ADMIN) { entry ->
                 DestinoConPermiso(sesionActual(), DestinoProtegido.ADMIN) {
                     val panel: PanelAdminViewModel = viewModel(viewModelStoreOwner = entry, factory = container.panelAdminFactory)
@@ -110,7 +136,6 @@ private fun NavegacionAutenticada(
                         notificaciones = container.notificacionesCatalogo,
                         sesionActual = sesionActual,
                         onCatalogo = { navegar(DestinoProtegido.CATALOGO, LISTA) },
-                        onPerfil = { navegar(DestinoProtegido.PERFIL, PERFIL) },
                         onCerrarSesion = onCerrarSesion
                     )
                 }
@@ -165,23 +190,6 @@ private fun NavegacionAutenticada(
                         onCerrarSesion = onCerrarSesion
                     )
                 }
-            }
-        }
-        if (entradaActual?.destination?.route !in setOf(ADMIN, PERFIL)) Surface(tonalElevation = 3.dp) {
-            Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(if (sesion.rol == Rol.ADMIN) "Administrador" else "Usuario", Modifier.weight(1f).padding(top = 14.dp), style = MaterialTheme.typography.labelLarge)
-                    TextButton(onClick = { navegar(DestinoProtegido.PERFIL, PERFIL) }) { Text("Perfil") }
-                    if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN)) {
-                        TextButton(onClick = {
-                            if (AccesoRutas.permite(sesionActual(), DestinoProtegido.ADMIN) &&
-                                navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED
-                            ) navController.popBackStack(ADMIN, inclusive = false)
-                        }) { Text("Administración") }
-                    }
-                    TextButton(onClick = onCerrarSesion) { Text("Cerrar sesión") }
-                }
-                Text("Favoritos locales compartidos entre cuentas", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

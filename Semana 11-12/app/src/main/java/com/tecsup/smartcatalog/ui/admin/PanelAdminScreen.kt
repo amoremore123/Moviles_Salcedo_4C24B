@@ -36,7 +36,6 @@ fun PanelAdminScreen(
     notificaciones: NotificacionesCatalogo,
     sesionActual: () -> Sesion?,
     onCatalogo: () -> Unit,
-    onPerfil: () -> Unit,
     onCerrarSesion: () -> Unit
 ) {
     val almacenamiento by panel.almacenamiento.collectAsStateWithLifecycle()
@@ -64,9 +63,6 @@ fun PanelAdminScreen(
                     Text("Bienvenido, administrador", style = MaterialTheme.typography.bodyMedium)
                     FilledTonalButton(onClick = onCatalogo, modifier = Modifier.fillMaxWidth()) { Text("Explorar catálogo") }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = onPerfil, colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)) {
-                            Text("Perfil")
-                        }
                         TextButton(onClick = onCerrarSesion, colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)) {
                             Text("Cerrar sesión")
                         }

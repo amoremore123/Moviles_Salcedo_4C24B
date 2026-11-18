@@ -34,6 +34,7 @@ import coil.ImageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.precioEnSoles
 import com.tecsup.smartcatalog.R
 import java.text.NumberFormat
 import java.util.Locale
@@ -95,10 +96,11 @@ internal fun ImagenProducto(item: Item, imageLoader: ImageLoader, modifier: Modi
 
 @Composable
 internal fun precioFormateado(precio: Double): String = remember(precio) {
-    NumberFormat.getNumberInstance(Locale.forLanguageTag("es-PE")).apply {
+    val importe = NumberFormat.getNumberInstance(Locale.forLanguageTag("es-PE")).apply {
         minimumFractionDigits = 2
         maximumFractionDigits = 2
-    }.format(precio)
+    }.format(precioEnSoles(precio))
+    "S/ $importe"
 }
 
 @Composable

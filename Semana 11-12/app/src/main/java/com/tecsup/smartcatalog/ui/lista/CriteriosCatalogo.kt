@@ -1,6 +1,7 @@
 package com.tecsup.smartcatalog.ui.lista
 
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.precioEnSoles
 import com.tecsup.smartcatalog.ui.UiState
 import java.text.Collator
 import java.util.Locale
@@ -34,9 +35,10 @@ internal data class CriteriosCatalogo(
         if (errorPrecio != null) return emptyList()
         val consulta = normalizar(busqueda)
         val coincidencias = productos.filter { item ->
+            val precio = if (minimo != null || maximo != null) precioEnSoles(item.precio) else item.precio
             (consulta.isEmpty() || normalizar(item.nombre).contains(consulta)) &&
-                (minimo == null || item.precio >= minimo) &&
-                (maximo == null || item.precio <= maximo) &&
+                (minimo == null || precio >= minimo) &&
+                (maximo == null || precio <= maximo) &&
                 (!soloFavoritos || item.favorito)
         }
         return when (orden) {

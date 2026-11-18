@@ -55,6 +55,7 @@ fun FavoritosScreen(viewModel: FavoritosViewModel, imageLoader: ImageLoader, onV
                     Column(Modifier.weight(1f)) {
                         Text("Mis favoritos", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Text("Guardados en este dispositivo", style = MaterialTheme.typography.bodyMedium)
+                        Text("Compartidos entre cuentas", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

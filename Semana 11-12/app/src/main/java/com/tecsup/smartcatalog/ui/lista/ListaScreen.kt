@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import com.tecsup.smartcatalog.R
 import com.tecsup.smartcatalog.domain.model.Item
+import com.tecsup.smartcatalog.domain.model.NOTA_PRECIOS
 import com.tecsup.smartcatalog.ui.UiState
 import com.tecsup.smartcatalog.ui.components.Cargando
 import com.tecsup.smartcatalog.ui.components.ErrorView
@@ -141,7 +142,7 @@ private fun ListaContenido(
                                 }
                                 if (vista.coincidencias.isNotEmpty()) {
                                     item(key = "nota") {
-                                        Text("Importes de la API · Sin conversión de moneda", modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                                        Text(NOTA_PRECIOS, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                                     }
                                 }
                             }

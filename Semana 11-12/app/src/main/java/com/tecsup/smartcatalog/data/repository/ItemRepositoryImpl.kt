@@ -21,7 +21,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
-/** Room es la única fuente de la colección; la respuesta HTTP solo se escribe mediante el DAO. */
 class ItemRepositoryImpl(
     private val api: ApiService,
     private val dao: ItemDao,
