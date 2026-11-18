@@ -90,6 +90,23 @@ Todas se hicieron en el emulador *Medium_Phone*.
 
 > **Nota sobre el valor por defecto de N:** en este emulador, contar hasta 500 000 tardaba solo ≈ 0,5 s. La guía pide ajustar el valor para que tarde entre 2 y 5 s, así que el campo empieza en **3 000 000** (≈ 2,3–3,2 s).
 
+## Fase 2 – Mejoras (rama `mejora-ia-s14`)
+
+Son 4 mejoras de la lista de la guía, cada una en su propio commit. El registro de prompts y decisiones está en [PROMPTS.md](PROMPTS.md).
+
+| # | Mejora | Capas que cambian | Qué hace |
+|---|---|---|---|
+| 1 | Progreso desde el Repository | Repository + ViewModel | `progresoTarea()` es un `flow { emit(...) }.flowOn(Dispatchers.Default)`; el ViewModel solo hace `collect` |
+| 2 | Primos con progreso | Repository + ViewModel + View | `contarPrimos` avisa su avance cada 1 % y la tarjeta muestra la barra con "Calculando... 41 %" |
+| 3 | Reintento automático | ViewModel + View | Los pedidos se reintentan hasta 3 veces con espera creciente (500 ms, 1000 ms) y la pantalla muestra cada intento |
+| 4 | Comparación de tiempos | ViewModel + View | Tabla con veces, último tiempo y promedio de cada modo, más el ahorro de *A la vez* (≈ 2000 ms, 39 %) |
+
+| Primos con progreso | Reintento automático | Tabla comparativa |
+|---|---|---|
+| ![Primos con progreso](capturas/mejora2_primos_progreso.png) | ![Reintentando](capturas/mejora3_reintentando.png) | ![Comparación](capturas/mejora4_comparacion.png) |
+
+Después de las mejoras se repitieron todas las pruebas de aceptación de la Fase 1 y todas siguen pasando: Logcat `HILO`, cancelar, primos, 5000 ms y 3000 ms, error con Reintentar y rotación.
+
 ## Para pensar
 
 **1. ¿Por qué no se veía "Trabajando..." en el Paso 1?**
