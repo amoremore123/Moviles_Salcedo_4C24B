@@ -1,6 +1,7 @@
 package com.tecsup.centrotareas.data
 
 import android.util.Log
+import com.tecsup.centrotareas.model.ResultadoPrimos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -34,17 +35,25 @@ class TareasRepositoryLocal : TareasRepository {
 
     // Paso 5: cálculo pesado de CPU, fuera del hilo principal
     override suspend fun contarPrimos(hasta: Int, alAvanzar: (Float) -> Unit): Int =
+        contarYSumarPrimos(hasta, alAvanzar).cantidad
+
+    // Mejora 5: el mismo recorrido del Paso 5, pero además va sumando cada primo
+    override suspend fun contarYSumarPrimos(hasta: Int, alAvanzar: (Float) -> Unit): ResultadoPrimos =
         withContext(Dispatchers.Default) {
             var cantidad = 0
+            var suma = 0L // Long: la suma pasa de 2 mil millones muy rápido
             // Mejora 2: avisa el avance cada 1 % (no en cada número, para no saturar la UI)
             val paso = maxOf(1, hasta / 100)
             for (n in 2..hasta) {
                 ensureActive() // permite cancelar a mitad del cálculo
-                if (esPrimo(n)) cantidad++
+                if (esPrimo(n)) {
+                    cantidad++
+                    suma += n
+                }
                 if (n % paso == 0) alAvanzar(n.toFloat() / hasta)
             }
             alAvanzar(1f)
-            cantidad
+            ResultadoPrimos(cantidad, suma)
         }
 
     // Prueba divisores desde 2 hasta la raíz de n (d * d <= n, en Long para no desbordar)

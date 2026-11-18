@@ -77,8 +77,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             val inicio = System.currentTimeMillis()
             try {
                 // MutableStateFlow es seguro para actualizarse desde Dispatchers.Default
-                val cantidad = repo.contarPrimos(hasta) { avance -> _progresoPrimos.value = avance }
-                _primos.value = PrimosUi.Listo(cantidad, System.currentTimeMillis() - inicio)
+                // Mejora 5: misma pasada del Paso 5, ahora también con la suma
+                val r = repo.contarYSumarPrimos(hasta) { avance -> _progresoPrimos.value = avance }
+                _primos.value = PrimosUi.Listo(r.cantidad, System.currentTimeMillis() - inicio, r.suma)
             } catch (e: CancellationException) {
                 _primos.value = PrimosUi.Cancelado
                 throw e // se relanza para no romper la cancelación

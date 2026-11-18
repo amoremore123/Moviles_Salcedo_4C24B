@@ -219,6 +219,7 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
             }
             is PrimosUi.Listo -> RecuadroExito {
                 Text("Primos hasta $ultimoN: ${estado.cantidad}", fontWeight = FontWeight.Bold)
+                Text("Suma de esos primos: ${estado.suma}")
                 Text("Tiempo: ${estado.milisegundos} ms")
             }
             PrimosUi.Cancelado -> Text(
