@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -115,6 +114,8 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
     // Ajustado: con 500 000 este emulador tardaba ~0,5 s; con 3 000 000 tarda ~3 s
     var texto by rememberSaveable { mutableStateOf("3000000") }
+    // Número con el que se calculó el último resultado ("Primos hasta N")
+    var ultimoN by rememberSaveable { mutableIntStateOf(0) }
     // Ignora textos no numéricos o menores que 2
     val numero = texto.toIntOrNull()?.takeIf { it >= 2 }
     val calculando = primos is PrimosUi.Calculando
@@ -123,7 +124,7 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
         OutlinedTextField(
             value = texto,
             onValueChange = { texto = it.filter(Char::isDigit).take(9) },
-            label = { Text("Contar primos hasta N") },
+            label = { Text("Hasta el número") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = numero == null,
@@ -134,7 +135,7 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
-                onClick = { numero?.let { vm.contar(it) } },
+                onClick = { numero?.let { ultimoN = it; vm.contar(it) } },
                 enabled = numero != null && !calculando,
                 modifier = Modifier.weight(1f)
             ) {
@@ -158,35 +159,35 @@ private fun TarjetaPrimos(vm: TareasViewModel) {
                 Text("Calculando...")
             }
             is PrimosUi.Listo -> RecuadroExito(
-                "Primos encontrados: ${estado.cantidad}\nTiempo: ${estado.milisegundos} ms"
+                "Primos hasta $ultimoN: ${estado.cantidad}\nTiempo: ${estado.milisegundos} ms"
             )
             PrimosUi.Cancelado -> Text("Cancelado", color = MaterialTheme.colorScheme.error)
         }
     }
 }
 
+// Como en el diseño del Paso 7: recuadro de color de error y, debajo, el botón Reintentar
 @Composable
 private fun RecuadroError(mensaje: String, onReintentar: () -> Unit) {
-    Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        shape = MaterialTheme.shapes.medium,
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = mensaje, fontWeight = FontWeight.Medium)
-            Button(
-                onClick = onReintentar,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                )
-            ) {
-                Text("Reintentar")
-            }
+            Text(
+                text = mensaje,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(12.dp)
+            )
+        }
+        OutlinedButton(onClick = onReintentar) {
+            Text("Reintentar")
         }
     }
 }
