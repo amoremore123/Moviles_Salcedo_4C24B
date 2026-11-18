@@ -5,7 +5,7 @@ H1–H16 corresponden al laboratorio original. M1–M4 son mejoras adicionales p
 | Mejora | Estado | Archivos principales | Evidencia local |
 | --- | --- | --- | --- |
 | [M1 Registro](MEJORA_M1_REGISTRO.md) | Formulario local y reanudación preparados. Activación del servidor y pruebas reales pendientes | `RegistroViewModel.kt`, `ServicioRegistro.kt`, `functions/index.js` | `evidencias/mejoras/m1/` |
-| [M2 Interfaz](MEJORA_M2_INTERFAZ.md) | Bienvenida y pantallas rediseñadas con Material 3 | `BienvenidaScreen.kt`, `Theme.kt`, `ItemCard.kt`, `PanelAdminScreen.kt` | `evidencias/mejoras/m2/` |
+| [M2 Interfaz](MEJORA_M2_INTERFAZ.md) | Tema fucsia con degradado, gatitos ilustrados y pantallas rediseñadas con Material 3 | `Theme.kt`, `Marca.kt`, `ItemCard.kt`, `ListaScreen.kt`, `PanelAdminScreen.kt` | `evidencias/mejoras/m2/` |
 | [M3 Búsqueda](MEJORA_M3_BUSQUEDA.md) | Búsqueda, filtros combinados y ordenamiento verificados con Room offline | `ListaViewModel.kt`, `CriteriosCatalogo.kt`, `ControlesCatalogo.kt` | `evidencias/mejoras/m3/` |
 | [M4 Perfil y tema](MEJORA_M4_PERFIL.md) | Lectura de perfil y tema persistente. Edición de nombre deshabilitada | `PerfilScreen.kt`, `PreferenciasTema.kt`, `AuthRepositoryFirebase.kt` | `evidencias/mejoras/m4/` |
 
@@ -19,6 +19,7 @@ Durante M2 se aisló la base en memoria de la prueba de rotación para que no he
 | --- | --- | --- | --- |
 | M1 | BUILD SUCCESSFUL | 133 aprobadas | 9 aprobadas |
 | M2 | BUILD SUCCESSFUL | 133 aprobadas | 14 aprobadas y 1 repetición en pantalla estrecha |
+| M2 tema fucsia | BUILD SUCCESSFUL | 140 aprobadas | 50 aprobadas |
 | M3 | BUILD SUCCESSFUL | 137 aprobadas | 10 aprobadas |
 | M4 y regresión final | BUILD SUCCESSFUL | 140 aprobadas | 49 casos distintos aprobados y 1 omitido |
 
@@ -30,6 +31,7 @@ También pasaron cinco pruebas Node de la callable local. La omisión final corr
 | --- | --- |
 | M1 | `b82e6b167260d5a614712064ff286c76020effec` |
 | M2 | `499afc7f5d907db34df7ddb01b5fd72b96675184` |
+| M2 tema fucsia | `65e839a` |
 | M3 | `fa48309c9cf971be6a8ca8fad4b9c6b42925f337` |
 | M4 | `feat: agregar perfil y modo oscuro` |
 

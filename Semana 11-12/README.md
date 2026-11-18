@@ -92,7 +92,7 @@ Las capturas originales están en las carpetas de cada hito. La selección para 
 ## Mejoras adicionales
 
 - **M1**. Formulario de registro y recuperación local preparados. El alta real queda pendiente de la integración y activación del servidor.
-- **M2**. Bienvenida y rediseño de acceso, catálogo, detalle, favoritos y panel con Material 3.
+- **M2**. Tema fucsia con degradado y gatitos ilustrados en bienvenida, acceso, catálogo en cuadrícula, detalle, favoritos, perfil y panel, con barra inferior.
 - **M3**. Búsqueda, filtros combinados y orden sobre productos de Room, incluso si falla la conexión a la API.
 - **M4**. Perfil de la sesión validada y temas claro, oscuro y del sistema. La edición de nombre permanece deshabilitada.
 
