@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,8 +40,15 @@ fun ListaLugares(
     dentroDelRadio: Set<Int> = emptySet(),
     radio: Int? = null
 ) {
+    // Al reordenarse (nueva búsqueda), LazyColumn se queda anclada al item que estaba primero
+    // y el más cercano queda escondido arriba. Por eso vuelve al inicio cuando cambia el orden.
+    val estadoLista = rememberLazyListState()
+    val orden = lugares.map { it.lugar.id }
+    LaunchedEffect(orden) { estadoLista.scrollToItem(0) }
+
     LazyColumn(
         modifier = modifier,
+        state = estadoLista,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(lugares, key = { it.lugar.id }) { item ->
