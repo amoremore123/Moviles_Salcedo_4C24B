@@ -7,6 +7,15 @@ enum class Origen(val texto: String) {
     MODO_AVION("Modo avión")
 }
 
+// Íconos que el usuario puede elegir para su aviso
+enum class IconoAviso(val etiqueta: String) {
+    ESTRELLA("Estrella"),
+    CORAZON("Corazón"),
+    REGALO("Regalo"),
+    CORONA("Corona"),
+    FLOR("Flor")
+}
+
 // Un aviso que la app ya mostró como notificación
 data class Aviso(
     val id: Int,
@@ -14,7 +23,8 @@ data class Aviso(
     val texto: String,
     val origen: Origen,
     val hora: String,
-    val urgente: Boolean = false // true = va por el canal "Urgentes"
+    val urgente: Boolean = false, // true = va por el canal "Urgentes"
+    val icono: IconoAviso = IconoAviso.ESTRELLA
 )
 
 // Estado del permiso POST_NOTIFICATIONS visto desde la UI

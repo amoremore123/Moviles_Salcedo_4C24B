@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.IconoAviso
 import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.Job
@@ -44,13 +45,31 @@ class AvisosViewModel(
         if (concedido) _mensaje.value = null
     }
 
+    // Mensaje que escribe el usuario para su aviso (máximo 100 caracteres)
+    private val _mensajeAviso = MutableStateFlow("¡Hola!")
+    val mensajeAviso: StateFlow<String> = _mensajeAviso.asStateFlow()
+
+    fun cambiarMensajeAviso(texto: String) {
+        _mensajeAviso.value = texto.take(100)
+    }
+
+    // Ícono elegido para el aviso
+    private val _iconoAviso = MutableStateFlow(IconoAviso.ESTRELLA)
+    val iconoAviso: StateFlow<IconoAviso> = _iconoAviso.asStateFlow()
+
+    fun cambiarIcono(icono: IconoAviso) {
+        _iconoAviso.value = icono
+    }
+
     // Botón "Mostrar aviso": guarda el aviso y le pide a la UI que lo notifique
     fun avisarAhora() {
         viewModelScope.launch {
+            val texto = _mensajeAviso.value.ifBlank { "Tu entrega fue registrada" }
             val aviso = repo.registrar(
                 titulo = "Tarea lista",
-                texto = "Tu entrega fue registrada",
-                origen = Origen.BOTON
+                texto = texto,
+                origen = Origen.BOTON,
+                icono = _iconoAviso.value
             )
             _eventos.emit(aviso)
         }

@@ -9,15 +9,21 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -25,6 +31,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -37,11 +44,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.tecsup.avisoscampus.model.IconoAviso
 import com.tecsup.avisoscampus.model.PermisoUi
 import com.tecsup.avisoscampus.notificacion.Notificador
 import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
@@ -146,6 +156,20 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
             }
             Tarjeta("Avisos") {
+                val mensajeAviso by vm.mensajeAviso.collectAsState()
+                val iconoAviso by vm.iconoAviso.collectAsState()
+
+                OutlinedTextField(
+                    value = mensajeAviso,
+                    onValueChange = { vm.cambiarMensajeAviso(it) },
+                    label = { Text("Mensaje") },
+                    supportingText = { Text("${mensajeAviso.length}/100") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                SelectorIcono(
+                    elegido = iconoAviso,
+                    alElegir = { vm.cambiarIcono(it) }
+                )
                 Button(onClick = { vm.avisarAhora() }) {
                     Text("Mostrar aviso")
                 }
@@ -182,6 +206,39 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
             }
             HistorialAvisos(avisos)
+        }
+    }
+}
+
+// Los 5 íconos como círculos; el elegido lleva borde azul
+@Composable
+private fun SelectorIcono(elegido: IconoAviso, alElegir: (IconoAviso) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        IconoAviso.entries.forEach { icono ->
+            val seleccionado = icono == elegido
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(
+                        width = if (seleccionado) 3.dp else 1.dp,
+                        color = if (seleccionado) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        },
+                        shape = CircleShape
+                    )
+                    .clickable { alElegir(icono) }
+            ) {
+                Image(
+                    painter = painterResource(icono.recurso()),
+                    contentDescription = icono.etiqueta,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
     }
 }

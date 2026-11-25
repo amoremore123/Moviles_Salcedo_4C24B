@@ -1,6 +1,7 @@
 package com.tecsup.avisoscampus.data
 
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.IconoAviso
 import com.tecsup.avisoscampus.model.Origen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ interface AvisosRepository {
         titulo: String,
         texto: String,
         origen: Origen,
-        urgente: Boolean = false
+        urgente: Boolean = false,
+        icono: IconoAviso = IconoAviso.ESTRELLA
     ): Aviso
 }
 
@@ -33,7 +35,8 @@ class AvisosRepositoryMemoria : AvisosRepository {
         titulo: String,
         texto: String,
         origen: Origen,
-        urgente: Boolean
+        urgente: Boolean,
+        icono: IconoAviso
     ): Aviso {
         val aviso = Aviso(
             id = siguienteId++,
@@ -41,7 +44,8 @@ class AvisosRepositoryMemoria : AvisosRepository {
             texto = texto,
             origen = origen,
             hora = formatoHora.format(Date()),
-            urgente = urgente
+            urgente = urgente,
+            icono = icono
         )
         // Lo más reciente arriba
         _avisos.update { listOf(aviso) + it }

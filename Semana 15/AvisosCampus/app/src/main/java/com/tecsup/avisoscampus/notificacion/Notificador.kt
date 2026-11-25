@@ -8,13 +8,17 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
+import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.MainActivity
 import com.tecsup.avisoscampus.R
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.ui.recurso
 
 // Todo lo que toca NotificationManager vive aquí, fuera del ViewModel
 object Notificador {
@@ -74,7 +78,7 @@ object Notificador {
             NotificationCompat.PRIORITY_DEFAULT
         }
 
-        val notificacion = NotificationCompat.Builder(context, canal)
+        val builder = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto) // vista colapsada: una línea
@@ -83,10 +87,31 @@ object Notificador {
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true) // se quita al tocarla
-            .build()
+
+        // Ícono grande con el dibujo elegido; si no se pudo crear, se omite
+        iconoGrande(context, aviso.icono.recurso())?.let { builder.setLargeIcon(it) }
+        val notificacion = builder.build()
 
         // Cada aviso usa su propio id, así no se reemplazan entre sí
         NotificationManagerCompat.from(context).notify(aviso.id, notificacion)
         return true
+    }
+
+    // Un vector no es un Bitmap: se dibuja sobre un Canvas para obtener uno.
+    // Devuelve null si algo falla, así la notificación sale igual sin ícono grande.
+    private fun iconoGrande(context: Context, @DrawableRes recurso: Int): Bitmap? = try {
+        val dibujo = ContextCompat.getDrawable(context, recurso)
+        if (dibujo == null) {
+            null
+        } else {
+            val lado = (64 * context.resources.displayMetrics.density).toInt()
+            val bitmap = Bitmap.createBitmap(lado, lado, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            dibujo.setBounds(0, 0, lado, lado)
+            dibujo.draw(canvas)
+            bitmap
+        }
+    } catch (e: Exception) {
+        null
     }
 }
