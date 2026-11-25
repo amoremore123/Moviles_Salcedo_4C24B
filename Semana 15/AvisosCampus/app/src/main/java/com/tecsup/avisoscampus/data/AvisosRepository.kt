@@ -20,6 +20,8 @@ interface AvisosRepository {
         urgente: Boolean = false,
         icono: IconoAviso = IconoAviso.ESTRELLA
     ): Aviso
+
+    fun borrarTodos()
 }
 
 // Guarda los avisos solo en memoria (se pierden al cerrar la app)
@@ -50,5 +52,11 @@ class AvisosRepositoryMemoria : AvisosRepository {
         // Lo más reciente arriba
         _avisos.update { listOf(aviso) + it }
         return aviso
+    }
+
+    // Vacía la lista, pero NO reinicia siguienteId:
+    // así los ids (y las notificaciones) nunca se repiten
+    override fun borrarTodos() {
+        _avisos.value = emptyList()
     }
 }

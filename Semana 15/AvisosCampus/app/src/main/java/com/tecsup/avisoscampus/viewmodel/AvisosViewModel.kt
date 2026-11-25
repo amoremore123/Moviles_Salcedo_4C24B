@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.FiltroHistorial
 import com.tecsup.avisoscampus.model.IconoAviso
 import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
@@ -12,9 +13,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 // El ViewModel no conoce Context, NotificationManager ni BroadcastReceiver:
@@ -25,6 +29,32 @@ class AvisosViewModel(
 
     // Historial de avisos (viene del repositorio)
     val avisos: StateFlow<List<Aviso>> = repo.avisos
+
+    // Filtro elegido en el historial
+    private val _filtro = MutableStateFlow(FiltroHistorial.TODOS)
+    val filtro: StateFlow<FiltroHistorial> = _filtro.asStateFlow()
+
+    // Historial ya filtrado: se recalcula si cambia la lista o el filtro
+    val avisosFiltrados: StateFlow<List<Aviso>> =
+        combine(repo.avisos, _filtro) { lista, filtro ->
+            when (filtro) {
+                FiltroHistorial.TODOS -> lista
+                FiltroHistorial.AVISOS -> lista.filter {
+                    it.origen == Origen.BOTON || it.origen == Origen.MODO_AVION
+                }
+                FiltroHistorial.RECORDATORIOS -> lista.filter {
+                    it.origen == Origen.RECORDATORIO
+                }
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun cambiarFiltro(filtro: FiltroHistorial) {
+        _filtro.value = filtro
+    }
+
+    fun borrarHistorial() {
+        repo.borrarTodos()
+    }
 
     // Avisos que la UI debe convertir en notificación (eventos de una sola vez)
     private val _eventos = MutableSharedFlow<Aviso>()

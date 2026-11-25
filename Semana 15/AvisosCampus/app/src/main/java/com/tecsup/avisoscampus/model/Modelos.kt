@@ -7,6 +7,13 @@ enum class Origen(val texto: String) {
     MODO_AVION("Modo avión")
 }
 
+// Filtros del historial
+enum class FiltroHistorial(val etiqueta: String) {
+    TODOS("Todos"),
+    AVISOS("Avisos"),
+    RECORDATORIOS("Recordatorios")
+}
+
 // Íconos que el usuario puede elegir para su aviso
 enum class IconoAviso(val etiqueta: String) {
     ESTRELLA("Estrella"),

@@ -62,7 +62,8 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 fun PantallaAvisos(vm: AvisosViewModel) {
     val context = LocalContext.current
     val permiso by vm.permiso.collectAsState()
-    val avisos by vm.avisos.collectAsState()
+    val avisosFiltrados by vm.avisosFiltrados.collectAsState()
+    val filtro by vm.filtro.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
 
     // Muestra el diálogo del sistema y entrega la respuesta al ViewModel
@@ -205,7 +206,12 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     )
                 }
             }
-            HistorialAvisos(avisos)
+            HistorialAvisos(
+                avisos = avisosFiltrados,
+                filtro = filtro,
+                alCambiarFiltro = vm::cambiarFiltro,
+                alBorrar = vm::borrarHistorial
+            )
         }
     }
 }
