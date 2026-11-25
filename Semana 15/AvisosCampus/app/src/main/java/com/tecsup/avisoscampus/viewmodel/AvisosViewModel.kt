@@ -1,8 +1,10 @@
 package com.tecsup.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 // El ViewModel no conoce Context, NotificationManager ni BroadcastReceiver:
 // solo decide qué aviso emitir; la UI se encarga de mostrarlo.
@@ -37,7 +40,17 @@ class AvisosViewModel(
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
     }
 
-    // TODO Paso 3: enviar un aviso al pulsar el botón (registrar + emitir evento)
+    // Botón "Mostrar aviso": guarda el aviso y le pide a la UI que lo notifique
+    fun avisarAhora() {
+        viewModelScope.launch {
+            val aviso = repo.registrar(
+                titulo = "Tarea lista",
+                texto = "Tu entrega fue registrada",
+                origen = Origen.BOTON
+            )
+            _eventos.emit(aviso)
+        }
+    }
 
     // TODO Paso 5: programar el recordatorio con una espera en viewModelScope
 
