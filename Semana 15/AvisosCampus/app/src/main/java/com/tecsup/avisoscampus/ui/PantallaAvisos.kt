@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -97,7 +99,22 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
             }
             Tarjeta("Recordatorio") {
-                Text("Pendiente.")
+                val faltan by vm.faltan.collectAsState()
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { vm.recordarEn(10) },
+                        enabled = faltan == null
+                    ) {
+                        Text("Recordar en 10 s")
+                    }
+                    OutlinedButton(
+                        onClick = { vm.cancelarRecordatorio() },
+                        enabled = faltan != null
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+                faltan?.let { Text("Faltan $it s") }
             }
             Tarjeta("Receptor de anuncios") {
                 Text("Pendiente.")

@@ -6,6 +6,8 @@ import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
 import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -52,7 +54,40 @@ class AvisosViewModel(
         }
     }
 
-    // TODO Paso 5: programar el recordatorio con una espera en viewModelScope
+    // Corrutina del recordatorio activo (null si nunca se programó)
+    private var trabajo: Job? = null
+
+    // Segundos que faltan para el recordatorio; null = no hay recordatorio activo
+    private val _faltan = MutableStateFlow<Int?>(null)
+    val faltan: StateFlow<Int?> = _faltan.asStateFlow()
+
+    // Vive en viewModelScope: sigue contando al rotar o minimizar la app
+    fun recordarEn(segundos: Int = 10) {
+        if (trabajo?.isActive == true) return // ya hay uno en curso
+
+        trabajo = viewModelScope.launch {
+            try {
+                for (s in segundos downTo 1) {
+                    _faltan.value = s
+                    delay(1000)
+                }
+                val aviso = repo.registrar(
+                    titulo = "Recordatorio",
+                    texto = "Revisa tu laboratorio pendiente",
+                    origen = Origen.RECORDATORIO
+                )
+                _eventos.emit(aviso)
+            } finally {
+                // Se ejecuta al terminar y también al cancelar
+                _faltan.value = null
+            }
+        }
+    }
+
+    // Cancelar interrumpe el delay: no se registra ni se emite ningún aviso
+    fun cancelarRecordatorio() {
+        trabajo?.cancel()
+    }
 
     // TODO Paso 6: registrar el aviso que llega desde el receptor de modo avión
 
