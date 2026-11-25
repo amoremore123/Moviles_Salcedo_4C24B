@@ -126,14 +126,12 @@ fun AppAvisosCampus(vm: AvisosViewModel) {
             composable(Rutas.HISTORIAL) {
                 val avisosFiltrados by vm.avisosFiltrados.collectAsState()
                 val filtro by vm.filtro.collectAsState()
-                PantallaBase(titulo = "Historial de avisos") {
-                    HistorialAvisos(
-                        avisos = avisosFiltrados,
-                        filtro = filtro,
-                        alCambiarFiltro = vm::cambiarFiltro,
-                        alBorrar = vm::borrarHistorial
-                    )
-                }
+                HistorialAvisos(
+                    avisos = avisosFiltrados,
+                    filtro = filtro,
+                    alCambiarFiltro = vm::cambiarFiltro,
+                    alBorrar = vm::borrarHistorial
+                )
             }
             composable(Rutas.ACERCA) { PantallaAcerca() }
         }

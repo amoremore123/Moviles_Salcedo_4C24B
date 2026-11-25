@@ -4,6 +4,8 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,18 +18,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,11 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tecsup.avisoscampus.R
 import com.tecsup.avisoscampus.model.PermisoUi
 import com.tecsup.avisoscampus.notificacion.Notificador
 import com.tecsup.avisoscampus.ui.theme.Amarillo
@@ -55,7 +53,6 @@ import com.tecsup.avisoscampus.ui.theme.TarjetaAmarilla
 import com.tecsup.avisoscampus.ui.theme.TarjetaLila
 import com.tecsup.avisoscampus.ui.theme.TarjetaRosa
 import com.tecsup.avisoscampus.ui.theme.TarjetaVerde
-import com.tecsup.avisoscampus.ui.theme.VerdeAndroid
 import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 
 @Composable
@@ -63,8 +60,7 @@ fun PantallaInicio(vm: AvisosViewModel, alNavegar: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Encabezado()
         Column(
@@ -82,14 +78,14 @@ fun PantallaInicio(vm: AvisosViewModel, alNavegar: (String) -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 TarjetaFuncion(
                     titulo = "Enviar aviso\nal instante",
-                    icono = Icons.Filled.NotificationsActive,
+                    icono = R.drawable.ic_card_campana,
                     color = TarjetaLila,
                     modifier = Modifier.weight(1f),
                     alTocar = { alNavegar(Rutas.ENVIAR) }
                 )
                 TarjetaFuncion(
                     titulo = "Programar recordatorio\n(en 10 s)",
-                    icono = Icons.Filled.CalendarMonth,
+                    icono = R.drawable.ic_card_calendario,
                     color = TarjetaVerde,
                     modifier = Modifier.weight(1f),
                     alTocar = { alNavegar(Rutas.RECORDATORIO) }
@@ -98,14 +94,14 @@ fun PantallaInicio(vm: AvisosViewModel, alNavegar: (String) -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 TarjetaFuncion(
                     titulo = "Detectar\nmodo avión",
-                    icono = Icons.Filled.Flight,
+                    icono = R.drawable.ic_card_avion,
                     color = TarjetaAmarilla,
                     modifier = Modifier.weight(1f),
                     alTocar = { alNavegar(Rutas.AVION) }
                 )
                 TarjetaFuncion(
                     titulo = "Ver historial\nde avisos",
-                    icono = Icons.Filled.History,
+                    icono = R.drawable.ic_card_historial,
                     color = TarjetaRosa,
                     modifier = Modifier.weight(1f),
                     alTocar = { alNavegar(Rutas.HISTORIAL) }
@@ -118,57 +114,70 @@ fun PantallaInicio(vm: AvisosViewModel, alNavegar: (String) -> Unit) {
     }
 }
 
-// Encabezado con degradado lila, campana, título y subtítulo
+// Encabezado: campana, título y subtítulo arriba; el campus de fondo abajo,
+// con un degradado hacia el color de la pantalla para que no corte de golpe
 @Composable
 private fun Encabezado() {
-    Row(
+    val fondo = MaterialTheme.colorScheme.background
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(300.dp)
             .background(
-                Brush.verticalGradient(
-                    listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.background)
-                ),
-                RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+                Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primaryContainer, fondo))
             )
-            .padding(horizontal = 20.dp, vertical = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        Image(
+            painterResource(R.drawable.ilus_campus),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
-                .size(64.dp)
-                .background(MaterialTheme.colorScheme.surface, CircleShape)
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(190.dp)
+                .padding(horizontal = 24.dp)
+        )
+        // Degradado lila abajo: funde la ilustración con el resto de la pantalla
+        Box(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(48.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, fondo)))
+        )
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                Icons.Filled.NotificationsActive,
+            Image(
+                painterResource(R.drawable.ic_card_campana),
                 contentDescription = null,
-                tint = Amarillo,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(56.dp)
             )
-        }
-        Column {
-            Text(
-                "AvisosCampus",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
+            Column {
                 Text(
-                    "Tu celular, siempre informado",
-                    style = MaterialTheme.typography.bodyMedium,
+                    "AvisosCampus",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Icon(
-                    Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        "Tu celular, siempre informado",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
             }
         }
     }
@@ -178,7 +187,7 @@ private fun Encabezado() {
 private fun TarjetaBienvenida() {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 16.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -207,11 +216,10 @@ private fun TarjetaBienvenida() {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Icon(
-                Icons.Filled.Android,
-                contentDescription = null,
-                tint = VerdeAndroid,
-                modifier = Modifier.size(72.dp)
+            Image(
+                painterResource(R.drawable.ilus_mascota),
+                contentDescription = "Mascota de AvisosCampus",
+                modifier = Modifier.size(96.dp)
             )
         }
     }
@@ -221,14 +229,14 @@ private fun TarjetaBienvenida() {
 @Composable
 private fun TarjetaFuncion(
     titulo: String,
-    icono: ImageVector,
+    @DrawableRes icono: Int,
     color: Color,
     modifier: Modifier = Modifier,
     alTocar: () -> Unit
 ) {
     Card(
         onClick = alTocar,
-        modifier = modifier.height(140.dp),
+        modifier = modifier.height(150.dp),
         colors = CardDefaults.cardColors(containerColor = color, contentColor = MoradoOscuro)
     ) {
         Column(
@@ -238,11 +246,10 @@ private fun TarjetaFuncion(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Icon(
-                icono,
+            Image(
+                painterResource(icono),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(52.dp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
