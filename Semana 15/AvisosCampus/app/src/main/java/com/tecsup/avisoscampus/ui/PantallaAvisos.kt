@@ -1,9 +1,12 @@
 package com.tecsup.avisoscampus.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -50,6 +53,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val context = LocalContext.current
     val permiso by vm.permiso.collectAsState()
     val avisos by vm.avisos.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
 
     // Muestra el diálogo del sistema y entrega la respuesta al ViewModel
     val lanzador = rememberLauncherForActivityResult(
@@ -82,8 +86,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     // Cada aviso que emite el ViewModel se convierte en notificación
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
-            // TODO Paso 8: comprobar el permiso antes de mostrar
-            Notificador.mostrar(context, aviso)
+            // mostrar devuelve false si no hay permiso: no falla, solo avisamos
+            if (!Notificador.mostrar(context, aviso)) vm.noSePudoMostrar()
         }
     }
 
@@ -109,14 +113,36 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             Tarjeta("Permiso de notificaciones") {
                 EtiquetaPermiso(permiso)
                 Button(onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        // Antes de Android 13 no hay diálogo: el permiso ya está concedido
+                    if (Notificador.tienePermiso(context)) {
+                        // Ya concedido (por ejemplo, al volver de Ajustes) o Android < 13:
+                        // no hace falta el diálogo
                         vm.permisoRespondido(true)
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }) {
                     Text("Permitir notificaciones")
+                }
+
+                mensaje?.let { texto ->
+                    Text(
+                        texto,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.errorContainer,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(12.dp)
+                    )
+                }
+
+                // Tras negar dos veces Android ya no muestra el diálogo: solo queda Ajustes
+                if (mensaje != null || permiso == PermisoUi.Denegado) {
+                    OutlinedButton(onClick = { context.startActivity(intentAjustes(context)) }) {
+                        Text("Abrir ajustes")
+                    }
                 }
             }
             Tarjeta("Avisos") {
@@ -159,6 +185,19 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         }
     }
 }
+
+// Pantalla de ajustes de notificaciones de esta app.
+// ACTION_APP_NOTIFICATION_SETTINGS existe desde Android 8; antes se abre la info de la app.
+private fun intentAjustes(context: Context): Intent =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+    } else {
+        Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", context.packageName, null)
+        )
+    }
 
 // Etiqueta de color: gris = sin pedir, verde = permitido, rojo = denegado
 @Composable

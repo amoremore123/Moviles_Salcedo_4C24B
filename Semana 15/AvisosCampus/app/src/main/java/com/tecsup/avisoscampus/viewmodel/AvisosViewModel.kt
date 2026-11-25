@@ -40,6 +40,8 @@ class AvisosViewModel(
     // La UI pide el permiso y solo nos avisa el resultado (true = concedido)
     fun permisoRespondido(concedido: Boolean) {
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
+        // Con el permiso ya concedido, el aviso de error deja de tener sentido
+        if (concedido) _mensaje.value = null
     }
 
     // Botón "Mostrar aviso": guarda el aviso y le pide a la UI que lo notifique
@@ -109,5 +111,8 @@ class AvisosViewModel(
         }
     }
 
-    // TODO Paso 8: limpiar el mensaje cuando la UI ya lo mostró
+    // La UI avisa que no pudo notificar (falta el permiso); el aviso ya está en el historial
+    fun noSePudoMostrar() {
+        _mensaje.value = "Sin permiso: el aviso se guardó en el historial, pero no se mostró"
+    }
 }
