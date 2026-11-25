@@ -75,7 +75,9 @@ class AvisosViewModel(
                 }
                 val aviso = repo.registrar(
                     titulo = "Recordatorio",
-                    texto = "Revisa tu laboratorio pendiente",
+                    texto = "Revisa tu laboratorio pendiente: faltan los pasos de permiso, " +
+                        "recordatorio y receptor del modo avión, y recuerda subir las " +
+                        "capturas al README antes de la fecha límite.",
                     origen = Origen.RECORDATORIO,
                     urgente = true // va por el canal "Urgentes"
                 )

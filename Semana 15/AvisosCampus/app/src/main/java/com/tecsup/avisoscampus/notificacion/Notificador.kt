@@ -77,7 +77,9 @@ object Notificador {
         val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
-            .setContentText(aviso.texto)
+            .setContentText(aviso.texto) // vista colapsada: una línea
+            // Vista expandida: el texto completo en varias líneas
+            .setStyle(NotificationCompat.BigTextStyle().bigText(aviso.texto))
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true) // se quita al tocarla
