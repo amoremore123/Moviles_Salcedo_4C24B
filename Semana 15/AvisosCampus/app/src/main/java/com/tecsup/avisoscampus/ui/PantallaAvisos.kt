@@ -49,6 +49,7 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 fun PantallaAvisos(vm: AvisosViewModel) {
     val context = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val avisos by vm.avisos.collectAsState()
 
     // Muestra el diálogo del sistema y entrega la respuesta al ViewModel
     val lanzador = rememberLauncherForActivityResult(
@@ -154,9 +155,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     )
                 }
             }
-            Tarjeta("Historial") {
-                Text("Pendiente.")
-            }
+            HistorialAvisos(avisos)
         }
     }
 }
@@ -179,8 +178,9 @@ private fun EtiquetaPermiso(permiso: PermisoUi) {
     )
 }
 
+// internal: también la usa HistorialAvisos para tener el mismo estilo
 @Composable
-private fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
+internal fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
