@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- El permiso POST_NOTIFICATIONS y AvisosApp se agregan en el Paso 1 -->
+    <!-- AvisosApp crea el canal de notificaciones al iniciar la app -->
     <application
+        android:name=".AvisosApp"
         android:allowBackup="true"
         android:icon="@android:drawable/ic_popup_reminder"
         android:label="@string/app_name"
