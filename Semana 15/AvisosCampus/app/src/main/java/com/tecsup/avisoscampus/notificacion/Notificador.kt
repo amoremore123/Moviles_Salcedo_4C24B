@@ -20,6 +20,7 @@ import com.tecsup.avisoscampus.model.Aviso
 object Notificador {
 
     const val CANAL = "avisos"
+    const val CANAL_URGENTE = "urgentes"
 
     // Desde Android 8 (API 26) toda notificación necesita un canal.
     // Crear un canal que ya existe no hace nada, así que es seguro llamarlo siempre.
@@ -30,8 +31,15 @@ object Notificador {
                 "Avisos",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
+            // IMPORTANCE_HIGH: suena y aparece como notificación emergente
+            val urgente = NotificationChannel(
+                CANAL_URGENTE,
+                "Urgentes",
+                NotificationManager.IMPORTANCE_HIGH
+            )
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(canal)
+            manager.createNotificationChannel(urgente)
         }
     }
 
@@ -58,11 +66,19 @@ object Notificador {
             PendingIntent.FLAG_IMMUTABLE // nadie puede modificar el intent después
         )
 
-        val notificacion = NotificationCompat.Builder(context, CANAL)
+        // Android 8+ usa la importancia del canal; la prioridad sirve en versiones anteriores
+        val canal = if (aviso.urgente) CANAL_URGENTE else CANAL
+        val prioridad = if (aviso.urgente) {
+            NotificationCompat.PRIORITY_HIGH
+        } else {
+            NotificationCompat.PRIORITY_DEFAULT
+        }
+
+        val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true) // se quita al tocarla
             .build()

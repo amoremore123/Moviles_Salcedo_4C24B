@@ -13,7 +13,8 @@ data class Aviso(
     val titulo: String,
     val texto: String,
     val origen: Origen,
-    val hora: String
+    val hora: String,
+    val urgente: Boolean = false // true = va por el canal "Urgentes"
 )
 
 // Estado del permiso POST_NOTIFICATIONS visto desde la UI

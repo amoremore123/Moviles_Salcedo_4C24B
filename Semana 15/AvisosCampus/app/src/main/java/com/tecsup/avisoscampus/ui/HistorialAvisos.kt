@@ -42,17 +42,32 @@ private fun FilaAviso(aviso: Aviso) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                aviso.origen.texto,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        RoundedCornerShape(50)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    aviso.origen.texto,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            RoundedCornerShape(50)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 2.dp)
+                )
+                if (aviso.urgente) {
+                    Text(
+                        "Urgente",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.errorContainer,
+                                RoundedCornerShape(50)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
                     )
-                    .padding(horizontal = 10.dp, vertical = 2.dp)
-            )
+                }
+            }
             Text(
                 aviso.hora,
                 style = MaterialTheme.typography.labelMedium,
