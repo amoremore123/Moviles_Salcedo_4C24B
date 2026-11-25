@@ -32,7 +32,10 @@ class AvisosViewModel(
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 
-    // TODO Paso 2: actualizar el permiso según la respuesta del usuario
+    // La UI pide el permiso y solo nos avisa el resultado (true = concedido)
+    fun permisoRespondido(concedido: Boolean) {
+        _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
+    }
 
     // TODO Paso 3: enviar un aviso al pulsar el botón (registrar + emitir evento)
 
